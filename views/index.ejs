@@ -6,15 +6,18 @@
     <main role="main" class="container mt-4">
       <div class="text-center">
         <h1>Giełda_dyżurowa</h1>
-        <div class="mt-4 text-center">
-          <a href="/duty/slots" class="btn btn-primary me-2">View Duty Slots</a>
-          <a href="/doctor/availabilities" class="btn btn-secondary">View Doctor Availabilities</a>
-          <% if (role === 'doctor') { %>
-            <a href="/doctor/availability" class="btn btn-secondary">Add Doctor Availability  </a>
-          <% } else { %>            
-            <a href="/duty/publish" class="btn btn-secondary"> Add Hospital Duty Vacancy </a>
-          <% } %>
-        </div>
+        <% if (locals.userId) { %>
+
+          <div class="mt-4 text-center">
+            <a href="/duty/slots" class="btn btn-primary me-2">View Duty Slots</a>
+            <a href="/doctor/availabilities" class="btn btn-secondary">View Doctor Availabilities</a>
+            <% if (role === 'doctor') { %>
+              <a href="/doctor/availability" class="btn btn-secondary">Add Doctor Availability  </a>
+            <% } else { %>            
+              <a href="/duty/publish" class="btn btn-secondary"> Add Hospital Duty Vacancy </a>
+            <% } %>
+          </div>
+        <% } %>
       </div>
     </main>
   </body>
