@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/_head.ejs') %>
+  <body>
+<%- include('partials/_header.ejs') %>
+    <main class="container mt-5">
+      <h2>Shift Swap Requests</h2>
+      <% if (swapRequests.length > 0) { %>
+        <% swapRequests.forEach(function(request) { %>
+          <div class="card mb-3">
+            <div class="card-body">
+              <h5 class="card-title">Swap Request: <%= request.status.toUpperCase() %></h5>
+              <p class="card-text">Requesting Doctor: <%= request.requestingDoctorId.username %></p>
+              <% if (request.targetDoctorId) { %>
+              <p class="card-text">Target Doctor: <%= request.targetDoctorId.username %></p>
+              <% } %>
+              <p class="card-text">Original Duty Slot: <%= new Date(request.originalDutySlotId.date).toDateString() %>, <%= request.originalDutySlotId.dutyHours %></p>
+              <% if (request.requestedDutySlotId) { %>
+              <p class="card-text">Requested Duty Slot: <%= new Date(request.requestedDutySlotId.date).toDateString() %>, <%= request.requestedDutySlotId.dutyHours %></p>
+              <% } %>
+              <% if (request.status === 'pending') { %>
+              <button type="button" class="btn btn-success me-2 respondSwapRequest" data-request-id="<%= request._id %>" data-status="accepted">Accept</button>
+              <button type="button" class="btn btn-danger respondSwapRequest" data-request-id="<%= request._id %>" data-status="declined">Decline</button>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p>No swap requests found.</p>
+      <% } %>
+    </main>
+  </body>
+<%- include('partials/_footer.ejs') %>
+<script src="/js/shiftSwap.js"></script>
+</html>

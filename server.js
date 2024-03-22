@@ -8,6 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const dutyRoutes = require('./routes/dutyRoutes');
 const doctorAvailabilityRoutes = require('./routes/doctorAvailabilityRoutes');
 const profileRoutes = require('./routes/profileRoutes');
+const shiftSwapRoutes = require('./routes/shiftSwapRoutes'); // Added for shift swap feature
 
 if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET) {
   console.error("Error: config environment variables not set. Please create/edit .env configuration file.");
@@ -82,6 +83,9 @@ app.use(doctorAvailabilityRoutes);
 
 // Profile Routes
 app.use(profileRoutes);
+
+// Shift Swap Routes
+app.use(shiftSwapRoutes); // Using the shift swap routes
 
 // Root path response
 app.get("/", (req, res) => {
