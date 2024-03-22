@@ -9,6 +9,7 @@ const dutyRoutes = require('./routes/dutyRoutes');
 const doctorAvailabilityRoutes = require('./routes/doctorAvailabilityRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const shiftSwapRoutes = require('./routes/shiftSwapRoutes'); // Added for shift swap feature
+const sessionDataMiddleware = require('./routes/middleware/sessionDataMiddleware');
 
 if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET) {
   console.error("Error: config environment variables not set. Please create/edit .env configuration file.");
@@ -49,6 +50,9 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.DATABASE_URL }),
   }),
 );
+
+// Apply session data middleware globally
+app.use(sessionDataMiddleware);
 
 app.on("error", (error) => {
   console.error(`Server error: ${error.message}`);
