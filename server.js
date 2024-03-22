@@ -97,7 +97,7 @@ app.use(availabilityRoutes); // Added for doctor availability viewing feature
 
 // Root path response
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", {role: req.session.role});
 });
 
 // If no routes handled the request, it's a 404
