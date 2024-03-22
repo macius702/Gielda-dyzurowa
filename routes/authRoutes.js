@@ -46,6 +46,7 @@ router.post('/auth/login', async (req, res) => {
     if (isMatch) {
       req.session.userId = user._id;
       req.session.role = user.role; // Store user role in session for role-based access control
+      req.session.username = user.username; // Store the username in the session
       console.log(`User logged in: ${user.username}`);
       return res.redirect('/');
     } else {
