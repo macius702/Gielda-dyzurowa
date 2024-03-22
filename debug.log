@@ -1318,7 +1318,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -1914,7 +1914,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -4994,7 +4994,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -5659,7 +5659,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -9346,7 +9346,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -14359,7 +14359,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -18684,7 +18684,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -19567,7 +19567,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -22146,7 +22146,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -26535,7 +26535,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -27469,7 +27469,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -33066,7 +33066,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
@@ -37464,7 +37464,7 @@ PORT=3000
 DATABASE_URL=mongodb://localhost/myDb # INPUT_REQUIRED {insert your MongoDB url here}
 
 # Session secret string (must be unique to your server)
-SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c
+SESSION_SECRET=
 
 ```
 
