@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/_head.ejs') %>
+  <body>
+<%- include('partials/_header.ejs') %>
+    <main class="container mt-5">
+      <h2>Settings</h2>
+      <form action="/user/settings" method="POST">
+        <div class="mb-3">
+          <input type="email" name="email" placeholder="Email" value="<%= user.email %>" class="form-control">
+        </div>
+        <div class="mb-3">
+          <input type="text" name="phoneNumber" placeholder="Phone Number" value="<%= user.phoneNumber %>" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+    </main>
+  </body>
+<%- include('partials/_footer.ejs') %>
+</html>

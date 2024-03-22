@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/_head.ejs') %>
+  <body>
+<%- include('partials/_header.ejs') %>
+    <main class="container mt-5">
+      <h2>Doctor Profile: <%= user.username %></h2>
+      <p><strong>Specialty:</strong> <%= user.specialty %></p>
+      <p><strong>Localization:</strong> <%= user.localization %></p>
+    </main>
+  </body>
+<%- include('partials/_footer.ejs') %>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/_head.ejs') %>
+  <body>
+<%- include('partials/_header.ejs') %>
+    <main class="container mt-5">
+      <h2>Publish Duty Slot</h2>
+      <form action="/duty/publish" method="POST">
+        <div class="mb-3">
+          <label for="date" class="form-label">Date</label>
+          <input type="date" name="date" required class="form-control" id="date">
+        </div>
+        <div class="mb-3">
+          <label for="dutyHours" class="form-label">Duty Hours</label>
+          <input type="text" name="dutyHours" placeholder="e.g., 20:00 - 08:00" required class="form-control" id="dutyHours">
+        </div>
+        <div class="mb-3">
+          <label for="requiredSpecialty" class="form-label">Required Specialty</label>
+          <input type="text" name="requiredSpecialty" required class="form-control" id="requiredSpecialty">
+        </div>
+        <button type="submit" class="btn btn-primary">Publish</button>
+      </form>
+    </main>
+  </body>
+<%- include('partials/_footer.ejs') %>
+</html>
