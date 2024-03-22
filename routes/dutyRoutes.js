@@ -80,4 +80,14 @@ router.post('/duty/interest/:id', isAuthenticated, isDoctor, async (req, res) =>
   }
 });
 
+router.get('/duty/slots', isAuthenticated, async (req, res) => {
+  try {
+    const dutySlots = await DutySlot.find().populate('hospitalId');
+    res.render('dutySlots', { dutySlots });
+  } catch (error) {
+    console.error('Error fetching duty slots:', error.message, error.stack);
+    res.status(500).send('Error fetching duty slots.');
+  }
+});
+
 module.exports = router;

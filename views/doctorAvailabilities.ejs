@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/_head.ejs') %>
+  <body>
+<%- include('partials/_header.ejs') %>
+    <main class="container mt-5">
+      <h2>Doctor Availabilities</h2>
+      <% if (availabilities.length > 0) { %>
+        <ul class="list-group">
+          <% availabilities.forEach(function(availability) { %>
+            <li class="list-group-item">
+              Doctor: <%= availability.doctorId.username %><br>
+              Date: <%= availability.date.toDateString() %><br>
+              Available Hours: <%= availability.availableHours %>
+            </li>
+          <% }); %>
+        </ul>
+      <% } else { %>
+        <p>No availabilities found.</p>
+      <% } %>
+      <a href="/" class="btn btn-primary mt-3">Back to Home</a>
+    </main>
+  </body>
+<%- include('partials/_footer.ejs') %>
+</html>

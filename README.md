@@ -1,18 +1,18 @@
 # Giełda_dyżurowa
 
-Giełda_dyżurowa is a web application aimed at optimizing the matching process of available doctors with hospital duties, specifically targeting overnight shifts. The platform simplifies the process for hospitals to find doctors and for doctors to find shifts that fit their schedules. With a focus on usability and efficiency, Giełda_dyżurowa supports the healthcare industry by ensuring that hospital shifts are always covered.
+Giełda_dyżurowa is a web application designed to streamline the process of matching available doctors with hospital duties, focusing specifically on overnight shifts. It serves two main user groups: hospitals looking to fill duty slots and doctors seeking shifts. By facilitating this matching process, the platform aims to ensure that hospitals can efficiently find qualified doctors to cover necessary shifts, enhancing the healthcare system's responsiveness and reliability.
 
 ## Overview
 
-This application utilizes a modern technology stack including Node.js and Express for the backend, MongoDB for the database, and EJS for templating on the frontend. The system architecture is designed to support robust user interactions, from registration and profile creation to duty slot publication and application. User-friendly interfaces are styled with Bootstrap, making navigation and usage straightforward for all users.
+The application is built as a web application utilizing Node.js with the Express framework for the backend, MongoDB for the database, and EJS for templating. The frontend styling is managed with Bootstrap, and Vanilla JavaScript is used for dynamic content and interactions. This architecture supports a range of functionalities including user registration, duty slot publication, and applications for duties, among others.
 
 ## Features
 
-- **User Registration and Profiles:** Both hospitals and doctors can register and create profiles, detailing specialties and locations.
-- **Duty Slot Publication:** Hospitals can publish available overnight duty slots.
-- **Application for Duties:** Doctors can browse and apply for these slots, or post their availability for hospitals to find them.
-- **Profile Viewing:** Enhanced decision-making through access to detailed profiles of hospitals and doctors.
-- **External Communication:** Facilitates off-platform communication once a duty slot has been filled.
+- **User Registration and Profiles:** Hospitals and doctors can register, creating profiles detailing their specialties and locations.
+- **Duty Slot Publication:** Hospitals can publish available slots for overnight duties.
+- **Application for Duties:** Doctors can browse and apply for duty slots or post their availability.
+- **Profile Viewing:** Both user groups can view each other's profiles for better decision-making.
+- **External Communication:** Facilitates further communication off-platform once a duty slot is filled.
 
 ## Getting started
 

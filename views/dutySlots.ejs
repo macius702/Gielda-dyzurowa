@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/_head.ejs') %>
+<body>
+<%- include('partials/_header.ejs') %>
+<main class="container mt-5">
+    <h2>Duty Slots</h2>
+    <div class="mb-3">
+        <input type="date" id="dateFilter" class="form-control" placeholder="Filter by Date">
+        <input type="text" id="specialtyFilter" class="form-control mt-2" placeholder="Filter by Specialty">
+    </div>
+    <ul id="dutySlotsList" class="list-group">
+        <% dutySlots.forEach(function(slot) { %>
+        <li class="list-group-item">
+            Hospital: <%= slot.hospitalId.username %><br>
+            Date: <%= slot.date.toDateString() %><br>
+            Duty Hours: <%= slot.dutyHours %><br>
+            Required Specialty: <%= slot.requiredSpecialty %>
+        </li>
+        <% }); %>
+    </ul>
+    <% if (dutySlots.length === 0) { %>
+    <p>No duty slots found.</p>
+    <% } %>
+    <a href="/" class="btn btn-primary mt-3">Back to Home</a>
+    <a href="/doctor/availabilities" class="btn btn-secondary mt-3">View Doctor Availabilities</a>
+</main>
+</body>
+<%- include('partials/_footer.ejs') %>
+<script src="/js/filterDutySlots.js"></script>
+</html>

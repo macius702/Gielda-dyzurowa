@@ -9,6 +9,7 @@ const dutyRoutes = require('./routes/dutyRoutes');
 const doctorAvailabilityRoutes = require('./routes/doctorAvailabilityRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const shiftSwapRoutes = require('./routes/shiftSwapRoutes'); // Added for shift swap feature
+const availabilityRoutes = require('./routes/availabilityRoutes'); // Added for doctor availability viewing feature
 const sessionDataMiddleware = require('./routes/middleware/sessionDataMiddleware');
 
 if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET) {
@@ -90,6 +91,9 @@ app.use(profileRoutes);
 
 // Shift Swap Routes
 app.use(shiftSwapRoutes); // Using the shift swap routes
+
+// Doctor Availabilities Viewing Routes
+app.use(availabilityRoutes); // Added for doctor availability viewing feature
 
 // Root path response
 app.get("/", (req, res) => {
