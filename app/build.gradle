@@ -7,7 +7,7 @@ android {
     compileSdkVersion 31 // mtlk  {update compileSdkVersion if necessary}
 
     defaultConfig {
-        applicationId "com.yourpackage" // mtlk {update applicationId with your package name}
+        applicationId "com.gieldaDyzurowa" // mtlk {update applicationId with your package name}
         minSdkVersion 21
         targetSdkVersion 31 // mtlk {update targetSdkVersion if necessary}
         versionCode 1
