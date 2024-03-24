@@ -1,1 +1,33 @@
-/* Placeholder for custom styles */
+/* Custom Button Styling */
+.btn-custom-primary {
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    margin-right: 15px;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-custom-secondary {
+    background-color: #6c757d; /* Bootstrap secondary color */
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    margin-right: 15px;
+    border: none;
+    transition: background-color 0.3s ease;
+}
+
+.btn-custom-primary:hover, .btn-custom-secondary:hover {
+    opacity: 0.8;
+}
+
+/* Ensure that the custom styles do not affect the layout and responsiveness */
+@media (max-width: 768px) {
+    .btn-custom-primary, .btn-custom-secondary {
+        font-size: 14px;
+        padding: 8px 15px;
+        margin: 5px 0; /* Adjust margins for smaller screens */
+    }
+}
