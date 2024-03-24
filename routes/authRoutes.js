@@ -38,7 +38,7 @@ router.get('/auth/login', (req, res) => {
 router.post('/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: new RegExp('^'+username+'$', 'i') });
     if (!user) {
       console.log('Login attempt: User not found');
       return res.status(400).send('User not found');
@@ -77,13 +77,12 @@ router.get('/auth/logout', (req, res) => {
 router.post('/auth/mobile-login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ username: new RegExp('^'+username+'$', 'i') });
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) {
-      // Use the JWT_SECRET environment variable
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
       return res.json({ token });
     } else {
