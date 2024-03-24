@@ -1,6 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 
 router.get('/auth/register', (req, res) => {
@@ -70,6 +71,29 @@ router.get('/auth/logout', (req, res) => {
     console.log('User logged out successfully');
     res.redirect('/auth/login');
   });
+});
+
+// New route for mobile login
+router.post('/auth/mobile-login', async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      // Use the JWT_SECRET environment variable
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      return res.json({ token });
+    } else {
+      return res.status(400).json({ message: 'Invalid credentials' });
+    }
+  } catch (error) {
+    console.error('Mobile login error:', error);
+    console.error(error.stack);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 module.exports = router;
