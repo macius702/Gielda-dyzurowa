@@ -8,7 +8,7 @@ android {
     namespace "com.example.gieldadyzurowa"
     defaultConfig {
         applicationId "com.example.gieldadyzurowa" // mtlk {update applicationId with your package name}
-        minSdkVersion 21
+        minSdkVersion 24
         targetSdkVersion 31 // mtlk {update targetSdkVersion if necessary}
         versionCode 1
         versionName "1.0"
