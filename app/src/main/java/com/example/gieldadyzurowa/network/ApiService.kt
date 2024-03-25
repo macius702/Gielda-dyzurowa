@@ -1,4 +1,4 @@
-package com.yourpackage.network
+package com.example.gieldadyzurowa.network
 
 import retrofit2.http.Body
 import retrofit2.http.POST

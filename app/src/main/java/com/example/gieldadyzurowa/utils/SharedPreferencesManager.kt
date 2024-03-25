@@ -1,4 +1,4 @@
-package com.yourpackage.utils
+package com.example.gieldadyzurowa.utils
 
 import android.content.Context
 import android.content.SharedPreferences

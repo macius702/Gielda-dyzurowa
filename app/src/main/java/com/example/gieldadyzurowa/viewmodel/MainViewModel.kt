@@ -1,4 +1,4 @@
-package com.yourpackage.viewmodel
+package com.example.gieldadyzurowa.viewmodel
 
 import androidx.lifecycle.ViewModel
 
