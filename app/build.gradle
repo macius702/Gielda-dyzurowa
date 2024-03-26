@@ -1,19 +1,23 @@
 plugins {
     id 'com.android.application'
-    id 'kotlin-android'
+    id 'org.jetbrains.kotlin.android'
 }
 
 android {
-    compileSdk 31 // mtlk  {update compileSdkVersion if necessary}
-    namespace "com.example.gieldadyzurowa"
+    namespace 'com.example.gieldadyzurowa'
+    compileSdk 33
+
     defaultConfig {
-        applicationId "com.example.gieldadyzurowa" // mtlk {update applicationId with your package name}
-        minSdkVersion 24
-        targetSdkVersion 31 // mtlk {update targetSdkVersion if necessary}
+        applicationId "com.example.gieldadyzurowa"
+        minSdk 24
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
     }
 
     buildTypes {
@@ -22,30 +26,57 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
     kotlinOptions {
         jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion '1.4.3'
+    }
+    packaging {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
     }
 }
 
 dependencies {
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.10'
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.activity:activity-ktx:1.3.1'
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.5.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
-    //implementation 'androidx.compose.ui:ui-graphics-android:1.2.1'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9"
-    implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation "com.squareup.retrofit2:converter-gson:2.9.0"
-    implementation "com.google.code.gson:gson:2.8.6"
+
+    implementation 'androidx.core:core-ktx:1.8.0' // Updated to the latest version compatible with SDK 33
+    implementation 'androidx.appcompat:appcompat:1.6.1' // This version should be compatible
+    implementation 'com.google.android.material:material:1.6.1' // Updated for SDK 33 compatibility
+    implementation 'androidx.compose.material3:material3:1.1.2' // Check for the latest version
+
+
+    implementation 'androidx.compose.ui:ui:1.1.0' // Use the appropriate version
+    implementation 'androidx.compose.material:material:1.1.0' // Material Design for Compose
+    implementation 'androidx.compose.ui:ui-tooling-preview:1.1.0'
+
+    implementation 'com.google.android.material:material:1.6.1' // Ensure this is the correct version for Material Design 3
+
+
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4' // This version should work, but always check for newer versions
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.5.1' // Updated to a version compatible with SDK 33
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1' // Same as above, for consistency
+    implementation 'androidx.navigation:navigation-fragment-ktx:2.5.2' // Updated for compatibility
+    implementation 'androidx.navigation:navigation-ui-ktx:2.5.2'
+
+
+    implementation 'androidx.activity:activity-compose:1.5.1'
+
+    implementation 'androidx.annotation:annotation:1.6.0'// Same as above
+    testImplementation 'junit:junit:4.13.2' // This version is fine as it's for testing
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5' // This version should be compatible
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1' // This version is also fine
+
+    debugImplementation 'androidx.compose.ui:ui-tooling:1.1.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+
+
 }
