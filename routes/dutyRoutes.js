@@ -45,7 +45,6 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
     res.status(500).send('Error while publishing duty slot. Please try again later.');
   }
 });
-
 router.get('/duty/browse', isAuthenticated, isDoctor, async (req, res) => {
   try {
     const dutySlots = await DutySlot.find().populate('hospitalId');
@@ -79,7 +78,6 @@ router.post('/duty/interest/:id', isAuthenticated, isDoctor, async (req, res) =>
     res.status(500).send('Error sending interest message');
   }
 });
-
 router.get('/duty/slots', isAuthenticated, async (req, res) => 
 {
     // Log incoming request details
@@ -124,6 +122,4 @@ router.get('/duty/slots', isAuthenticated, async (req, res) =>
       res.status(500).send('Error fetching duty slots.');
   }
 });
-  
-
 module.exports = router;
