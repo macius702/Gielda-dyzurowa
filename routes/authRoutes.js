@@ -35,30 +35,68 @@ router.get('/auth/login', (req, res) => {
   res.render('login');
 });
 
-router.post('/auth/login', async (req, res) => {
-  try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username: new RegExp('^'+username+'$', 'i') });
-    if (!user) {
-      console.log('Login attempt: User not found');
-      return res.status(400).send('User not found');
+router.post('/auth/login', async (req, res) =>
+{
+    // Log the full incoming request
+    console.log('Incoming Request:', 
+    {
+        method: req.method,
+        url: req.originalUrl,
+        headers: req.headers,
+        body: req.body
+    });
+
+    // Function to log and send the response
+    const sendResponse = (statusCode, body, redirect) =>
+    {
+        console.log('Outgoing Response:', 
+        {
+            statusCode: statusCode,
+            body: body || 'REDIRECT: ' + redirect,
+            // You can add more details here if needed
+        });
+
+        if (redirect)
+        {
+            res.redirect(redirect);
+        }
+        else
+        {
+            res.status(statusCode).send(body);
+        }
+    };
+
+    try
+    {
+        const { username, password } = req.body;
+        const user = await User.findOne({ username: new RegExp('^'+username+'$', 'i') });
+        if (!user)
+        {
+            console.log('Login attempt: User not found');
+            return sendResponse(400, 'User not found');
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (isMatch)
+        {
+            req.session.userId = user._id;
+            req.session.role = user.role; // Store user role in session for role-based access control
+            req.session.username = user.username; // Store the username in the session
+            console.log(`User logged in: ${user.username}`);
+            return sendResponse(null, null, '/');
+        }
+        else
+        {
+            console.log(`Login attempt failed for user: ${username}`);
+            return sendResponse(400, 'Password is incorrect');
+        }
     }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (isMatch) {
-      req.session.userId = user._id;
-      req.session.role = user.role; // Store user role in session for role-based access control
-      req.session.username = user.username; // Store the username in the session
-      console.log(`User logged in: ${user.username}`);
-      return res.redirect('/');
-    } else {
-      console.log(`Login attempt failed for user: ${username}`);
-      return res.status(400).send('Password is incorrect');
+    catch (error)
+    {
+        console.error('Login error:', error);
+        console.error(error.stack); // Log the error stack for more detailed debugging information
+        return sendResponse(500, error.message);
     }
-  } catch (error) {
-    console.error('Login error:', error);
-    console.error(error.stack); // Log the error stack for more detailed debugging information
-    return res.status(500).send(error.message);
-  }
 });
 
 router.get('/auth/logout', (req, res) => {
