@@ -80,14 +80,50 @@ router.post('/duty/interest/:id', isAuthenticated, isDoctor, async (req, res) =>
   }
 });
 
-router.get('/duty/slots', isAuthenticated, async (req, res) => {
-  try {
-    const dutySlots = await DutySlot.find().populate('hospitalId');
-    res.render('dutySlots', { dutySlots });
-  } catch (error) {
-    console.error('Error fetching duty slots:', error.message, error.stack);
-    res.status(500).send('Error fetching duty slots.');
+router.get('/duty/slots', isAuthenticated, async (req, res) => 
+{
+    // Log incoming request details
+    console.log('Incoming Request:', 
+    {
+        method: req.method,
+        url: req.originalUrl,
+        headers: req.headers
+    });
+
+    // Wrap res.render for logging
+    const originalRender = res.render.bind(res);
+    res.render = (view, options, callback) =>
+    {
+      console.log('Outgoing Response (render):', 
+      {
+          view: view,
+          options: options
+      });
+  
+      originalRender(view, options, callback);
+  };
+  
+  try
+  {
+      const dutySlots = await DutySlot.find().populate('hospitalId');
+      
+      // The actual rendering happens here, and the logging will take place in the wrapped res.render above
+      res.render('dutySlots', { dutySlots });
+  } 
+  catch (error)
+  {
+      console.error('Error fetching duty slots:', error.message, error.stack);
+      
+      // Log before sending error response
+      console.log('Outgoing Response (error):', 
+      {
+          statusCode: 500,
+          body: 'Error fetching duty slots.'
+      });
+  
+      res.status(500).send('Error fetching duty slots.');
   }
 });
+  
 
 module.exports = router;
