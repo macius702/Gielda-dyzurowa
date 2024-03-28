@@ -106,7 +106,7 @@ router.get('/duty/slots', isAuthenticated, async (req, res) =>
       const dutySlots = await DutySlot.find().populate('hospitalId');
       
       // The actual rendering happens here, and the logging will take place in the wrapped res.render above
-      res.json({ dutySlots: dutySlots });
+      res.json(dutySlots);
 
   } 
   catch (error)
