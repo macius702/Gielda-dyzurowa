@@ -1,64 +1,182 @@
 package com.example.gieldadyzurowa
 
+
+
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.gieldadyzurowa.ui.theme.GieldadyzurowaTheme
-
-
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.gieldadyzurowa.ui.theme.GieldadyzurowaTheme
+import androidx.lifecycle.ViewModel
 
-import android.util.Log
+
+
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gieldadyzurowa.network.LoginRequest
+import com.example.gieldadyzurowa.network.RetrofitClient
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.toRequestBody
-
-import android.content.Context
 import org.json.JSONObject
 import java.io.IOException
 
+import okhttp3.CookieJar
+import okhttp3.HttpUrl
+import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
+
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+
+import java.text.SimpleDateFormat
+import java.util.Locale
+
+fun formatDate(dateStr: String): String {
+    val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+    val formatter = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault())
+    return try {
+        val parsedDate = parser.parse(dateStr)
+        if (parsedDate != null) formatter.format(parsedDate) else "Invalid date"
+    } catch (e: Exception) {
+        "Invalid date"
+    }
+}
+
+
+class MainActivity : ComponentActivity()
+{
+    override fun onCreate(savedInstanceState: Bundle?)
+    {
         super.onCreate(savedInstanceState)
-        setContent {
-            GieldadyzurowaTheme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    LoginScreen()
-                }
+        setContent()
+        {
+            AppContent()
+        }
+    }
+}
+
+data class Hospital(
+    val _id: String,
+    val username: String,
+    val password: String, // Note: It's unusual and insecure to handle passwords in client-side code.
+    val role: String,
+    val profileVisible: Boolean
+    // Add other fields as necessary...
+)
+
+data class DutySlot(
+    val hospitalId: Hospital, // Assuming hospitalId is unique and can be used as such; adjust as needed
+    val date: String, // Using String for simplicity; consider using a proper date type
+    val dutyHours: String,
+    val requiredSpecialty: String
+)
+
+
+@Composable
+fun AppContent()
+{
+    var isLoggedIn by remember { mutableStateOf(false) }
+    var selectedNav by remember { mutableStateOf("Doctor Availabilities") }
+    var username by remember { mutableStateOf("") } // State to hold the username
+    val dutySlotsViewModel = viewModel<DutyOffersViewModel>() // Consider providing this ViewModel to the DutyOffersScreen.
+
+
+
+    Scaffold(
+        topBar = { Header(isLoggedIn, username) },
+        bottomBar = { Footer() }
+    ) { padding ->
+        Column(modifier = Modifier.padding(padding))
+        {
+            NavBar(selectedNav) { selectedNav = it }
+            if (selectedNav == "Login" && !isLoggedIn) {
+                LoginScreen(onLoginSuccess = { user ->
+                    isLoggedIn = true
+                    username = user // Update the username upon successful login
+                    selectedNav = "Doctor Availabilities" // Navigate away from the login page
+                })
+            }
+            else if (selectedNav == "Duty Offers")
+            {
+                DutyOffersScreen(viewModel = dutySlotsViewModel)
+
+            }
+            else {
+                MainContent(selectedNav)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen() {
+fun Header(isLoggedIn: Boolean, username: String) {
+    TopAppBar(
+        title = {
+            Text(text = if (isLoggedIn) username else "Not Logged In")
+        }
+    )
+}
+
+@Composable
+fun NavBar(selectedNav: String, onNavSelected: (String) -> Unit)
+{
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    )
+    {
+        Button(onClick = { onNavSelected("Login") }) { Text("Login") }
+        Button(onClick = { onNavSelected("Register") }) { Text("Register") }
+        Button(onClick = { onNavSelected("Duty Offers") }) { Text("Duty Offers") }
+        Button(onClick = { onNavSelected("Doctor Availabilities") }) { Text("Doctors") }
+    }
+}
+
+
+
+
+
+@Composable
+fun MainContent(selectedNav: String) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        var dutyslots : List<DutySlot> = emptyList()
+        when (selectedNav) {
+            "Register" -> RegisterScreen()
+            "Doctor Availabilities" -> DoctorAvailabilitiesScreen()
+            else -> Text("Select an option from the navigation.")
+        }
+    }
+}
+
+
+@Composable
+fun LoginScreen(onLoginSuccess: (String) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    val context = LocalContext.current // Capture the context
 
     Column(modifier = Modifier.padding(PaddingValues(16.dp))) {
         OutlinedTextField(
@@ -79,7 +197,7 @@ fun LoginScreen() {
         )
         Button(
             onClick = {
-                performLogin(username, password, context) // Call performLogin on click
+                performLogin(username, password, onLoginSuccess) // Call performLogin on click
 
             },
             modifier = Modifier.padding(top = 16.dp)
@@ -90,58 +208,133 @@ fun LoginScreen() {
 }
 
 
-
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+fun RegisterScreen() {
+    // Implementation of the Register Screen
+    Text("Register Screen")
 }
 
-@Preview(showBackground = true)
+
 @Composable
-fun GreetingPreview() {
-    GieldadyzurowaTheme {
-        Greeting("Android")
+fun DoctorAvailabilitiesScreen() {
+    // Implementation of the Doctor Availabilities Screen
+    Text("Doctor Availabilities Screen")
+}
+
+@Composable
+fun Footer()
+{
+    BottomAppBar {
+        Text("Footer", modifier = Modifier.padding(16.dp))
+    }
+}
+
+
+object OkHttpClientInstance {
+    val client: OkHttpClient by lazy {
+        OkHttpClient.Builder()
+            .cookieJar(object : CookieJar {
+                private val cookieStore = mutableMapOf<String, List<Cookie>>()
+
+                override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
+                    cookieStore[url.toString()] = cookies
+                }
+
+                override fun loadForRequest(url: HttpUrl): List<Cookie> {
+                    return cookieStore[url.toString()] ?: listOf()
+                }
+            })
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            .build()
+    }
+}
+
+// This function can be called within the onClick listener of the login button
+fun performLogin(username: String, password: String, onLoginSuccess: (String) -> Unit) {
+    val loginRequest = LoginRequest(username, password)
+    RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<Void> {
+        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+            if (response.isSuccessful) {
+                Log.d("LoginSuccess", "Successfully logged in user: $username")
+                onLoginSuccess(username)
+            } else {
+                Log.e(
+                    "LoginError",
+                    "Failed to log in user: $username. Response code: ${response.code()}"
+                )
+                // Handle error response
+            }
+        }
+
+        override fun onFailure(call: Call<Void>, t: Throwable) {
+            Log.e("LoginFailure", "Failed to log in user: $username", t)
+            // Handle the failure, e.g., show an error message
+        }
+    })
+}
+
+
+@Composable
+fun DutyOffersScreen(viewModel: DutyOffersViewModel) {
+    viewModel.fetchDutySlots()
+    val dutySlots = viewModel.dutySlots.collectAsState().value
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text("Duty Slots", style = MaterialTheme.typography.headlineMedium)
+        if (dutySlots.isEmpty()) {
+            Text("No duty slots found.", modifier = Modifier.padding(top = 16.dp))
+        } else {
+            LazyColumn {
+                items(count = dutySlots.size, itemContent = { index ->
+                    DutySlotCard(slot = dutySlots[index])
+                })
+            }}
+    }
+}
+
+class DutyOffersViewModel : ViewModel() {
+    private val _dutySlots = MutableStateFlow<List<DutySlot>>(emptyList())
+    val dutySlots: StateFlow<List<DutySlot>> = _dutySlots
+
+    init {
+        fetchDutySlots()
+    }
+
+     fun fetchDutySlots() = viewModelScope.launch {
+        try {
+            val response = RetrofitClient.apiService.fetchDutySlots()
+            if (response.isSuccessful) {
+                _dutySlots.value = response.body() ?: emptyList()
+            } else {
+                // Log error or handle error state
+                Log.e("DutyOffersViewModel", "Error fetching duty slots: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            // Handle exceptions from network call
+            Log.e("DutyOffersViewModel", "Exception when fetching duty slots", e)
+        }
     }
 }
 
 
 
-
-// This function can be called within the onClick listener of the login button
-fun performLogin(username: String, password: String, context: Context) {
-    val client = OkHttpClient()
-    val jsonObject = JSONObject()
-    jsonObject.put("username", username)
-    jsonObject.put("password", password)
-
-    val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
-    val requestBody = jsonObject.toString().toRequestBody(mediaType)
-
-    val request = Request.Builder()
-        .url("https://powerful-sea-67789-a7c9da8bf02d.herokuapp.com/auth/login")
-        //.url("http://10.0.2.2:3000/auth/login")
-        .post(requestBody)
-        .build()
-
-    client.newCall(request).enqueue(object : Callback {
-        override fun onResponse(call: Call, response: Response) {
-            if (response.isSuccessful) {
-                Log.d("LoginSuccess", "Successfully logged in user: $username")
-                // Handle successful response, e.g., navigate to another screen
-            } else {
-                Log.e("LoginError", "Failed to log in user: $username. Response code: ${response.code}")
-                // Handle error response
-            }
+@Composable
+fun DutySlotCard(slot: DutySlot) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text("Hospital: ${slot.hospitalId.username}", style = MaterialTheme.typography.bodyLarge)
+            Text("Date: ${formatDate(slot.date)}", style = MaterialTheme.typography.bodyLarge)
+            Text("Duty Hours: ${slot.dutyHours}", style = MaterialTheme.typography.bodyLarge)
+            Text("Required Specialty: ${slot.requiredSpecialty}", style = MaterialTheme.typography.bodyLarge)
         }
-
-        override fun onFailure(call: Call, e: IOException) {
-            Log.e("LoginFailure", "Failed to log in user: $username", e)
-
-            // Handle the failure, e.g., show an error message
-        }
-    })
+    }
 }
+
+
 
