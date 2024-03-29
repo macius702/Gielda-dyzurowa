@@ -6,14 +6,23 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+
+
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -24,6 +33,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gieldadyzurowa.network.LoginRequest
+import com.example.gieldadyzurowa.network.RegistrationRequest
 import com.example.gieldadyzurowa.network.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -46,6 +56,8 @@ import retrofit2.Response
 
 import java.text.SimpleDateFormat
 import java.util.Locale
+
+
 
 fun formatDate(dateStr: String): String {
     val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
@@ -93,17 +105,34 @@ fun AppContent()
 {
     var isLoggedIn by remember { mutableStateOf(false) }
     var selectedNav by remember { mutableStateOf("Doctor Availabilities") }
-    var username by remember { mutableStateOf("") } // State to hold the username
-    val dutySlotsViewModel = viewModel<DutyOffersViewModel>() // Consider providing this ViewModel to the DutyOffersScreen.
+    var username by remember { mutableStateOf("") }
+    var showRegistrationSuccessDialog by remember { mutableStateOf(false) } // New state for showing registration success dialog
+    val dutySlotsViewModel = viewModel<DutyOffersViewModel>()
 
-
+    // Check for registration success and show dialog
+    if (showRegistrationSuccessDialog) {
+        AlertDialog(
+            onDismissRequest = { showRegistrationSuccessDialog = false },
+            title = { Text(text = "Registration Successful") },
+            text = { Text("You've successfully registered. Please log in.") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showRegistrationSuccessDialog = false
+                        selectedNav = "Login" // Navigate to login screen
+                    }
+                ) {
+                    Text("OK")
+                }
+            }
+        )
+    }
 
     Scaffold(
         topBar = { Header(isLoggedIn, username) },
         bottomBar = { Footer() }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding))
-        {
+        Column(modifier = Modifier.padding(padding)) {
             NavBar(selectedNav) { selectedNav = it }
             if (selectedNav == "Login" && !isLoggedIn) {
                 LoginScreen(onLoginSuccess = { user ->
@@ -111,13 +140,14 @@ fun AppContent()
                     username = user // Update the username upon successful login
                     selectedNav = "Doctor Availabilities" // Navigate away from the login page
                 })
-            }
-            else if (selectedNav == "Duty Offers")
-            {
+            } else if (selectedNav == "Register" && !isLoggedIn) {
+                RegisterScreen(onRegistrationSuccess = {
+                    // Upon successful registration, show success dialog
+                    showRegistrationSuccessDialog = true
+                })
+            } else if (selectedNav == "Duty Offers") {
                 DutyOffersScreen(viewModel = dutySlotsViewModel)
-
-            }
-            else {
+            } else {
                 MainContent(selectedNav)
             }
         }
@@ -165,7 +195,6 @@ fun MainContent(selectedNav: String) {
     ) {
         var dutyslots : List<DutySlot> = emptyList()
         when (selectedNav) {
-            "Register" -> RegisterScreen()
             "Doctor Availabilities" -> DoctorAvailabilitiesScreen()
             else -> Text("Select an option from the navigation.")
         }
@@ -207,11 +236,140 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
     }
 }
 
+@Composable
+fun ExampleDropdownMenu() {
+    var expanded by remember { mutableStateOf(false) }
+    val roles = listOf("doctor", "hospital")
+    var selectedRole by remember { mutableStateOf("") }
+
+    Column {
+        OutlinedTextField(
+            value = selectedRole,
+            onValueChange = { selectedRole = it },
+            label = { Text("Role") },
+            readOnly = true,
+            trailingIcon = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                    contentDescription = "Dropdown",
+                    Modifier.clickable { expanded = !expanded }
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            roles.forEach { role ->
+                DropdownMenuItem(
+                    onClick = {
+                        selectedRole = role
+                        expanded = false
+                    }
+                ) {
+                    // Ensure the Text composable is correctly receiving a string for its 'text' parameter
+                    Text(text = role.replaceFirstChar { it.uppercase() })
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
-fun RegisterScreen() {
-    // Implementation of the Register Screen
-    Text("Register Screen")
+fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
+    var username by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var role by remember { mutableStateOf("") }
+    var specialty by remember { mutableStateOf("") }
+    var localization by remember { mutableStateOf("") }
+    var expanded by remember { mutableStateOf(false) }
+    val showSpecialtyLocalization by remember { derivedStateOf { role == "doctor" } }
+
+    val roles = listOf("doctor", "hospital") // Your roles
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        OutlinedTextField(
+            value = username,
+            onValueChange = { username = it },
+            label = { Text("Username") },
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            singleLine = true,
+            visualTransformation = PasswordVisualTransformation()
+        )
+
+        Box {
+            OutlinedTextField(
+                readOnly = true,
+                value = role.ifEmpty { "Select Role" },
+                onValueChange = {},
+                label = { Text("Role") },
+                trailingIcon = {
+                    Icon(
+                        imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                        contentDescription = null,
+                        Modifier.clickable { expanded = !expanded }
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded }
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                roles.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        onClick = {
+                            role = selectionOption
+
+                            expanded = false
+                        }
+                    ) {
+                        Text(text = selectionOption.replaceFirstChar { it.uppercase() })
+                    }
+                }
+            }
+        }
+
+        if (showSpecialtyLocalization) {
+            OutlinedTextField(
+                value = specialty,
+                onValueChange = { specialty = it },
+                label = { Text("Specialty (Doctors only)") },
+                singleLine = true
+            )
+            OutlinedTextField(
+                value = localization,
+                onValueChange = { localization = it },
+                label = { Text("Localization (Doctors only)") },
+                singleLine = true
+            )
+        }
+
+        Button(
+            onClick = {
+
+                performRegistration(username,
+                    password,
+                    role,
+                    specialty,
+                    localization,
+                    onRegistrationSuccess)
+
+            },
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            Text("Register")
+        }
+    }
 }
 
 
@@ -249,6 +407,48 @@ object OkHttpClientInstance {
             })
             .build()
     }
+}
+
+fun performRegistration(
+    username: String,
+    password: String,
+    role: String,
+    specialty: String?,
+    localization: String?,
+    onRegistrationSuccess: () -> Unit
+)
+{
+    val registrationRequest = RegistrationRequest(
+        username = username,
+        password = password,
+        role = role,
+        specialty = specialty?.takeIf { it.isNotEmpty() },
+        localization = localization?.takeIf { it.isNotEmpty() }
+    )
+
+
+    RetrofitClient.apiService.registerUser(registrationRequest).enqueue(object : Callback<Void>
+    {
+        override fun onResponse(call: Call<Void>, response: Response<Void>)
+        {
+            if (response.isSuccessful)
+            {
+                Log.d("RegistrationSuccess", "Successfully registered user: $username")
+                onRegistrationSuccess()
+            }
+            else
+            {
+                Log.e("RegistrationError", "Failed to register user: $username. Response code: ${response.code()}")
+                // Here you can handle different HTTP codes and give feedback to the user accordingly
+            }
+        }
+
+        override fun onFailure(call: Call<Void>, t: Throwable)
+        {
+            Log.e("RegistrationFailure", "Failed to register user: $username", t)
+            // Handle the failure, for example, by showing an error message to the user
+        }
+    })
 }
 
 // This function can be called within the onClick listener of the login button

@@ -56,6 +56,8 @@ dependencies {
 
     implementation 'androidx.compose.ui:ui:1.1.0' // Use the appropriate version
     implementation 'androidx.compose.material:material:1.1.0' // Material Design for Compose
+    implementation "androidx.compose.material:material-icons-core:1.1.0"
+    implementation "androidx.compose.material:material-icons-extended:1.1.0"
     implementation 'androidx.compose.ui:ui-tooling-preview:1.1.0'
 
     implementation 'com.google.android.material:material:1.6.1' // Ensure this is the correct version for Material Design 3
