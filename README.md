@@ -30,6 +30,21 @@ The application is architected using Node.js with the Express framework powering
 4. Start the application using `npm start`.
 5. Access the application through `http://localhost:3000`.
 
+
+### Useful commands
+
+Heroku
+curl https://cli-assets.heroku.com/install-ubuntu.sh | sh
+heroku --version
+heroku config:set PORT=3000 -a powerful-sea-67789
+heroku config:set DATABASE_URL='mongodb+srv://macius702:Wigolmhmyfn11;@cluster0.g84cahs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'  -a powerful-sea-67789 
+heroku config:set SESSION_SECRET=e4e634dcb2c84f67afed8dd2c0a61b8c -a powerful-sea-67789
+git push heroku master
+heroku logs --tail
+heroku apps
+
+
+
 ### License
 
 Copyright (c) 2024.
