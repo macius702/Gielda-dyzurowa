@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ModalDrawer
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,6 +57,11 @@ import retrofit2.Response
 
 import java.text.SimpleDateFormat
 import java.util.Locale
+
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.filled.Menu
 
 
 
@@ -100,59 +106,112 @@ data class DutySlot(
 )
 
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppContent()
-{
+fun AppContent() {
+    val coroutineScope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
     var isLoggedIn by remember { mutableStateOf(false) }
     var selectedNav by remember { mutableStateOf("Doctor Availabilities") }
     var username by remember { mutableStateOf("") }
-    var showRegistrationSuccessDialog by remember { mutableStateOf(false) } // New state for showing registration success dialog
+    var showRegistrationSuccessDialog by remember { mutableStateOf(false) }
     val dutySlotsViewModel = viewModel<DutyOffersViewModel>()
 
-    // Check for registration success and show dialog
-    if (showRegistrationSuccessDialog) {
-        AlertDialog(
-            onDismissRequest = { showRegistrationSuccessDialog = false },
-            title = { Text(text = "Registration Successful") },
-            text = { Text("You've successfully registered. Please log in.") },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showRegistrationSuccessDialog = false
-                        selectedNav = "Login" // Navigate to login screen
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            DrawerContent(
+                onNavSelected = { nav ->
+                    selectedNav = nav
+                    coroutineScope.launch {
+                        drawerState.close()
                     }
-                ) {
-                    Text("OK")
-                }
+                    if (nav == "Logout") {
+                        isLoggedIn = false
+                        username = ""
+                        selectedNav = "Login"
+                    }
+                },
+                isLoggedIn = isLoggedIn
+            )
+        }
+    ) {
+        // Scaffold and your app's content go here
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { 
+                        Text(
+                            text = if (isLoggedIn && username.isNotEmpty()) "Logged in as $username" else "Not Logged In"
+                        )
+                    },                    navigationIcon = {
+                        if (drawerState.isClosed) {
+                            IconButton(onClick = {
+                                coroutineScope.launch { drawerState.open() }
+                            }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                            }
+                        }
+                    }
+                )
             }
-        )
-    }
+        ) { padding ->
+            Column(modifier = Modifier.padding(padding)) {
+                if (showRegistrationSuccessDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showRegistrationSuccessDialog = false },
+                        title = { Text("Registration Successful") },
+                        text = { Text("You've successfully registered. Please log in.") },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    showRegistrationSuccessDialog = false
+                                    selectedNav = "Login"
+                                }
+                            ) { Text("OK") }
+                        }
+                    )
+                }
 
-    Scaffold(
-        topBar = { Header(isLoggedIn, username) },
-        bottomBar = { Footer() }
-    ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            NavBar(selectedNav) { selectedNav = it }
-            if (selectedNav == "Login" && !isLoggedIn) {
-                LoginScreen(onLoginSuccess = { user ->
-                    isLoggedIn = true
-                    username = user // Update the username upon successful login
-                    selectedNav = "Doctor Availabilities" // Navigate away from the login page
-                })
-            } else if (selectedNav == "Register" && !isLoggedIn) {
-                RegisterScreen(onRegistrationSuccess = {
-                    // Upon successful registration, show success dialog
-                    showRegistrationSuccessDialog = true
-                })
-            } else if (selectedNav == "Duty Offers") {
-                DutyOffersScreen(viewModel = dutySlotsViewModel)
-            } else {
-                MainContent(selectedNav)
+                // The rest of your conditional content logic
+                when (selectedNav) {
+                    "Login" -> if (!isLoggedIn) {
+                        LoginScreen(onLoginSuccess = { user ->
+                            isLoggedIn = true
+                            username = user
+                            selectedNav = "Doctor Availabilities"
+                        })
+                    }
+                    "Register" -> if (!isLoggedIn) {
+                        RegisterScreen(onRegistrationSuccess = {
+                            showRegistrationSuccessDialog = true
+                        })
+                    }
+                    "Duty Offers" -> DutyOffersScreen(viewModel = dutySlotsViewModel)
+                    else -> MainContent(selectedNav)
+                }
             }
         }
     }
 }
+
+@Composable
+fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        // Populate your drawer content here
+        Button(onClick = { onNavSelected("Login") }) { Text("Login") }
+        Button(onClick = { onNavSelected("Register") }) { Text("Register") }
+        Button(onClick = { onNavSelected("Duty Offers") }) { Text("Duty Offers") }
+        Button(onClick = { onNavSelected("Doctor Availabilities") }) { Text("Doctors") }
+        if (isLoggedIn) {
+            Button(onClick = { onNavSelected("Logout") }) { Text("Logout") }
+        }
+    }
+}
+
+// Ensure you define or adapt LoginScreen, RegisterScreen, DutyOffersScreen, and MainContent for compatibility with your app's logic and Material 3 components.
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -162,23 +221,6 @@ fun Header(isLoggedIn: Boolean, username: String) {
             Text(text = if (isLoggedIn) username else "Not Logged In")
         }
     )
-}
-
-@Composable
-fun NavBar(selectedNav: String, onNavSelected: (String) -> Unit)
-{
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    )
-    {
-        Button(onClick = { onNavSelected("Login") }) { Text("Login") }
-        Button(onClick = { onNavSelected("Register") }) { Text("Register") }
-        Button(onClick = { onNavSelected("Duty Offers") }) { Text("Duty Offers") }
-        Button(onClick = { onNavSelected("Doctor Availabilities") }) { Text("Doctors") }
-    }
 }
 
 
@@ -193,7 +235,6 @@ fun MainContent(selectedNav: String) {
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        var dutyslots : List<DutySlot> = emptyList()
         when (selectedNav) {
             "Doctor Availabilities" -> DoctorAvailabilitiesScreen()
             else -> Text("Select an option from the navigation.")
