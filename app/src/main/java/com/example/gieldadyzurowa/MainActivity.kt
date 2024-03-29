@@ -19,11 +19,9 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.ModalDrawer
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -40,10 +38,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody.Companion.toRequestBody
-import org.json.JSONObject
-import java.io.IOException
 
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
@@ -98,12 +92,13 @@ data class Hospital(
     // Add other fields as necessary...
 )
 
-data class DutySlot(
+data class DutyVacancy(
     val hospitalId: Hospital, // Assuming hospitalId is unique and can be used as such; adjust as needed
     val date: String, // Using String for simplicity; consider using a proper date type
     val dutyHours: String,
     val requiredSpecialty: String
 )
+
 
 
 
@@ -116,7 +111,7 @@ fun AppContent() {
     var selectedNav by remember { mutableStateOf("Doctor Availabilities") }
     var username by remember { mutableStateOf("") }
     var showRegistrationSuccessDialog by remember { mutableStateOf(false) }
-    val dutySlotsViewModel = viewModel<DutyOffersViewModel>()
+    val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -188,7 +183,7 @@ fun AppContent() {
                             showRegistrationSuccessDialog = true
                         })
                     }
-                    "Duty Offers" -> DutyOffersScreen(viewModel = dutySlotsViewModel)
+                    "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel)
                     else -> MainContent(selectedNav)
                 }
             }
@@ -202,7 +197,7 @@ fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
         // Populate your drawer content here
         Button(onClick = { onNavSelected("Login") }) { Text("Login") }
         Button(onClick = { onNavSelected("Register") }) { Text("Register") }
-        Button(onClick = { onNavSelected("Duty Offers") }) { Text("Duty Offers") }
+        Button(onClick = { onNavSelected("Duty Vacancies") }) { Text("Duty Vacancies") }
         Button(onClick = { onNavSelected("Doctor Availabilities") }) { Text("Doctors") }
         if (isLoggedIn) {
             Button(onClick = { onNavSelected("Logout") }) { Text("Logout") }
@@ -210,7 +205,7 @@ fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
     }
 }
 
-// Ensure you define or adapt LoginScreen, RegisterScreen, DutyOffersScreen, and MainContent for compatibility with your app's logic and Material 3 components.
+// Ensure you define or adapt LoginScreen, RegisterScreen, DutyVacanciesScreen, and MainContent for compatibility with your app's logic and Material 3 components.
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -518,42 +513,42 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String) ->
 
 
 @Composable
-fun DutyOffersScreen(viewModel: DutyOffersViewModel) {
-    viewModel.fetchDutySlots()
-    val dutySlots = viewModel.dutySlots.collectAsState().value
+fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel) {
+    viewModel.fetchDutyVacancies()
+    val dutyVacancies = viewModel.dutyVacancies.collectAsState().value
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("Duty Slots", style = MaterialTheme.typography.headlineMedium)
-        if (dutySlots.isEmpty()) {
-            Text("No duty slots found.", modifier = Modifier.padding(top = 16.dp))
+        Text("Duty Vacancies", style = MaterialTheme.typography.headlineMedium)
+        if (dutyVacancies.isEmpty()) {
+            Text("No duty vacancies found.", modifier = Modifier.padding(top = 16.dp))
         } else {
             LazyColumn {
-                items(count = dutySlots.size, itemContent = { index ->
-                    DutySlotCard(slot = dutySlots[index])
+                items(count = dutyVacancies.size, itemContent = { index ->
+                    DutyVacancyCard(dutyVacancy = dutyVacancies[index])
                 })
             }}
     }
 }
 
-class DutyOffersViewModel : ViewModel() {
-    private val _dutySlots = MutableStateFlow<List<DutySlot>>(emptyList())
-    val dutySlots: StateFlow<List<DutySlot>> = _dutySlots
+class DutyVacanciesViewModel : ViewModel() {
+    private val _dutyVacancies = MutableStateFlow<List<DutyVacancy>>(emptyList())
+    val dutyVacancies: StateFlow<List<DutyVacancy>> = _dutyVacancies
 
     init {
-        fetchDutySlots()
+        fetchDutyVacancies()
     }
 
-     fun fetchDutySlots() = viewModelScope.launch {
+     fun fetchDutyVacancies() = viewModelScope.launch {
         try {
-            val response = RetrofitClient.apiService.fetchDutySlots()
+            val response = RetrofitClient.apiService.fetchDutyVacancies()
             if (response.isSuccessful) {
-                _dutySlots.value = response.body() ?: emptyList()
+                _dutyVacancies.value = response.body() ?: emptyList()
             } else {
                 // Log error or handle error state
-                Log.e("DutyOffersViewModel", "Error fetching duty slots: ${response.errorBody()?.string()}")
+                Log.e("DutyVacanciesViewModel", "Error fetching duty vacancies: ${response.errorBody()?.string()}")
             }
         } catch (e: Exception) {
             // Handle exceptions from network call
-            Log.e("DutyOffersViewModel", "Exception when fetching duty slots", e)
+            Log.e("DutyVacanciesViewModel", "Exception when fetching duty vacancies", e)
         }
     }
 }
@@ -561,7 +556,7 @@ class DutyOffersViewModel : ViewModel() {
 
 
 @Composable
-fun DutySlotCard(slot: DutySlot) {
+fun DutyVacancyCard(dutyVacancy: DutyVacancy) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -569,10 +564,10 @@ fun DutySlotCard(slot: DutySlot) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Hospital: ${slot.hospitalId.username}", style = MaterialTheme.typography.bodyLarge)
-            Text("Date: ${formatDate(slot.date)}", style = MaterialTheme.typography.bodyLarge)
-            Text("Duty Hours: ${slot.dutyHours}", style = MaterialTheme.typography.bodyLarge)
-            Text("Required Specialty: ${slot.requiredSpecialty}", style = MaterialTheme.typography.bodyLarge)
+            Text("Hospital: ${dutyVacancy.hospitalId.username}", style = MaterialTheme.typography.bodyLarge)
+            Text("Date: ${formatDate(dutyVacancy.date)}", style = MaterialTheme.typography.bodyLarge)
+            Text("Duty Hours: ${dutyVacancy.dutyHours}", style = MaterialTheme.typography.bodyLarge)
+            Text("Required Specialty: ${dutyVacancy.requiredSpecialty}", style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

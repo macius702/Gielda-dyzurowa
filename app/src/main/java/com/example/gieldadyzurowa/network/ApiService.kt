@@ -1,6 +1,6 @@
 package com.example.gieldadyzurowa.network
 
-import com.example.gieldadyzurowa.DutySlot
+import com.example.gieldadyzurowa.DutyVacancy
 import retrofit2.Call
 import retrofit2.Response
 import retrofit2.http.*
@@ -13,7 +13,7 @@ interface ApiService {
     fun registerUser(@Body registrationRequest: RegistrationRequest): Call<Void>
 
     @GET("/duty/slots/json")
-    suspend fun fetchDutySlots(): Response<List<DutySlot>>
+    suspend fun fetchDutyVacancies(): Response<List<DutyVacancy>>
 
     }
     
