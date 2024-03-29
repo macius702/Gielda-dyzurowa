@@ -9,7 +9,7 @@ interface ApiService {
     @POST("/auth/login")
     fun loginUser(@Body loginRequest: LoginRequest): Call<Void> // Or Call<ResponseType> if your API returns a response
 
-    @GET("/duty/slots")
+    @GET("/duty/slots/json")
     suspend fun fetchDutySlots(): Response<List<DutySlot>>
 }
 

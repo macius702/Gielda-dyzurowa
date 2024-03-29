@@ -78,9 +78,9 @@ router.post('/duty/interest/:id', isAuthenticated, isDoctor, async (req, res) =>
     res.status(500).send('Error sending interest message');
   }
 });
-router.get('/duty/slots', isAuthenticated, async (req, res) => 
+// Common function to fetch and log duty slots
+async function fetch_and_log_duty_slots(req, res, respond)
 {
-    // Log incoming request details
     console.log('Incoming Request:', 
     {
         method: req.method,
@@ -88,42 +88,56 @@ router.get('/duty/slots', isAuthenticated, async (req, res) =>
         headers: req.headers
     });
 
-    // Wrap res.render for logging
-    const originalRender = res.render.bind(res);
-    res.render = (view, options, callback) =>
+    try
     {
-      console.log('Outgoing Response (render):', 
-      {
-          view: view,
-          options: options
-      });
-  
-      originalRender(view, options, callback);
-  };
-  
-  try
-  {
-      const dutySlots = await DutySlot.find().populate('hospitalId');
-      
-      // Log the data about to be sent
-      console.log('Outgoing Response (JSON):', dutySlots );      
-      
-      // The actual rendering happens here, and the logging will take place in the wrapped res.render above
-      res.json(dutySlots);
+        const duty_slots = await DutySlot.find().populate('hospitalId');
+        console.log('Outgoing Response (Data):', duty_slots);
 
-  } 
-  catch (error)
-  {
-      console.error('Error fetching duty slots:', error.message, error.stack);
-      
-      // Log before sending error response
-      console.log('Outgoing Response (error):', 
-      {
-          statusCode: 500,
-          body: 'Error fetching duty slots.'
-      });
-  
-      res.status(500).send('Error fetching duty slots.');
-  }
+        // Respond using the provided callback function (either render or JSON)
+        respond(res, duty_slots);
+    } 
+    catch (error)
+    {
+        console.error('Error fetching duty slots:', error.message, error.stack);
+        console.log('Outgoing Response (error):', 
+        {
+            statusCode: 500,
+            body: 'Error fetching duty slots.'
+        });
+        res.status(500).send('Error fetching duty slots.');
+    }
+}
+
+// Endpoint for rendering view
+router.get('/duty/slots', isAuthenticated, (req, res) => 
+{
+    fetch_and_log_duty_slots(req, res, (response, duty_slots) =>
+    {
+        // Modify res.render to log the response
+        const original_render = response.render.bind(response);
+        response.render = (view, options, callback) =>
+        {
+            console.log('Outgoing Response (render):', 
+            {
+                view: view,
+                options: options
+            });
+            original_render(view, options, callback);
+        };
+
+        // Render view with duty slots
+        response.render('dutySlots', { dutySlots: duty_slots });
+    });
 });
+
+// Endpoint for JSON response
+router.get('/duty/slots/json', isAuthenticated, (req, res) => 
+{
+    fetch_and_log_duty_slots(req, res, (response, duty_slots) =>
+    {
+        // Directly respond with JSON
+        response.json(duty_slots);
+    });
+});
+
 module.exports = router;
