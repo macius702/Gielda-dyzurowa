@@ -109,7 +109,7 @@ async function fetch_and_log_duty_slots(req, res, respond)
 }
 
 // Endpoint for rendering view
-router.get('/duty/slots', isAuthenticated, (req, res) => 
+router.get('/duty/slots/rendered', isAuthenticated, (req, res) => 
 {
     fetch_and_log_duty_slots(req, res, (response, duty_slots) =>
     {
