@@ -15,6 +15,11 @@ interface ApiService {
     @GET("/duty/slots/json")
     suspend fun fetchDutyVacancies(): Response<List<DutyVacancy>>
 
+    @POST("duty/publish")
+    suspend fun publishDutyVacancy(
+        @Body dutyVacancy: DutyVacancy
+    ): Response<Unit> // Adjust return type based on your API response
+
     }
     
 

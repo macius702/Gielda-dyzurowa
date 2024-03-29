@@ -2,6 +2,7 @@ package com.example.gieldadyzurowa
 
 
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -58,6 +59,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.filled.Menu
 
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.ui.platform.LocalContext
+import java.util.Calendar
+import android.app.DatePickerDialog
+
 
 fun formatDate(dateStr: String): String {
     val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
@@ -93,7 +103,7 @@ data class Hospital(
 )
 
 data class DutyVacancy(
-    val hospitalId: Hospital, // Assuming hospitalId is unique and can be used as such; adjust as needed
+    val hospitalId: Hospital?, // Assuming hospitalId is unique and can be used as such; adjust as needed
     val date: String, // Using String for simplicity; consider using a proper date type
     val dutyHours: String,
     val requiredSpecialty: String
@@ -184,6 +194,19 @@ fun AppContent() {
                         })
                     }
                     "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel)
+
+                    "Publish Duty Vacancy" -> if (isLoggedIn) {
+                        // Ensure only logged in users can access the publish screen
+                        DutyVacancyPublishScreen(
+                            viewModel = dutyVacanciesViewModel,
+                            onPublishSuccess = {
+                                // Handle what happens after a successful publish
+                                // For example, you could navigate back to the Duty Vacancies list
+                                selectedNav = "Duty Vacancies"
+                            }
+                        )
+                    }
+
                     else -> MainContent(selectedNav)
                 }
             }
@@ -197,9 +220,10 @@ fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
         // Populate your drawer content here
         Button(onClick = { onNavSelected("Login") }) { Text("Login") }
         Button(onClick = { onNavSelected("Register") }) { Text("Register") }
-        Button(onClick = { onNavSelected("Duty Vacancies") }) { Text("Duty Vacancies") }
         Button(onClick = { onNavSelected("Doctor Availabilities") }) { Text("Doctors") }
+        Button(onClick = { onNavSelected("Duty Vacancies") }) { Text("Duty Vacancies") }
         if (isLoggedIn) {
+            Button(onClick = { onNavSelected("Publish Duty Vacancy") }) { Text("Publish Duty Vacancy") }
             Button(onClick = { onNavSelected("Logout") }) { Text("Logout") }
         }
     }
@@ -551,7 +575,31 @@ class DutyVacanciesViewModel : ViewModel() {
             Log.e("DutyVacanciesViewModel", "Exception when fetching duty vacancies", e)
         }
     }
+
+    fun publishDutyVacancy(date: String, dutyHours: String, requiredSpecialty: String) = viewModelScope.launch {
+        try {
+            val dutyVacancy = DutyVacancy(
+                null  /* Your logic to obtain the hospital ID */, // You might need to adjust this according to how you manage hospital IDs
+                date = date,
+                dutyHours = dutyHours,
+                requiredSpecialty = requiredSpecialty
+            )
+            val response = RetrofitClient.apiService.publishDutyVacancy(dutyVacancy)
+            if (response.isSuccessful) {
+                // Handle successful publish
+                Log.d("DutyVacanciesViewModel", "Duty vacancy published successfully")
+                // Optionally, refresh the list of vacancies or navigate the user
+            } else {
+                // Log error or handle error state
+                Log.e("DutyVacanciesViewModel", "Error publishing duty vacancy: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("DutyVacanciesViewModel", "Exception when publishing duty vacancy", e)
+        }
+    }
 }
+
 
 
 
@@ -564,7 +612,7 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Hospital: ${dutyVacancy.hospitalId.username}", style = MaterialTheme.typography.bodyLarge)
+            Text("Hospital: ${dutyVacancy.hospitalId!!.username}", style = MaterialTheme.typography.bodyLarge)
             Text("Date: ${formatDate(dutyVacancy.date)}", style = MaterialTheme.typography.bodyLarge)
             Text("Duty Hours: ${dutyVacancy.dutyHours}", style = MaterialTheme.typography.bodyLarge)
             Text("Required Specialty: ${dutyVacancy.requiredSpecialty}", style = MaterialTheme.typography.bodyLarge)
@@ -573,4 +621,66 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy) {
 }
 
 
+
+
+@Composable
+fun DutyVacancyPublishScreen(
+    viewModel: DutyVacanciesViewModel = viewModel(),
+    onPublishSuccess: () -> Unit
+) {
+    var date by remember { mutableStateOf("") }
+    var dutyHours by remember { mutableStateOf("") }
+    var requiredSpecialty by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    // Date picker dialog
+    fun showDatePicker() {
+        val calendar = Calendar.getInstance()
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                date = dateFormat.format(calendar.time)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
+
+    Column {
+        // Use a Button for the date selection
+        Button(onClick = { showDatePicker() }) {
+            Text(text = if (date.isBlank()) "Select Date" else date)
+        }
+    
+        OutlinedTextField(
+            value = dutyHours,
+            onValueChange = { dutyHours = it },
+            label = { Text("Duty Hours") },
+            modifier = Modifier.padding(PaddingValues(all = 8.dp))
+        )
+        OutlinedTextField(
+            value = requiredSpecialty,
+            onValueChange = { requiredSpecialty = it },
+            label = { Text("Required Specialty") },
+            modifier = Modifier.padding(PaddingValues(all = 8.dp))
+        )
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    viewModel.publishDutyVacancy(date, dutyHours, requiredSpecialty)
+                    onPublishSuccess()
+                }
+            },
+            modifier = Modifier.padding(PaddingValues(all = 8.dp))
+        ) {
+            Text("Publish")
+        }
+    }
+}
 
