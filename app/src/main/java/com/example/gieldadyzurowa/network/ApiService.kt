@@ -24,7 +24,11 @@ interface ApiService {
     @GET("/doctor/availabilities/json")
     suspend fun fetchDoctorAvailabilities(): Response<List<DoctorAvailability>>
 
-    }
+    @POST("/doctor/availability")
+    suspend fun addDoctorAvailability(
+        @Body availabilityRequest: DoctorAvailability
+    ): Response<Unit> // A
+}
     
 
 

@@ -125,7 +125,7 @@ data class Doctor(
 
 
 data class DoctorAvailability(
-    val doctorId: Doctor,
+    val doctorId: Doctor?,
     val date: String, // Depending on your use case, you might want to parse this into a Date object
     val availableHours: String
 )
@@ -144,6 +144,14 @@ fun AppContent() {
     var showRegistrationSuccessDialog by remember { mutableStateOf(false) }
     val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
     val doctorAvailabilitiesViewModel = viewModel<DoctorAvailabilitiesViewModel>()
+
+    // performLogin("abba", "alamakota",
+    //     onLoginSuccess = { user ->
+    //         isLoggedIn = true
+    //         username = user
+    //         selectedNav = LANDING_SCREEN
+    //     }
+    // )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -231,6 +239,16 @@ fun AppContent() {
                         )
                     }
 
+                    "Add Doctor Availability" -> if (isLoggedIn) {
+                        val viewModel: DoctorAvailabilitiesViewModel = viewModel()
+                        AddDoctorAvailabilityScreen(viewModel)
+                        {
+                            selectedNav = "Doctor Availabilities"
+                        }
+
+                    }
+
+
                     else ->             Text("Select an option from the navigation.")
 
                 }
@@ -246,6 +264,9 @@ fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
         Button(onClick = { onNavSelected("Login") }) { Text("Login") }
         Button(onClick = { onNavSelected("Register") }) { Text("Register") }
         Button(onClick = { onNavSelected("Doctor Availabilities") }) { Text("Doctor Availabilities") }
+        if (isLoggedIn) {
+            Button(onClick = { onNavSelected("Add Doctor Availability") }) { Text("Add Doctor Availability") }
+        }
         Button(onClick = { onNavSelected("Duty Vacancies") }) { Text("Duty Vacancies") }
         if (isLoggedIn) {
             Button(onClick = { onNavSelected("Publish Duty Vacancy") }) { Text("Publish Duty Vacancy") }
@@ -456,6 +477,25 @@ class DoctorAvailabilitiesViewModel : ViewModel() {
             Log.e("DoctorAvailViewModel", "Exception when fetching availabilities", e)
         }
     }
+
+    fun addDoctorAvailability(date: String, availableHours: String) = viewModelScope.launch {
+        try {
+            val availabilityRequest = DoctorAvailability(null, date, availableHours)
+            val response = RetrofitClient.apiService.addDoctorAvailability(availabilityRequest)
+            if (response.isSuccessful) {
+                // Handle successful post
+                Log.d("DoctorAvailability", "Doctor availability added successfully")
+                // Optionally, update your UI or state here
+            } else {
+                // Handle API error response
+                Log.e("DoctorAvailability", "Error adding doctor availability: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            // Handle exceptions
+            Log.e("DoctorAvailability", "Exception when adding doctor availability", e)
+        }
+    }
+
 }
 
 @Composable
@@ -489,7 +529,7 @@ fun DoctorAvailabilityCard(doctorAvailability: DoctorAvailability) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Doctor ID
             Text(
-                text = "Doctor ID: ${doctorAvailability.doctorId.username}",
+                text = "Doctor ID: ${doctorAvailability.doctorId!!.username}",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -509,6 +549,142 @@ fun DoctorAvailabilityCard(doctorAvailability: DoctorAvailability) {
             )
         }
     }
+}
+
+
+
+@Composable
+fun AddDoctorAvailabilityScreen(
+    viewModel: DoctorAvailabilitiesViewModel, // Assume this ViewModel handles the logic
+    onAddSuccess: () -> Unit // Callback for successful addition
+)
+{
+    Column(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+
+
+        var date by remember { mutableStateOf("") }
+        var availableHours by remember { mutableStateOf("") }
+
+        val context = LocalContext.current
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        // Date picker dialog
+        fun showDatePicker() {
+            val calendar = Calendar.getInstance()
+            DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    calendar.set(Calendar.YEAR, year)
+                    calendar.set(Calendar.MONTH, month)
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                    date = dateFormat.format(calendar.time)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }
+
+        Text("Add Availability", style = MaterialTheme.typography.titleMedium)
+
+        // Use a Button for the date selection
+        Button(onClick = { showDatePicker() }) {
+            Text(text = if (date.isBlank()) "Select Date" else date)
+        }
+
+        // Placeholder for Available Hours Input
+        OutlinedTextField(
+            value = availableHours,
+            onValueChange = {availableHours = it},
+            label = { Text("Available Hours") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // Placeholder for Submit Button
+        Button(
+            onClick = {
+                viewModel.addDoctorAvailability(date, availableHours)
+                onAddSuccess()
+
+            },
+            modifier = Modifier.align(Alignment.End)
+        ) {
+            Text("Submit")
+        }
+    }
+}
+
+//
+//@Composable
+//fun AddDoctorAvailabilityScreen(
+//    viewModel: DoctorAvailabilitiesViewModel, // Assume this ViewModel handles the logic
+//    onAddSuccess: () -> Unit // Callback for successful addition
+//) {
+//    var date by remember { mutableStateOf("") }
+//    var availableHours by remember { mutableStateOf("") }
+//    val context = LocalContext.current
+//
+//    Column(
+//        modifier = Modifier
+//            .padding(16.dp)
+//            .fillMaxWidth(),
+//        verticalArrangement = Arrangement.spacedBy(8.dp)
+//    ) {
+//        Text("Add Availability", style = MaterialTheme.typography.h6)
+//
+//        // Date Picker
+//        OutlinedButton(
+//            onClick = { showDatePicker(context, date) { selectedDate -> date = selectedDate } }
+//        ) {
+//            Text(if (date.isNotEmpty()) date else "Select Date")
+//        }
+//
+//        // Available Hours
+//        OutlinedTextField(
+//            value = availableHours,
+//            onValueChange = { availableHours = it },
+//            label = { Text("Available Hours") },
+//            singleLine = true
+//        )
+//
+//        // Submit Button
+//        Button(
+//            onClick = {
+//                // Assume viewModel.addDoctorAvailability triggers necessary logic and updates state
+//                viewModel.addDoctorAvailability(date, availableHours)
+//                // For mockup purposes, we assume success and directly call onAddSuccess
+//                onAddSuccess()
+//            },
+//            modifier = Modifier.align(Alignment.End)
+//        ) {
+//            Text("Submit")
+//        }
+//    }
+//}
+//
+fun showDatePicker(
+    context: Context,
+    initialDate: String,
+    onDateSelected: (String) -> Unit
+) {
+    val calendar = Calendar.getInstance()
+    DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            // Update the `date` state with the new date
+            calendar.set(year, month, dayOfMonth)
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            onDateSelected(dateFormat.format(calendar.time))
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    ).show()
 }
 
 @Composable
