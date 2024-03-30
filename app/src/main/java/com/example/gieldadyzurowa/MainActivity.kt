@@ -69,6 +69,7 @@ import java.util.Calendar
 import android.app.DatePickerDialog
 
 
+
 fun formatDate(dateStr: String): String {
     val parser = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
     val formatter = SimpleDateFormat("dd MMMM yyyy, HH:mm", Locale.getDefault())
@@ -110,6 +111,25 @@ data class DutyVacancy(
 )
 
 
+data class Doctor(
+    val _id: String,
+    val username: String,
+    val password: String, // Note: Handling passwords like this is insecure, especially on client-side.
+    val role: String,
+    val specialty: String,
+    val localization: String,
+    val profileVisible: Boolean
+    // Add other fields as necessary...
+)
+
+
+data class DoctorAvailability(
+    val doctorId: Doctor,
+    val date: String, // Depending on your use case, you might want to parse this into a Date object
+    val availableHours: String
+)
+
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -122,6 +142,7 @@ fun AppContent() {
     var username by remember { mutableStateOf("") }
     var showRegistrationSuccessDialog by remember { mutableStateOf(false) }
     val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
+    val doctorAvailabilitiesViewModel = viewModel<DoctorAvailabilitiesViewModel>()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -194,6 +215,8 @@ fun AppContent() {
                         })
                     }
                     "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel)
+                    "Doctor Availabilities" -> DoctorAvailabilitiesScreen(viewModel = doctorAvailabilitiesViewModel)
+
 
                     "Publish Duty Vacancy" -> if (isLoggedIn) {
                         // Ensure only logged in users can access the publish screen
@@ -207,7 +230,8 @@ fun AppContent() {
                         )
                     }
 
-                    else -> MainContent(selectedNav)
+                    else ->             Text("Select an option from the navigation.")
+
                 }
             }
         }
@@ -220,7 +244,7 @@ fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
         // Populate your drawer content here
         Button(onClick = { onNavSelected("Login") }) { Text("Login") }
         Button(onClick = { onNavSelected("Register") }) { Text("Register") }
-        Button(onClick = { onNavSelected("Doctor Availabilities") }) { Text("Doctors") }
+        Button(onClick = { onNavSelected("Doctor Availabilities") }) { Text("Doctor Availabilities") }
         Button(onClick = { onNavSelected("Duty Vacancies") }) { Text("Duty Vacancies") }
         if (isLoggedIn) {
             Button(onClick = { onNavSelected("Publish Duty Vacancy") }) { Text("Publish Duty Vacancy") }
@@ -243,23 +267,6 @@ fun Header(isLoggedIn: Boolean, username: String) {
 }
 
 
-
-
-
-@Composable
-fun MainContent(selectedNav: String) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        when (selectedNav) {
-            "Doctor Availabilities" -> DoctorAvailabilitiesScreen()
-            else -> Text("Select an option from the navigation.")
-        }
-    }
-}
 
 
 @Composable
@@ -432,11 +439,75 @@ fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
     }
 }
 
+class DoctorAvailabilitiesViewModel : ViewModel() {
+    private val _doctorAvailabilities = MutableStateFlow<List<DoctorAvailability>>(emptyList())
+    val doctorAvailabilities: StateFlow<List<DoctorAvailability>> = _doctorAvailabilities
+
+    fun fetchDoctorAvailabilities() = viewModelScope.launch {
+        try {
+            val response = RetrofitClient.apiService.fetchDoctorAvailabilities()
+            if (response.isSuccessful) {
+                _doctorAvailabilities.value = response.body() ?: emptyList()
+            } else {
+                Log.e("DoctorAvailViewModel", "Error fetching availabilities: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("DoctorAvailViewModel", "Exception when fetching availabilities", e)
+        }
+    }
+}
 
 @Composable
-fun DoctorAvailabilitiesScreen() {
-    // Implementation of the Doctor Availabilities Screen
-    Text("Doctor Availabilities Screen")
+fun DoctorAvailabilitiesScreen(viewModel: DoctorAvailabilitiesViewModel) {
+    viewModel.fetchDoctorAvailabilities()
+    val doctorAvailabilities = viewModel.doctorAvailabilities.collectAsState().value
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        Text("Doctor Availabilities", style = MaterialTheme.typography.headlineMedium)
+        if (doctorAvailabilities.isEmpty()) {
+            Text("No availabilities found.", modifier = Modifier.padding(top = 16.dp))
+        } else {
+            LazyColumn {
+                items(count = doctorAvailabilities.size) { index ->
+                    DoctorAvailabilityCard(doctorAvailability = doctorAvailabilities[index])
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DoctorAvailabilityCard(doctorAvailability: DoctorAvailability) {
+    // Material 3 Card
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Doctor ID
+            Text(
+                text = "Doctor ID: ${doctorAvailability.doctorId.username}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            // Date
+            Text(
+                text = "Date: ${doctorAvailability.date}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(8.dp))
+            // Available Hours
+            Text(
+                text = "Available Hours: ${doctorAvailability.availableHours}",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
 }
 
 @Composable

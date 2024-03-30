@@ -1,5 +1,6 @@
 package com.example.gieldadyzurowa.network
 
+import com.example.gieldadyzurowa.DoctorAvailability
 import com.example.gieldadyzurowa.DutyVacancy
 import retrofit2.Call
 import retrofit2.Response
@@ -19,6 +20,9 @@ interface ApiService {
     suspend fun publishDutyVacancy(
         @Body dutyVacancy: DutyVacancy
     ): Response<Unit> // Adjust return type based on your API response
+
+    @GET("/doctor/availabilities/json")
+    suspend fun fetchDoctorAvailabilities(): Response<List<DoctorAvailability>>
 
     }
     
