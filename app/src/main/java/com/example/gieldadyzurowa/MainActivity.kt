@@ -68,6 +68,7 @@ import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 import android.app.DatePickerDialog
 
+const val LANDING_SCREEN = "Duty Vacancies"
 
 
 fun formatDate(dateStr: String): String {
@@ -138,7 +139,7 @@ fun AppContent() {
     val coroutineScope = rememberCoroutineScope()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     var isLoggedIn by remember { mutableStateOf(false) }
-    var selectedNav by remember { mutableStateOf("Doctor Availabilities") }
+    var selectedNav by remember { mutableStateOf(LANDING_SCREEN) }
     var username by remember { mutableStateOf("") }
     var showRegistrationSuccessDialog by remember { mutableStateOf(false) }
     val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
@@ -206,7 +207,7 @@ fun AppContent() {
                         LoginScreen(onLoginSuccess = { user ->
                             isLoggedIn = true
                             username = user
-                            selectedNav = "Doctor Availabilities"
+                            selectedNav = LANDING_SCREEN
                         })
                     }
                     "Register" -> if (!isLoggedIn) {
