@@ -112,6 +112,31 @@ app.use((err, req, res, next) => {
   res.status(500).send("There was an error serving your request.");
 });
 
+const WebSocket = require('ws');
+
+const wss = new WebSocket.Server({ port: 8080 });
+
+wss.on('connection', function connection(ws)
+{
+    ws.on('message', function incoming(message)
+    {
+        console.log('received: %s', message);
+        
+        // Broadcast incoming message to all clients except the sender
+        wss.clients.forEach(function each(client)
+        {
+            if (client !== ws && client.readyState === WebSocket.OPEN)
+            {
+                console.log('Broadcasting incoming message to all clients except the sender')
+                client.send(message);
+            }
+        });
+    });
+    
+    ws.send('Hello! You are connected.');
+});
+
+
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });

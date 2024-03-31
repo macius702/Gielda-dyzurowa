@@ -2,7 +2,92 @@
 <html lang="en">
 <%- include('partials/_head.ejs') %>
 <body>
-<%- include('partials/_header.ejs') %>
+
+    <script>
+        // Example of passing a server-side variable into JavaScript
+        const currentUsername = "<%= locals.username %>";
+    </script>
+
+    <script>
+        // Establish the WebSocket connection
+        const socket = new WebSocket('ws://localhost:8080');
+  
+        // Event listener for when the connection opens
+        socket.addEventListener('open', function (event) {
+            // Connection opened
+  
+            // Send a message
+            socket.send('your initial message');
+        });
+  
+        // Event listener for incoming messages
+        socket.addEventListener('message', function (event) {
+
+            // Log the type of event.data
+            console.log('Type of data received:', typeof event.data);
+
+            // Further type checking if event.data is an object
+            if (typeof event.data === "object") {
+                console.log('The data is of object type. Checking instanceof...');
+                if (event.data instanceof Blob) {
+                    console.log('Data is a Blob');
+                } else if (event.data instanceof ArrayBuffer) {
+                    console.log('Data is an ArrayBuffer');
+                } else {
+                    console.log('Data is an object, but not a Blob or ArrayBuffer');
+                }
+            }            
+            // Check if the incoming message is a Blob
+
+        if (event.data instanceof Blob) 
+        {
+            // Convert Blob to text to parse as JSON
+            const reader = new FileReader();
+            reader.onload = function() 
+            {
+                // Parse the text as JSON
+                const jsonObj = JSON.parse(reader.result);
+
+                // Check if the jsonObj contains the sendingDoctor property
+                if (jsonObj.hasOwnProperty('hospitalUsername')) {
+                    // Check if sendingDoctor is for the current user
+                    console.log('currentUsername:', currentUsername)
+                    if (jsonObj.hospitalUsername === currentUsername) {
+                        console.log('This message is for us:', jsonObj);
+                        const messagesDiv = document.getElementById('messages');
+
+                        messagesDiv.innerHTML = '<p>New message: ' + JSON.stringify(jsonObj, null, 2) + '</p>';
+
+                    } else {
+                        console.log('This message is not for us.');
+                    }
+                } else {
+                    console.log('JSON message from server does not contain a sendingDoctor property.');
+                }    
+                console.log('JSON message from server:', jsonObj);
+            
+            };
+            reader.onerror = function(error) 
+            {
+                console.error('Error reading the Blob:', error);
+            };
+            reader.readAsText(event.data);
+        }
+        else 
+        {
+            // Handle non-Blob data (e.g., text)
+            console.log('Message from server:', event.data);
+        }
+});
+  
+        // Example function to send messages
+        function sendMessage(message) {
+            socket.send(message);
+        }
+    </script>
+  
+  
+  <%- include('partials/_header.ejs') %>
 <main class="container mt-5">
     <h2>Duty Slots</h2>
     <div class="mb-3">
@@ -16,6 +101,9 @@
             Date: <%= slot.date.toDateString() %><br>
             Duty Hours: <%= slot.dutyHours %><br>
             Required Specialty: <%= slot.requiredSpecialty %>
+            <button class="btn btn-primary" onclick='sendMessage(JSON.stringify({sendingDoctor: "<%= locals.username %>", hospitalUsername: "<%= slot.hospitalId.username %>", date: "<%= slot.date.toDateString() %>", dutyHours: "<%= slot.dutyHours %>", requiredSpecialty: "<%= slot.requiredSpecialty %>"}))'>Send Message</button>
+
+
         </li>
         <% }); %>
     </ul>
