@@ -90,7 +90,7 @@ async function fetch_and_log_duty_slots(req, res, respond)
 
     try
     {
-        const duty_slots = await DutySlot.find().populate('hospitalId').populate('assignedUser');
+        const duty_slots = await DutySlot.find().populate('hospitalId').populate('assignedDoctorId');
         console.log('Outgoing Response (Data):', duty_slots);
 
         // Respond using the provided callback function (either render or JSON)
@@ -154,7 +154,7 @@ router.post('/assign-duty-slot', async (req, res) =>
         if (slot) 
         {
           slot.status = 'pending';
-            slot.assignedUser = sendingDoctorId; // Assuming sendingDoctor is the _id of the doctor being assigned
+            slot.assignedDoctorId = sendingDoctorId; // Assuming sendingDoctorId is the _id of the doctor being assigned
             
             await slot.save();
             

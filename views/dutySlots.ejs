@@ -145,7 +145,7 @@
             Duty Hours: <%= slot.dutyHours %><br>
             Required Specialty: <%= slot.requiredSpecialty %>
             Status: <span class="status-display" data-slot-id="<%= slot._id %>"><%= slot.status %></span><br>
-            Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="<%= slot._id %>"><%= slot.assignedUser ? slot.assignedUser.username : 'None' %></span><br>
+            Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="<%= slot._id %>"><%= slot.assignedDoctorId ? slot.assignedDoctorId.username : 'None' %></span><br>
             <div class="btn btn-primary" onclick="assignAndSendMessage('<%= slot._id %>', '<%= locals.userId %>', '<%= locals.username %>' ,  '<%= slot.hospitalId.username %>', '<%= slot.date.toDateString() %>', '<%= slot.dutyHours %>', '<%= slot.requiredSpecialty %>')">Send Message</div>
 
 

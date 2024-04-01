@@ -11,7 +11,7 @@ const dutySlotSchema = new mongoose.Schema({
         enum: ['open', 'pending', 'filled'],
         default: 'open'
     },
-    assignedUser: {
+    assignedDoctorId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: false // Set to true if a user must be assigned, or false to allow duty slots without an assigned user.
