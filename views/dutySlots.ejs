@@ -146,8 +146,23 @@
             Required Specialty: <%= slot.requiredSpecialty %>
             Status: <span class="status-display" data-slot-id="<%= slot._id %>"><%= slot.status %></span><br>
             Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="<%= slot._id %>"><%= slot.assignedDoctorId ? slot.assignedDoctorId.username : 'None' %></span><br>
-            <div class="btn btn-primary" onclick="assignAndSendMessage('<%= slot._id %>', '<%= locals.userId %>', '<%= locals.username %>' ,  '<%= slot.hospitalId.username %>', '<%= slot.date.toDateString() %>', '<%= slot.dutyHours %>', '<%= slot.requiredSpecialty %>')">Send Message</div>
-
+            <% if (locals.role === 'doctor') { %>
+                <% if (slot.status === 'open') { %>
+                    <div class="btn btn-primary" onclick="assignAndSendMessage('<%= slot._id %>', '<%= locals.userId %>', '<%= locals.username %>' , '<%= slot.hospitalId.username %>', '<%= slot.date.toDateString() %>', '<%= slot.dutyHours %>', '<%= slot.requiredSpecialty %>')">Assign</div>
+                <% } else if (slot.status === 'pending') { %>
+                    <div class="btn btn-secondary disabled">Waiting for Consent</div>
+                <% } else if (slot.status === 'filled') { %>
+                    <div class="btn btn-primary" onclick="revokeAssignment('<%= slot._id %>')">Revoke</div>
+                <% } %>
+            <% } else if (locals.role === 'hospital') { %>
+                <% if (slot.status === 'open') { %>
+                    <div class="btn btn-secondary disabled">Waiting</div>
+                <% } else if (slot.status === 'pending') { %>
+                    <div class="btn btn-primary" onclick="giveConsent('<%= slot._id %>', '<%= locals.userId %>')">Consent</div>
+                <% } else if (slot.status === 'filled') { %>
+                    <div class="btn btn-secondary disabled">Filled</div>
+                <% } %>
+            <% } %>
 
         </li>
         <% }); %>
