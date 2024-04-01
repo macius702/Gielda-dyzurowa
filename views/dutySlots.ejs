@@ -91,6 +91,42 @@
         function sendMessage(message) {
             socket.send(message);
         }
+
+
+        function assignAndSendMessage(slotId, sendingDoctorId, sendingDoctorName, hospitalUsername, date, dutyHours, requiredSpecialty) {
+            const data = {
+                _id: slotId,
+                sendingDoctorId: sendingDoctorId,
+                sendingDoctorName: sendingDoctorName,
+                hospitalUsername: hospitalUsername,
+                date: date,
+                dutyHours: dutyHours,
+                requiredSpecialty: requiredSpecialty
+            };
+
+            fetch('/assign-duty-slot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(assignData => {
+                console.log('Assignment Success:', assignData);
+
+                // Update status display
+                document.querySelector(`.status-display[data-slot-id="${slotId}"]`).innerText = 'pending'; // or assignData.status if your API responds with it
+
+                // Update assigned doctor display
+                document.querySelector(`.assigned-doctor-display[data-slot-id="${slotId}"]`).innerText = sendingDoctorName; // Assuming your API responds with the doctor's name under assignedDoctorName
+
+                sendMessage(JSON.stringify(data)); // Call sendMessage on success
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+
     </script>
   
   
@@ -108,7 +144,9 @@
             Date: <%= slot.date.toDateString() %><br>
             Duty Hours: <%= slot.dutyHours %><br>
             Required Specialty: <%= slot.requiredSpecialty %>
-            <button class="btn btn-primary" onclick='sendMessage(JSON.stringify({sendingDoctor: "<%= locals.username %>", hospitalUsername: "<%= slot.hospitalId.username %>", date: "<%= slot.date.toDateString() %>", dutyHours: "<%= slot.dutyHours %>", requiredSpecialty: "<%= slot.requiredSpecialty %>"}))'>Send Message</button>
+            Status: <span class="status-display" data-slot-id="<%= slot._id %>"><%= slot.status %></span><br>
+            Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="<%= slot._id %>"><%= slot.assignedUser ? slot.assignedUser.username : 'None' %></span><br>
+            <div class="btn btn-primary" onclick="assignAndSendMessage('<%= slot._id %>', '<%= locals.userId %>', '<%= locals.username %>' ,  '<%= slot.hospitalId.username %>', '<%= slot.date.toDateString() %>', '<%= slot.dutyHours %>', '<%= slot.requiredSpecialty %>')">Send Message</div>
 
 
         </li>

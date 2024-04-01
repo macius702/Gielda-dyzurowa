@@ -90,7 +90,7 @@ async function fetch_and_log_duty_slots(req, res, respond)
 
     try
     {
-        const duty_slots = await DutySlot.find().populate('hospitalId');
+        const duty_slots = await DutySlot.find().populate('hospitalId').populate('assignedUser');
         console.log('Outgoing Response (Data):', duty_slots);
 
         // Respond using the provided callback function (either render or JSON)
@@ -138,6 +138,39 @@ router.get('/duty/slots/json', isAuthenticated, (req, res) =>
         // Directly respond with JSON
         response.json(duty_slots);
     });
+});
+
+router.post('/assign-duty-slot', async (req, res) => 
+{
+
+  console.log('Executing /assign-duty-slot')
+    try 
+    {
+      const { _id, sendingDoctorId, sendingDoctorName , hospitalUsername, date, dutyHours, requiredSpecialty } = req.body;
+        
+      const slot = await DutySlot.findOne({ _id: _id, status: 'open' });
+      //const slot = await DutySlot.findOne({ _id: _id}); //mtlk debug aid
+
+        if (slot) 
+        {
+          slot.status = 'pending';
+            slot.assignedUser = sendingDoctorId; // Assuming sendingDoctor is the _id of the doctor being assigned
+            
+            await slot.save();
+            
+            res.status(200).send({ message: 'Duty slot updated successfully', slot});
+        } 
+        else 
+        {
+          res.status(404).send({ message: 'Duty slot not found or already assigned' });
+        }
+    } 
+    catch (error) 
+    {
+        console.error(error);
+        res.status(500).send({ message: 'Server error', error: error.message });
+    }
+
 });
 
 module.exports = router;
