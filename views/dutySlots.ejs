@@ -52,14 +52,21 @@
                 if (jsonObj.hasOwnProperty('hospitalUsername')) {
                     // Check if sendingDoctor is for the current user
                     console.log('currentUsername:', currentUsername)
+                    const notificationIndicator = document.querySelector('.notification-indicator');
                     if (jsonObj.hospitalUsername === currentUsername) {
                         console.log('This message is for us:', jsonObj);
-                        const messagesDiv = document.getElementById('messages');
 
-                        messagesDiv.innerHTML = '<p>New message: ' + JSON.stringify(jsonObj, null, 2) + '</p>';
+                        notificationIndicator.style.display = 'block';
+                        // notificationIndicator.innerHTML = '<p>New message: ' + JSON.stringify(jsonObj, null, 2) + '</p>';
+
+                        //const messagesDiv = document.getElementById('messages');
+
+                        //messagesDiv.innerHTML = '<p>New message: ' + JSON.stringify(jsonObj, null, 2) + '</p>';
 
                     } else {
                         console.log('This message is not for us.');
+                        notificationIndicator.style.display = 'none';
+                        notificationIndicator.innerHTML = '';
                     }
                 } else {
                     console.log('JSON message from server does not contain a sendingDoctor property.');
