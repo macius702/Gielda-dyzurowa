@@ -43,6 +43,9 @@ git push heroku master
 heroku logs --tail
 heroku apps
 
+### Todo
+.populate more specific or not needed - use database view
+
 
 
 ### License
