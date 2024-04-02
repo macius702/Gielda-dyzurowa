@@ -93,7 +93,7 @@
         }
 
 
-        function assignAndSendMessage(slotId, sendingDoctorId, sendingDoctorName, hospitalUsername, date, dutyHours, requiredSpecialty) {
+        function assignAndSendMessage(slotId, sendingDoctorId, sendingDoctorName, hospitalUsername, date, dutyHours, requiredSpecialty, element) {
             const data = {
                 _id: slotId,
                 sendingDoctorId: sendingDoctorId,
@@ -120,6 +120,12 @@
 
                 // Update assigned doctor display
                 document.querySelector(`.assigned-doctor-display[data-slot-id="${slotId}"]`).innerText = sendingDoctorName; // Assuming your API responds with the doctor's name under assignedDoctorName
+
+
+                // Disable the button and update its text
+                element.disabled = true;
+                element.innerText = 'Waiting for Consent';
+                element.classList.add('disabled'); // Optionally add 'disabled' class for styling
 
                 sendMessage(JSON.stringify(data)); // Call sendMessage on success
             })
@@ -211,7 +217,7 @@
             Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="<%= slot._id %>"><%= slot.assignedDoctorId ? slot.assignedDoctorId.username : 'None' %></span><br>
             <% if (locals.role === 'doctor') { %>
                 <% if (slot.status === 'open') { %>
-                    <div class="btn btn-primary" onclick="assignAndSendMessage('<%= slot._id %>', '<%= locals.userId %>', '<%= locals.username %>' , '<%= slot.hospitalId.username %>', '<%= slot.date.toDateString() %>', '<%= slot.dutyHours %>', '<%= slot.requiredSpecialty %>')">Assign</div>
+                    <div class="btn btn-primary" onclick="assignAndSendMessage('<%= slot._id %>', '<%= locals.userId %>', '<%= locals.username %>', '<%= slot.hospitalId.username %>', '<%= slot.date.toDateString() %>', '<%= slot.dutyHours %>', '<%= slot.requiredSpecialty %>', this)">Assign</div>
                 <% } else if (slot.status === 'pending') { %>
                     <div class="btn btn-secondary disabled">Waiting for Consent</div>
                 <% } else if (slot.status === 'filled') { %>
