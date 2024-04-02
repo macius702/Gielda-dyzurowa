@@ -45,7 +45,7 @@ heroku apps
 
 ### Todo
 .populate more specific or not needed - use database view
-
+show only my hospital duty records - or enable buttons only on my duty slots
 
 
 ### License
