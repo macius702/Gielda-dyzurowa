@@ -202,5 +202,26 @@ router.post('/give-consent', async (req, res) =>
     }
 });
 
+router.post('/revoke-assignment', async (req, res) => {
+  console.log('Executing /revoke-assignment');
+  try {
+      const { _id } = req.body; // Extract the slot ID from the request body
+      
+      const slot = await DutySlot.findOne({ _id: _id });
+      if (slot) {
+          slot.status = 'open'; // Set the slot status back to 'open'
+          slot.assignedDoctorId = null; // Remove the assigned doctor
+          
+          await slot.save();
+          res.status(200).send({ message: 'Assignment revoked successfully', slot });
+      } else {
+          res.status(404).send({ message: 'Duty slot not found' });
+      }
+  } catch (error) {
+      console.error(error);
+      res.status(500).send({ message: 'Server error', error: error.message });
+  }
+});
+
 
 module.exports = router;

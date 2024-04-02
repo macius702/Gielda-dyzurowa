@@ -159,6 +159,37 @@
             .catch(error => console.error('Error:', error));
         }
 
+        function revoke_assignment(slot_id, element) {
+            const data = { _id: slot_id };
+
+            fetch('/revoke-assignment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Revoke Success:', data);
+
+                // Update the slot status display to 'open'
+                document.querySelector(`.status-display[data-slot-id="${slot_id}"]`).innerText = 'open';
+
+                // Update the assigned doctor display to 'None'
+                document.querySelector(`.assigned-doctor-display[data-slot-id="${slot_id}"]`).innerText = 'None';
+
+                // Update the button to allow new assignments
+                element.innerText = 'Assign'; // Change button text back to "Assign"
+                element.setAttribute('onclick', `assignAndSendMessage('${slot_id}', ...)`);
+                element.classList.remove('disabled'); // Remove 'disabled' class if exists
+                element.disabled = false; // Enable the button
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+
+
     </script>
   
   
@@ -184,7 +215,7 @@
                 <% } else if (slot.status === 'pending') { %>
                     <div class="btn btn-secondary disabled">Waiting for Consent</div>
                 <% } else if (slot.status === 'filled') { %>
-                    <div class="btn btn-primary" onclick="revokeAssignment('<%= slot._id %>')">Revoke</div>
+                    <div class="btn btn-primary" onclick="revoke_assignment('<%= slot._id %>', this)">Revoke</div>
                 <% } %>
             <% } else if (locals.role === 'hospital') { %>
                 <% if (slot.status === 'open') { %>
