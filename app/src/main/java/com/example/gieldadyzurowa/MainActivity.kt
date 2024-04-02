@@ -67,6 +67,12 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 import android.app.DatePickerDialog
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonParseException
+import java.lang.reflect.Type
 
 const val LANDING_SCREEN = "Duty Vacancies"
 
@@ -104,12 +110,29 @@ data class Hospital(
     // Add other fields as necessary...
 )
 
-data class DutyVacancy(
-    val hospitalId: Hospital?, // Assuming hospitalId is unique and can be used as such; adjust as needed
-    val date: String, // Using String for simplicity; consider using a proper date type
-    val dutyHours: String,
-    val requiredSpecialty: String
-)
+enum class DutySlotStatus(val status: String) {
+    OPEN("open"),
+    PENDING("pending"),
+    FILLED("filled");
+
+    companion object {
+        fun from(status: String): DutySlotStatus {
+            return when(status) {
+                "open" -> OPEN
+                "pending" -> PENDING
+                "filled" -> FILLED
+                else -> throw IllegalArgumentException("Unknown status: $status")
+            }
+        }
+    }
+}
+
+class DutySlotStatusDeserializer : JsonDeserializer<DutySlotStatus> {
+    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): DutySlotStatus {
+        val status = json?.asString
+        return DutySlotStatus.from(status ?: throw JsonParseException("Null or invalid status value"))
+    }
+}
 
 
 data class Doctor(
@@ -121,6 +144,16 @@ data class Doctor(
     val localization: String,
     val profileVisible: Boolean
     // Add other fields as necessary...
+)
+
+data class DutyVacancy(
+    val _id: String?,
+    val hospitalId: Hospital?,
+    val date: String,
+    val dutyHours: String,
+    val requiredSpecialty: String,
+    val status: DutySlotStatus, // Use enum type here
+    val assignedDoctorId: Doctor? = null
 )
 
 
@@ -145,13 +178,16 @@ fun AppContent() {
     val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
     val doctorAvailabilitiesViewModel = viewModel<DoctorAvailabilitiesViewModel>()
 
-    // performLogin("abba", "alamakota",
-    //     onLoginSuccess = { user ->
-    //         isLoggedIn = true
-    //         username = user
-    //         selectedNav = LANDING_SCREEN
-    //     }
-    // )
+
+
+    // debug aid debugging
+     performLogin("abba", "alamakota",
+         onLoginSuccess = { user ->
+             isLoggedIn = true
+             username = user
+             selectedNav = LANDING_SCREEN
+         }
+     )
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -795,7 +831,9 @@ fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel) {
         } else {
             LazyColumn {
                 items(count = dutyVacancies.size, itemContent = { index ->
-                    DutyVacancyCard(dutyVacancy = dutyVacancies[index])
+                    DutyVacancyCard(
+                        dutyVacancy = dutyVacancies[index]
+                    )
                 })
             }}
     }
@@ -827,10 +865,13 @@ class DutyVacanciesViewModel : ViewModel() {
     fun publishDutyVacancy(date: String, dutyHours: String, requiredSpecialty: String) = viewModelScope.launch {
         try {
             val dutyVacancy = DutyVacancy(
-                null  /* Your logic to obtain the hospital ID */, // You might need to adjust this according to how you manage hospital IDs
                 date = date,
                 dutyHours = dutyHours,
-                requiredSpecialty = requiredSpecialty
+                requiredSpecialty = requiredSpecialty,
+                _id = null,
+                status = DutySlotStatus.from("open"),
+                hospitalId = null
+
             )
             val response = RetrofitClient.apiService.publishDutyVacancy(dutyVacancy)
             if (response.isSuccessful) {
@@ -846,13 +887,32 @@ class DutyVacanciesViewModel : ViewModel() {
             Log.e("DutyVacanciesViewModel", "Exception when publishing duty vacancy", e)
         }
     }
+
+    fun assignDutySlot(slotId: String) {
+        // Implement network request to assign duty slot
+        // Update local data and UI state accordingly
+    }
+    
+    fun giveConsent(slotId: String) {
+        // Implement network request for giving consent
+        // Update local data and UI state accordingly
+    }
+    
+    fun revokeAssignment(slotId: String) {
+        // Implement network request to revoke assignment
+        // Update local data and UI state accordingly
+    }
+    
 }
 
 
 
 
 @Composable
-fun DutyVacancyCard(dutyVacancy: DutyVacancy) {
+fun DutyVacancyCard(dutyVacancy: DutyVacancy
+//                    , onAssign: () -> Unit, onGiveConsent: () -> Unit, onRevoke: () -> Unit
+)
+{
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -864,6 +924,16 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy) {
             Text("Date: ${formatDate(dutyVacancy.date)}", style = MaterialTheme.typography.bodyLarge)
             Text("Duty Hours: ${dutyVacancy.dutyHours}", style = MaterialTheme.typography.bodyLarge)
             Text("Required Specialty: ${dutyVacancy.requiredSpecialty}", style = MaterialTheme.typography.bodyLarge)
+
+            // Status display
+            Text("Status: ${dutyVacancy.status}", style = MaterialTheme.typography.bodyLarge)
+
+            // Conditional button rendering based on status
+//            when (dutyVacancy.status) {
+//                "open" -> Button(onClick = onAssign) { Text("Assign") }
+//                "pending" -> Button(onClick = {}, enabled = false) { Text("Waiting for Consent") }
+//                "filled" -> Button(onClick = onRevoke) { Text("Revoke") }
+//            }
         }
     }
 }
