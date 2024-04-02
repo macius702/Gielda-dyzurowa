@@ -173,4 +173,34 @@ router.post('/assign-duty-slot', async (req, res) =>
 
 });
 
+router.post('/give-consent', async (req, res) => 
+{
+    console.log('Executing /give-consent');
+    try 
+    {
+        const { _id } = req.body; // Expecting the duty slot ID to be passed in the request body
+        
+        const slot = await DutySlot.findOne({ _id: _id, status: 'pending' }); // Only allow updating slots that are in 'pending' status
+        
+        if (slot) 
+        {
+            slot.status = 'filled'; // Update the status to 'filled' to indicate consent has been given
+            
+            await slot.save(); // Save the updated slot
+            
+            res.status(200).send({ message: 'Consent given successfully, duty slot updated', slot });
+        } 
+        else 
+        {
+            res.status(404).send({ message: 'Duty slot not found or not in pending status' });
+        }
+    } 
+    catch (error) 
+    {
+        console.error(error);
+        res.status(500).send({ message: 'Server error', error: error.message });
+    }
+});
+
+
 module.exports = router;

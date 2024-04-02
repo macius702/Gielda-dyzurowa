@@ -126,6 +126,38 @@
             .catch(error => console.error('Error:', error));
         }
 
+        function give_consent(slot_id, button)
+        {
+            const data =
+            {
+                _id: slot_id
+            };
+
+            fetch('/give-consent',
+            {
+                method: 'POST',
+                headers:
+                {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(consentData =>
+            {
+                console.log('Consent Success:', consentData);
+
+                // Assuming your API responds with the updated slot status, update the UI accordingly
+                document.querySelector(`.status-display[data-slot-id="${slot_id}"]`).innerText = 'filled'; 
+
+                // Disable the button
+                button.disabled = true; // Disable the button to prevent further clicks
+                button.classList.add('disabled'); // Optionally add 'disabled' class for styling
+
+
+            })
+            .catch(error => console.error('Error:', error));
+        }
 
     </script>
   
@@ -158,7 +190,7 @@
                 <% if (slot.status === 'open') { %>
                     <div class="btn btn-secondary disabled">Waiting</div>
                 <% } else if (slot.status === 'pending') { %>
-                    <div class="btn btn-primary" onclick="giveConsent('<%= slot._id %>', '<%= locals.userId %>')">Consent</div>
+                    <div class="btn btn-primary" onclick="give_consent('<%= slot._id %>', this)">Consent</div>
                 <% } else if (slot.status === 'filled') { %>
                     <div class="btn btn-secondary disabled">Filled</div>
                 <% } %>
