@@ -175,6 +175,7 @@ fun AppContent() {
     var selectedNav by remember { mutableStateOf(LANDING_SCREEN) }
     var username by remember { mutableStateOf("") }
     var userrole by remember { mutableStateOf("") }
+    var userId by remember  { mutableStateOf("") }
     var showRegistrationSuccessDialog by remember { mutableStateOf(false) }
     val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
     val doctorAvailabilitiesViewModel = viewModel<DoctorAvailabilitiesViewModel>()
@@ -183,10 +184,11 @@ fun AppContent() {
 
     // debug aid debugging
      performLogin("abba", "alamakota",
-         onLoginSuccess = { user , role ->
+         onLoginSuccess = { user , role, userIdFromlogin ->
              isLoggedIn = true
              username = user
              userrole = role
+             userId = userIdFromlogin
              selectedNav = LANDING_SCREEN
          }
      )
@@ -250,9 +252,10 @@ fun AppContent() {
                 // The rest of your conditional content logic
                 when (selectedNav) {
                     "Login" -> if (!isLoggedIn) {
-                        LoginScreen(onLoginSuccess = { user, role ->
+                        LoginScreen(onLoginSuccess = { user, role, userIdFromLogin ->
                             isLoggedIn = true
                             username = user
+                            userId = userIdFromLogin
                             userrole = role
                             selectedNav = LANDING_SCREEN
                         })
@@ -262,7 +265,7 @@ fun AppContent() {
                             showRegistrationSuccessDialog = true
                         })
                     }
-                    "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel, userrole = userrole)
+                    "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel, userrole = userrole, userId = userId)
                     "Doctor Availabilities" -> DoctorAvailabilitiesScreen(viewModel = doctorAvailabilitiesViewModel)
 
 
@@ -331,7 +334,7 @@ fun Header(isLoggedIn: Boolean, username: String) {
 
 
 @Composable
-fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
+fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -799,7 +802,7 @@ fun performRegistration(
 }
 
 // This function can be called within the onClick listener of the login button
-fun performLogin(username: String, password: String, onLoginSuccess: (String, String) -> Unit) {
+fun performLogin(username: String, password: String, onLoginSuccess: (String, String, String) -> Unit) {
     val loginRequest = LoginRequest(username, password)
     RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<AdditionalUserInfo> {
         override fun onResponse(call: Call<AdditionalUserInfo>, response: Response<AdditionalUserInfo>) {
@@ -808,7 +811,7 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String, St
                 response.body()?.let { userInfo ->
                     Log.d("LoginSuccess", "Successfully logged in user: $username")
                     // Proceed with login success logic, e.g., updating UI or navigating to another activity
-                    onLoginSuccess(username, userInfo.role)
+                    onLoginSuccess(username, userInfo.role, userInfo.userId)
                 } ?: run {
                     // Handle the case where response is successful but the body is null
                     Log.e("LoginError", "Login was successful but no user info was received")
@@ -830,7 +833,7 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String, St
 
 
 @Composable
-fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, userrole: String) {
+fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, userrole: String, userId: String) {
     viewModel.fetchDutyVacancies()
     val dutyVacancies = viewModel.dutyVacancies.collectAsState().value
     Column(modifier = Modifier.padding(16.dp)) {

@@ -42,6 +42,7 @@ data class RegistrationRequest(
 )
 
 data class AdditionalUserInfo(
-    val role: String
+    val role: String,
+    val userId : String
     // Add other fields that your backend might return
 )

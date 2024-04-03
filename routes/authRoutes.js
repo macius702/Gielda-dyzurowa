@@ -88,6 +88,7 @@ router.post('/auth/login', async (req, res) =>
             // Prepare user info to send back
             const additionalUserInfo = {
               role: user.role,
+              userId: user._id
               // Add any other user fields you want to return here
               // Make sure not to include sensitive data
           };
