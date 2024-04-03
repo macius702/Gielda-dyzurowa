@@ -8,7 +8,7 @@ import retrofit2.http.*
 
 interface ApiService {
     @POST("/auth/login")
-    fun loginUser(@Body loginRequest: LoginRequest): Call<Void> // Or Call<ResponseType> if your API returns a response
+    fun loginUser(@Body loginRequest: LoginRequest): Call<AdditionalUserInfo> // Or Call<ResponseType> if your API returns a response
 
     @POST("/auth/register")
     fun registerUser(@Body registrationRequest: RegistrationRequest): Call<Void>
@@ -41,3 +41,7 @@ data class RegistrationRequest(
     val localization: String?
 )
 
+data class AdditionalUserInfo(
+    val role: String
+    // Add other fields that your backend might return
+)

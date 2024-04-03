@@ -67,7 +67,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 import android.app.DatePickerDialog
-import com.google.gson.GsonBuilder
+import com.example.gieldadyzurowa.network.AdditionalUserInfo
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
@@ -174,6 +174,7 @@ fun AppContent() {
     var isLoggedIn by remember { mutableStateOf(false) }
     var selectedNav by remember { mutableStateOf(LANDING_SCREEN) }
     var username by remember { mutableStateOf("") }
+    var userrole by remember { mutableStateOf("") }
     var showRegistrationSuccessDialog by remember { mutableStateOf(false) }
     val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
     val doctorAvailabilitiesViewModel = viewModel<DoctorAvailabilitiesViewModel>()
@@ -182,9 +183,10 @@ fun AppContent() {
 
     // debug aid debugging
      performLogin("abba", "alamakota",
-         onLoginSuccess = { user ->
+         onLoginSuccess = { user , role ->
              isLoggedIn = true
              username = user
+             userrole = role
              selectedNav = LANDING_SCREEN
          }
      )
@@ -248,9 +250,10 @@ fun AppContent() {
                 // The rest of your conditional content logic
                 when (selectedNav) {
                     "Login" -> if (!isLoggedIn) {
-                        LoginScreen(onLoginSuccess = { user ->
+                        LoginScreen(onLoginSuccess = { user, role ->
                             isLoggedIn = true
                             username = user
+                            userrole = role
                             selectedNav = LANDING_SCREEN
                         })
                     }
@@ -259,7 +262,7 @@ fun AppContent() {
                             showRegistrationSuccessDialog = true
                         })
                     }
-                    "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel)
+                    "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel, userrole = userrole)
                     "Doctor Availabilities" -> DoctorAvailabilitiesScreen(viewModel = doctorAvailabilitiesViewModel)
 
 
@@ -328,7 +331,7 @@ fun Header(isLoggedIn: Boolean, username: String) {
 
 
 @Composable
-fun LoginScreen(onLoginSuccess: (String) -> Unit) {
+fun LoginScreen(onLoginSuccess: (String, String) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -796,23 +799,29 @@ fun performRegistration(
 }
 
 // This function can be called within the onClick listener of the login button
-fun performLogin(username: String, password: String, onLoginSuccess: (String) -> Unit) {
+fun performLogin(username: String, password: String, onLoginSuccess: (String, String) -> Unit) {
     val loginRequest = LoginRequest(username, password)
-    RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<Void> {
-        override fun onResponse(call: Call<Void>, response: Response<Void>) {
+    RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<AdditionalUserInfo> {
+        override fun onResponse(call: Call<AdditionalUserInfo>, response: Response<AdditionalUserInfo>) {
             if (response.isSuccessful) {
-                Log.d("LoginSuccess", "Successfully logged in user: $username")
-                onLoginSuccess(username)
+                // Assuming response.body() is not null, let's use it.
+                response.body()?.let { userInfo ->
+                    Log.d("LoginSuccess", "Successfully logged in user: $username")
+                    // Proceed with login success logic, e.g., updating UI or navigating to another activity
+                    onLoginSuccess(username, userInfo.role)
+                } ?: run {
+                    // Handle the case where response is successful but the body is null
+                    Log.e("LoginError", "Login was successful but no user info was received")
+                }
             } else {
+                // Handle unsuccessful response, e.g., wrong credentials
                 Log.e(
                     "LoginError",
-                    "Failed to log in user: $username. Response code: ${response.code()}"
+                    "Failed to log in user. Response code: ${response.code()}, message: ${response.errorBody()?.string() ?: "Unknown error"}"
                 )
-                // Handle error response
             }
         }
-
-        override fun onFailure(call: Call<Void>, t: Throwable) {
+        override fun onFailure(call: Call<AdditionalUserInfo>, t: Throwable) {
             Log.e("LoginFailure", "Failed to log in user: $username", t)
             // Handle the failure, e.g., show an error message
         }
@@ -821,7 +830,7 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String) ->
 
 
 @Composable
-fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel) {
+fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, userrole: String) {
     viewModel.fetchDutyVacancies()
     val dutyVacancies = viewModel.dutyVacancies.collectAsState().value
     Column(modifier = Modifier.padding(16.dp)) {
@@ -831,9 +840,16 @@ fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel) {
         } else {
             LazyColumn {
                 items(count = dutyVacancies.size, itemContent = { index ->
+                    val dutyVacancy = dutyVacancies[index]
+
                     DutyVacancyCard(
-                        dutyVacancy = dutyVacancies[index]
+                        dutyVacancy = dutyVacancy,
+                        userrole = userrole,
+                        onAssign = { viewModel.assignDutySlot(dutyVacancy._id!!) },
+                        onGiveConsent = { viewModel.giveConsent(dutyVacancy._id!!)},
+                        onRevoke = { viewModel.revokeAssignment(dutyVacancy._id!!) }
                     )
+
                 })
             }}
     }
@@ -909,8 +925,8 @@ class DutyVacanciesViewModel : ViewModel() {
 
 
 @Composable
-fun DutyVacancyCard(dutyVacancy: DutyVacancy
-//                    , onAssign: () -> Unit, onGiveConsent: () -> Unit, onRevoke: () -> Unit
+fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String
+                    , onAssign: () -> Unit, onGiveConsent: () -> Unit, onRevoke: () -> Unit
 )
 {
     Card(
@@ -928,12 +944,36 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy
             // Status display
             Text("Status: ${dutyVacancy.status}", style = MaterialTheme.typography.bodyLarge)
 
-            // Conditional button rendering based on status
-//            when (dutyVacancy.status) {
-//                "open" -> Button(onClick = onAssign) { Text("Assign") }
-//                "pending" -> Button(onClick = {}, enabled = false) { Text("Waiting for Consent") }
-//                "filled" -> Button(onClick = onRevoke) { Text("Revoke") }
-//            }
+
+            when (userrole)
+            {
+                "doctor" ->
+                {
+                    when (dutyVacancy.status)
+                    {
+                        DutySlotStatus.OPEN -> Button(onClick = onAssign) { Text("Assign") }
+                        DutySlotStatus.PENDING -> Button(onClick = {}, enabled = false) { Text("Waiting for Consent") }
+                        DutySlotStatus.FILLED -> Button(onClick = onRevoke) { Text("Revoke") }
+                        else -> {} // Handle unexpected status
+
+                    }
+                }
+                "hospital" ->
+                {
+                    when (dutyVacancy.status)
+                    {
+                        DutySlotStatus.OPEN -> Button(onClick = {}, enabled = false) { Text("Waiting") }
+                        DutySlotStatus.PENDING -> Button(onClick = onGiveConsent) { Text("Consent") }
+                        DutySlotStatus.FILLED -> Button(onClick = {}, enabled = false) { Text("Filled") }
+                        else -> {} // Handle unexpected status
+
+                    }
+                }
+                else -> {} // Handle unexpected
+            }
+
+
+
         }
     }
 }
