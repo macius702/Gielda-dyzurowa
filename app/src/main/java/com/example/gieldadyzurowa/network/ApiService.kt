@@ -28,6 +28,11 @@ interface ApiService {
     suspend fun addDoctorAvailability(
         @Body availabilityRequest: DoctorAvailability
     ): Response<Unit> // A
+
+    @POST("/assign-duty-slot")
+    suspend fun assignDutySlot(
+        @Body assignDutySlotRequest: AssignDutySlotRequest
+    ): Response<Unit> // Adjust the return type as needed based on your API response
 }
     
 
@@ -46,3 +51,9 @@ data class AdditionalUserInfo(
     val userId : String
     // Add other fields that your backend might return
 )
+
+data class AssignDutySlotRequest(
+    val _id: String,
+    val sendingDoctorId: String,
+)
+

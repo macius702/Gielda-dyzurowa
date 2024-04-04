@@ -144,12 +144,23 @@ router.post('/assign-duty-slot', async (req, res) =>
 {
 
   console.log('Executing /assign-duty-slot')
+
+ // Log the entire request body
+ console.log('Request body:', req.body);
+      
     try 
     {
       const { _id, sendingDoctorId, sendingDoctorName , hospitalUsername, date, dutyHours, requiredSpecialty } = req.body;
+
+      // Logging _id and sendingDoctorId
+      console.log(`_id: ${_id}, sendingDoctorId: ${sendingDoctorId}`);
+
         
       const slot = await DutySlot.findOne({ _id: _id, status: 'open' });
       //const slot = await DutySlot.findOne({ _id: _id}); //mtlk debug aid
+
+     // Log the slot
+     console.log(`Slot:`, slot);      
 
         if (slot) 
         {

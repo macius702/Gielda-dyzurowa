@@ -68,6 +68,7 @@ import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 import android.app.DatePickerDialog
 import com.example.gieldadyzurowa.network.AdditionalUserInfo
+import com.example.gieldadyzurowa.network.AssignDutySlotRequest
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
@@ -265,7 +266,7 @@ fun AppContent() {
                             showRegistrationSuccessDialog = true
                         })
                     }
-                    "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel, userrole = userrole, userId = userId)
+                    "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel, username = username, userrole = userrole, userId = userId)
                     "Doctor Availabilities" -> DoctorAvailabilitiesScreen(viewModel = doctorAvailabilitiesViewModel)
 
 
@@ -833,7 +834,7 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String, St
 
 
 @Composable
-fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, userrole: String, userId: String) {
+fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, username: String, userrole: String, userId: String) {
     viewModel.fetchDutyVacancies()
     val dutyVacancies = viewModel.dutyVacancies.collectAsState().value
     Column(modifier = Modifier.padding(16.dp)) {
@@ -845,10 +846,19 @@ fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, userrole: String, use
                 items(count = dutyVacancies.size, itemContent = { index ->
                     val dutyVacancy = dutyVacancies[index]
 
+
                     DutyVacancyCard(
                         dutyVacancy = dutyVacancy,
                         userrole = userrole,
-                        onAssign = { viewModel.assignDutySlot(dutyVacancy._id!!) },
+                        onAssign = { viewModel.assignDutySlot(
+                            dutySlotId = dutyVacancy._id!!, 
+                            doctorId = userId, 
+                            doctorName = username,
+                            date = dutyVacancy.date, 
+                            dutyHours = dutyVacancy.dutyHours, 
+                            requiredSpecialty = dutyVacancy.requiredSpecialty
+                        )
+                        },
                         onGiveConsent = { viewModel.giveConsent(dutyVacancy._id!!)},
                         onRevoke = { viewModel.revokeAssignment(dutyVacancy._id!!) }
                     )
@@ -907,11 +917,26 @@ class DutyVacanciesViewModel : ViewModel() {
         }
     }
 
-    fun assignDutySlot(slotId: String) {
-        // Implement network request to assign duty slot
-        // Update local data and UI state accordingly
+    fun assignDutySlot(dutySlotId: String, doctorId: String, doctorName: String, date: String, dutyHours: String, requiredSpecialty: String) = viewModelScope.launch {
+        val data = AssignDutySlotRequest(
+            _id = dutySlotId,
+            sendingDoctorId = doctorId,
+        )
+        try {
+            Log.d("AssignDutySlotRequest", "Created with slotId: $dutySlotId, sendingDoctorId: $doctorId")
+
+            val response = RetrofitClient.apiService.assignDutySlot(data)
+            if (response.isSuccessful) {
+                Log.d("DutyVacanciesViewModel", "Duty slot assigned successfully")
+                // Handle successful assignment
+            } else {
+                Log.e("DutyVacanciesViewModel", "Error assigning duty slot: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("DutyVacanciesViewModel", "Exception when assigning duty slot", e)
+        }
     }
-    
+        
     fun giveConsent(slotId: String) {
         // Implement network request for giving consent
         // Update local data and UI state accordingly
