@@ -917,6 +917,18 @@ class DutyVacanciesViewModel : ViewModel() {
         }
     }
 
+    private fun updateDutyVacancyStatus(dutySlotId: String, newStatus: DutySlotStatus) {
+        // Directly assign a new list to the StateFlow's value
+        _dutyVacancies.value = _dutyVacancies.value.map { vacancy ->
+            if (vacancy._id == dutySlotId) {
+                vacancy.copy(status = newStatus) // Update the status if the ID matches
+            } else {
+                vacancy // Keep the original item unchanged if the ID does not match
+            }
+        }
+    }
+
+
     fun assignDutySlot(dutySlotId: String, doctorId: String, doctorName: String, date: String, dutyHours: String, requiredSpecialty: String) = viewModelScope.launch {
         val data = AssignDutySlotRequest(
             _id = dutySlotId,
@@ -928,6 +940,9 @@ class DutyVacanciesViewModel : ViewModel() {
             val response = RetrofitClient.apiService.assignDutySlot(data)
             if (response.isSuccessful) {
                 Log.d("DutyVacanciesViewModel", "Duty slot assigned successfully")
+
+                updateDutyVacancyStatus(dutySlotId, DutySlotStatus.PENDING)
+
                 // Handle successful assignment
             } else {
                 Log.e("DutyVacanciesViewModel", "Error assigning duty slot: ${response.errorBody()?.string()}")
