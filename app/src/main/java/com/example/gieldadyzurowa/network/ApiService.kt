@@ -33,6 +33,17 @@ interface ApiService {
     suspend fun assignDutySlot(
         @Body assignDutySlotRequest: AssignDutySlotRequest
     ): Response<Unit> // Adjust the return type as needed based on your API response
+
+    @POST("/give-consent")
+    suspend fun giveConsent(
+        @Body request: DutySlotActionRequest
+    ): Response<Unit> // Adjust the return type as needed
+
+    @POST("/revoke-assignment")
+    suspend fun revokeAssignment(
+        @Body request: DutySlotActionRequest
+    ): Response<Unit> // Adjust the return type as needed
+
 }
     
 
@@ -55,5 +66,9 @@ data class AdditionalUserInfo(
 data class AssignDutySlotRequest(
     val _id: String,
     val sendingDoctorId: String,
+)
+
+data class DutySlotActionRequest(
+    val _id: String
 )
 

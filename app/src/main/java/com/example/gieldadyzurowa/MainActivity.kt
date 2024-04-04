@@ -69,6 +69,7 @@ import java.util.Calendar
 import android.app.DatePickerDialog
 import com.example.gieldadyzurowa.network.AdditionalUserInfo
 import com.example.gieldadyzurowa.network.AssignDutySlotRequest
+import com.example.gieldadyzurowa.network.DutySlotActionRequest
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
@@ -951,15 +952,35 @@ class DutyVacanciesViewModel : ViewModel() {
             Log.e("DutyVacanciesViewModel", "Exception when assigning duty slot", e)
         }
     }
-        
-    fun giveConsent(slotId: String) {
-        // Implement network request for giving consent
-        // Update local data and UI state accordingly
+
+    fun giveConsent(dutySlotId: String) = viewModelScope.launch {
+        val request = DutySlotActionRequest(_id = dutySlotId)
+        try {
+            val response = RetrofitClient.apiService.giveConsent(request)
+            if (response.isSuccessful) {
+                Log.d("DutyVacanciesViewModel", "Consent given successfully")
+                updateDutyVacancyStatus(dutySlotId, DutySlotStatus.FILLED)
+            } else {
+                Log.e("DutyVacanciesViewModel", "Error giving consent: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("DutyVacanciesViewModel", "Exception when giving consent", e)
+        }
     }
-    
-    fun revokeAssignment(slotId: String) {
-        // Implement network request to revoke assignment
-        // Update local data and UI state accordingly
+
+    fun revokeAssignment(dutySlotId: String) = viewModelScope.launch {
+        val request = DutySlotActionRequest(_id = dutySlotId)
+        try {
+            val response = RetrofitClient.apiService.revokeAssignment(request)
+            if (response.isSuccessful) {
+                Log.d("DutyVacanciesViewModel", "Assignment revoked successfully")
+                updateDutyVacancyStatus(dutySlotId, DutySlotStatus.OPEN)
+            } else {
+                Log.e("DutyVacanciesViewModel", "Error revoking assignment: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("DutyVacanciesViewModel", "Exception when revoking assignment", e)
+        }
     }
     
 }
