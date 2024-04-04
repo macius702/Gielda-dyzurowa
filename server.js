@@ -128,6 +128,7 @@ wss.on('connection', function connection(ws)
             if (client !== ws && client.readyState === WebSocket.OPEN)
             {
                 console.log('Broadcasting incoming message to all clients except the sender')
+                console.log(typeof message); // This should log 'string', but is object
                 client.send(message);
             }
         });

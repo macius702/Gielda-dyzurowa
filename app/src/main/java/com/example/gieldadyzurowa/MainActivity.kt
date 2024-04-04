@@ -48,7 +48,10 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 import retrofit2.Call
 import retrofit2.Callback
-import retrofit2.Response
+import retrofit2.Response as RetrofitResponse
+
+
+
 
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -74,6 +77,7 @@ import com.google.gson.JsonDeserializationContext
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
+import okio.ByteString
 import java.lang.reflect.Type
 
 const val LANDING_SCREEN = "Duty Vacancies"
@@ -781,7 +785,7 @@ fun performRegistration(
 
     RetrofitClient.apiService.registerUser(registrationRequest).enqueue(object : Callback<Void>
     {
-        override fun onResponse(call: Call<Void>, response: Response<Void>)
+        override fun onResponse(call: Call<Void>, response: RetrofitResponse<Void>)
         {
             if (response.isSuccessful)
             {
@@ -807,7 +811,7 @@ fun performRegistration(
 fun performLogin(username: String, password: String, onLoginSuccess: (String, String, String) -> Unit) {
     val loginRequest = LoginRequest(username, password)
     RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<AdditionalUserInfo> {
-        override fun onResponse(call: Call<AdditionalUserInfo>, response: Response<AdditionalUserInfo>) {
+        override fun onResponse(call: Call<AdditionalUserInfo>, response: RetrofitResponse<AdditionalUserInfo>) {
             if (response.isSuccessful) {
                 // Assuming response.body() is not null, let's use it.
                 response.body()?.let { userInfo ->
@@ -872,9 +876,49 @@ fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, username: String, use
 class DutyVacanciesViewModel : ViewModel() {
     private val _dutyVacancies = MutableStateFlow<List<DutyVacancy>>(emptyList())
     val dutyVacancies: StateFlow<List<DutyVacancy>> = _dutyVacancies
+    private lateinit var webSocket: WebSocket
+
 
     init {
         fetchDutyVacancies()
+        initWebSocket()
+    }
+
+    private fun initWebSocket() {
+        val client = OkHttpClient()
+        val request = Request.Builder().url("ws://10.0.2.2:8080").build()
+        webSocket = client.newWebSocket(request, object : WebSocketListener() {
+            override fun onMessage(webSocket: WebSocket, text: String) {
+                // Assume the server sends a JSON string that can be directly converted to a DutyVacancy object or list
+                // Update your duty vacancies list here based on the message content
+                // This is a simplified example; you'll need to parse the JSON and update the list appropriately
+                Log.d("WebSocket", "Message received: $text")
+
+
+            }
+            override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
+                val jsonString = bytes.utf8()
+                Log.d("WebSocket", "JSON message received: $jsonString")
+                fetchDutyVacancies()
+
+
+
+            }
+
+                // Handle other WebSocket events as needed
+        })
+    }
+
+
+    fun sendMessage(message: String) {
+        webSocket.send(message)
+    }
+
+    // Existing functions (fetchDutyVacancies, publishDutyVacancy, etc.)
+
+    override fun onCleared() {
+        super.onCleared()
+        webSocket.close(1000, null) // Properly close the WebSocket when the ViewModel is cleared
     }
 
      fun fetchDutyVacancies() = viewModelScope.launch {
