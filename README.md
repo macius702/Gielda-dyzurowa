@@ -53,6 +53,7 @@ Doctors should be able to publish their unavailabilities as well
 Button logic dependent automatically on status
 Formatter
 fix passsword in open text (OAuth2 ?2)
+malignant doctor can occupy all slots, and assign to all duties
 
 
 ### License
