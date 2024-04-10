@@ -2,6 +2,7 @@
 require("dotenv").config();
 const mongoose = require("mongoose");
 const express = require("express");
+const expressListEndpoints = require('express-list-endpoints');
 const session = require("express-session");
 const MongoStore = require('connect-mongo');
 const authRoutes = require("./routes/authRoutes");
@@ -137,6 +138,7 @@ wss.on('connection', function connection(ws)
     ws.send('Hello! You are connected.');
 });
 
+console.log("List of all defined routes in the application:", expressListEndpoints(app));
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
