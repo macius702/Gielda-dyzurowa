@@ -83,17 +83,7 @@ router.post('/auth/login', async (req, res) =>
             req.session.role = user.role; // Store user role in session for role-based access control
             req.session.username = user.username; // Store the username in the session
             console.log(`User logged in: ${user.username}`);
-
-
-            // Prepare user info to send back
-            const additionalUserInfo = {
-              userId: user._id,
-              role: user.role
-              // Add any other user fields you want to return here
-              // Make sure not to include sensitive data
-          };
-
-            return sendResponse(200, additionalUserInfo);
+            return sendResponse(null, null, '/');
         }
         else
         {

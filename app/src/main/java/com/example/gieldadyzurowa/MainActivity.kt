@@ -70,7 +70,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 import android.app.DatePickerDialog
-import com.example.gieldadyzurowa.network.AdditionalUserInfo
+import com.example.gieldadyzurowa.network.UserroleAndId
 import com.example.gieldadyzurowa.network.AssignDutySlotRequest
 import com.example.gieldadyzurowa.network.DutySlotActionRequest
 import com.google.gson.JsonDeserializationContext
@@ -186,16 +186,44 @@ fun AppContent() {
     val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
     val doctorAvailabilitiesViewModel = viewModel<DoctorAvailabilitiesViewModel>()
 
+    fun fetchAndAssignUserData(user: String)
+    {
+        RetrofitClient.apiService.fetchUserData().enqueue(object : Callback<UserroleAndId>
+        {
+            override fun onResponse(call: Call<UserroleAndId>, response: RetrofitResponse<UserroleAndId>)
+            {
+                if (response.isSuccessful)
+                {
+                    val userInfo = response.body()
+                    if (userInfo != null)
+                    {
+                        userrole = userInfo.role
+                        userId = userInfo._id
+                        isLoggedIn = true
+                        username = user
+                        selectedNav = LANDING_SCREEN
+                        Log.d("fetchUserData", "Successfully fetched userrole and Id")
+                    }
+                }
+                else
+                {
+                    Log.e("fetchUserData", "Failed to fetch user info: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<UserroleAndId>, t: Throwable)
+            {
+                Log.e("fetchUserData", "Failed to fetch user info", t)
+            }
+        })
+    }
+
 
 
     // debug aid debugging
      performLogin("abba", "alamakota",
-         onLoginSuccess = { user , role, userIdFromlogin ->
-             isLoggedIn = true
-             username = user
-             userrole = role
-             userId = userIdFromlogin
-             selectedNav = LANDING_SCREEN
+         onLoginSuccess = { user  ->
+             fetchAndAssignUserData(user)
          }
      )
 
@@ -258,12 +286,8 @@ fun AppContent() {
                 // The rest of your conditional content logic
                 when (selectedNav) {
                     "Login" -> if (!isLoggedIn) {
-                        LoginScreen(onLoginSuccess = { user, role, userIdFromLogin ->
-                            isLoggedIn = true
-                            username = user
-                            userId = userIdFromLogin
-                            userrole = role
-                            selectedNav = LANDING_SCREEN
+                        LoginScreen(onLoginSuccess = { user ->
+                            fetchAndAssignUserData(user)
                         })
                     }
                     "Register" -> if (!isLoggedIn) {
@@ -340,7 +364,7 @@ fun Header(isLoggedIn: Boolean, username: String) {
 
 
 @Composable
-fun LoginScreen(onLoginSuccess: (String, String, String) -> Unit) {
+fun LoginScreen(onLoginSuccess: (String) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -808,16 +832,16 @@ fun performRegistration(
 }
 
 // This function can be called within the onClick listener of the login button
-fun performLogin(username: String, password: String, onLoginSuccess: (String, String, String) -> Unit) {
+fun performLogin(username: String, password: String, onLoginSuccess: (String) -> Unit) {
     val loginRequest = LoginRequest(username, password)
-    RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<AdditionalUserInfo> {
-        override fun onResponse(call: Call<AdditionalUserInfo>, response: RetrofitResponse<AdditionalUserInfo>) {
+    RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<Unit> {
+        override fun onResponse(call: Call<Unit>, response: RetrofitResponse<Unit>) {
             if (response.isSuccessful) {
                 // Assuming response.body() is not null, let's use it.
                 response.body()?.let { userInfo ->
                     Log.d("LoginSuccess", "Successfully logged in user: $username")
                     // Proceed with login success logic, e.g., updating UI or navigating to another activity
-                    onLoginSuccess(username, userInfo.role, userInfo.userId)
+                    onLoginSuccess(username)
                 } ?: run {
                     // Handle the case where response is successful but the body is null
                     Log.e("LoginError", "Login was successful but no user info was received")
@@ -830,7 +854,7 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String, St
                 )
             }
         }
-        override fun onFailure(call: Call<AdditionalUserInfo>, t: Throwable) {
+        override fun onFailure(call: Call<Unit>, t: Throwable) {
             Log.e("LoginFailure", "Failed to log in user: $username", t)
             // Handle the failure, e.g., show an error message
         }

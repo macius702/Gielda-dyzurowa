@@ -39,10 +39,13 @@ router.get('/doctor/profile/:id', isAuthenticated, async (req, res) => {
 
 // Get user data like role, userId, etc
 router.get('/user/data', isAuthenticated, async (req, res) => {
-  try {
+  try {// add logging to see what is happening
+    console.log('Fetching user data');
+
     const user = await User.findById(req.session  ? req.session.userId : null); // If session is not available, return null user
-    // but only id and role {"user":{"_id":"66099ada42d4f936280b1939","role":"doctor"}} 
-    res.json({ user: { _id: user._id, role: user.role } });
+
+    console.log('User data:', user);
+    res.json({   _id: user._id, role: user.role } );
   } catch (error) {
     console.error('Error fetching user data:', error);
     console.error(error.stack);
