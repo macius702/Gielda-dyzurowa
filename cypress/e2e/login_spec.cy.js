@@ -24,7 +24,20 @@ describe('Login Page', function ()
         // cy.contains('button', 'Logout').should('exist');
     });
 
-    it('should show an error for wrong credentials', function ()
+    it('should show an error for wrong password', function ()
+    {
+        // This test assumes the application shows an error for wrong credentials
+        cy.get('input[name="username"]')
+          .type('Doktor2');
+        cy.get('input[name="password"]')
+          .type('wrong_password');
+        cy.get('form').submit();
+
+        // Adjust the error message to what your application actually shows
+        cy.contains('Invalid username or password').should('exist');
+    });
+
+    it('should show an error for wrong username', function ()
     {
         // This test assumes the application shows an error for wrong credentials
         cy.get('input[name="username"]')
