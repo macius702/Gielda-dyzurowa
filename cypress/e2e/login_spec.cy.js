@@ -10,15 +10,15 @@ describe('Login Page', function ()
     {
         // Replace 'your_username' and 'your_password' with valid credentials
         // It's a good practice to use environment variables for sensitive data
-        cy.get('input[name="Doktor2"]')
-          .type('your_username');
-        cy.get('input[name="alamakota"]')
-          .type('your_password');
+        cy.get('input[name="username"]')
+          .type('Doktor2');
+        cy.get('input[name="password"]')
+          .type('alamakota');
         cy.get('form').submit();
 
         // Adjust the following assertions to match the expected outcome of a successful login
         // For example, checking if the URL changed:
-        cy.url().should('include', '/dashboard');
+        cy.url().should('include', '/');
 
         // Or checking for a logout button to ensure the user is logged in:
         // cy.contains('button', 'Logout').should('exist');

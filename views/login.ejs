@@ -6,6 +6,11 @@
     <main role="main">
       <div class="container mt-5">
         <h2>Login</h2>
+        <% if (typeof(errorMessage) !== 'undefined' && errorMessage) { %>
+          <div class="alert alert-danger" role="alert">
+            <%= errorMessage %>
+          </div>
+        <% } %>
         <form action="/auth/login" method="POST">
           <div class="mb-3">
             <input type="text" name="username" placeholder="Username" required class="form-control">

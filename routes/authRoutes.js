@@ -62,7 +62,7 @@ router.post('/auth/login', async (req, res) =>
         }
         else
         {
-            res.status(statusCode).send(body);
+            res.status(statusCode).render('login', { errorMessage: body });
         }
     };
 
@@ -73,7 +73,7 @@ router.post('/auth/login', async (req, res) =>
         if (!user)
         {
             console.log('Login attempt: User not found');
-            return sendResponse(400, 'User not found');
+            return sendResponse(400, 'Invalid username or password');
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
@@ -88,7 +88,7 @@ router.post('/auth/login', async (req, res) =>
         else
         {
             console.log(`Login attempt failed for user: ${username}`);
-            return sendResponse(400, 'Password is incorrect');
+            return sendResponse(400, 'Invalid username or password');
         }
     }
     catch (error)
