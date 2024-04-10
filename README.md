@@ -43,6 +43,10 @@ git push heroku master
 heroku logs --tail
 heroku apps
 
+
+npm install cypress --save-dev
+
+
 ### Todo
 .populate more specific or not needed - use database view
 show only my hospital duty records - or enable buttons only on my duty slots
@@ -50,7 +54,7 @@ price
 languages
 gui changes on notification
 Doctors should be able to publish their unavailabilities as well
-Button logic dependent automatically on status
+DONE Button logic dependent automatically on status
 Formatter
 fix passsword in open text (OAuth2 ?2)
 malignant doctor can occupy all slots, and assign to all duties
