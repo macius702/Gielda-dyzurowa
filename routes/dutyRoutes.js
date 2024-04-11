@@ -79,158 +79,140 @@ router.post('/duty/interest/:id', isAuthenticated, isDoctor, async (req, res) =>
   }
 });
 // Common function to fetch and log duty slots
-async function fetch_and_log_duty_slots(req, res, respond)
-{
-    console.log('Incoming Request:', 
+async function fetch_and_log_duty_slots(req, res, respond) {
+  console.log('Incoming Request:',
     {
-        method: req.method,
-        url: req.originalUrl,
-        headers: req.headers
+      method: req.method,
+      url: req.originalUrl,
+      headers: req.headers
     });
 
-    try
-    {
-        const duty_slots = await DutySlot.find().populate('hospitalId').populate('assignedDoctorId');
-        console.log('Outgoing Response (Data):', duty_slots);
+  try {
+    const duty_slots = await DutySlot.find().populate('hospitalId').populate('assignedDoctorId');
+    console.log('Outgoing Response (Data):', duty_slots);
 
-        // Respond using the provided callback function (either render or JSON)
-        respond(res, duty_slots);
-    } 
-    catch (error)
-    {
-        console.error('Error fetching duty slots:', error.message, error.stack);
-        console.log('Outgoing Response (error):', 
-        {
-            statusCode: 500,
-            body: 'Error fetching duty slots.'
-        });
-        res.status(500).send('Error fetching duty slots.');
-    }
+    // Respond using the provided callback function (either render or JSON)
+    respond(res, duty_slots);
+  }
+  catch (error) {
+    console.error('Error fetching duty slots:', error.message, error.stack);
+    console.log('Outgoing Response (error):',
+      {
+        statusCode: 500,
+        body: 'Error fetching duty slots.'
+      });
+    res.status(500).send('Error fetching duty slots.');
+  }
 }
 
 // Endpoint for rendering view
-router.get('/duty/slots/rendered', isAuthenticated, (req, res) => 
-{
-    fetch_and_log_duty_slots(req, res, (response, duty_slots) =>
-    {
-        // Modify res.render to log the response
-        const original_render = response.render.bind(response);
-        response.render = (view, options, callback) =>
+router.get('/duty/slots/rendered', isAuthenticated, (req, res) => {
+  fetch_and_log_duty_slots(req, res, (response, duty_slots) => {
+    // Modify res.render to log the response
+    const original_render = response.render.bind(response);
+    response.render = (view, options, callback) => {
+      console.log('Outgoing Response (render):',
         {
-            console.log('Outgoing Response (render):', 
-            {
-                view: view,
-                options: options
-            });
-            original_render(view, options, callback);
-        };
+          view: view,
+          options: options
+        });
+      original_render(view, options, callback);
+    };
 
-        // Render view with duty slots
-        response.render('dutySlots', { dutySlots: duty_slots });
-    });
+    // Render view with duty slots
+    response.render('dutySlots', { dutySlots: duty_slots });
+  });
 });
 
 // Endpoint for JSON response
-router.get('/duty/slots/json', isAuthenticated, (req, res) => 
-{
-    fetch_and_log_duty_slots(req, res, (response, duty_slots) =>
-    {
-        // Directly respond with JSON
-        response.json(duty_slots);
-    });
+router.get('/duty/slots/json', isAuthenticated, (req, res) => {
+  fetch_and_log_duty_slots(req, res, (response, duty_slots) => {
+    // Directly respond with JSON
+    response.json(duty_slots);
+  });
 });
 
-router.post('/assign-duty-slot', async (req, res) => 
-{
+router.post('/assign-duty-slot', async (req, res) => {
 
   console.log('Executing /assign-duty-slot')
 
- // Log the entire request body
- console.log('Request body:', req.body);
-      
-    try 
-    {
-      const { _id, sendingDoctorId, sendingDoctorName , hospitalUsername, date, dutyHours, requiredSpecialty } = req.body;
+  // Log the entire request body
+  console.log('Request body:', req.body);
 
-      // Logging _id and sendingDoctorId
-      console.log(`_id: ${_id}, sendingDoctorId: ${sendingDoctorId}`);
+  try {
+    const { _id, sendingDoctorId, sendingDoctorName, hospitalUsername, date, dutyHours, requiredSpecialty } = req.body;
 
-        
-      const slot = await DutySlot.findOne({ _id: _id, status: 'open' });
-      //const slot = await DutySlot.findOne({ _id: _id}); //mtlk debug aid
+    // Logging _id and sendingDoctorId
+    console.log(`_id: ${_id}, sendingDoctorId: ${sendingDoctorId}`);
 
-     // Log the slot
-     console.log(`Slot:`, slot);      
 
-        if (slot) 
-        {
-          slot.status = 'pending';
-            slot.assignedDoctorId = sendingDoctorId; // Assuming sendingDoctorId is the _id of the doctor being assigned
-            
-            await slot.save();
-            
-            res.status(200).send({ message: 'Duty slot updated successfully', slot});
-        } 
-        else 
-        {
-          res.status(404).send({ message: 'Duty slot not found or already assigned' });
-        }
-    } 
-    catch (error) 
-    {
-        console.error(error);
-        res.status(500).send({ message: 'Server error', error: error.message });
+    const slot = await DutySlot.findOne({ _id: _id, status: 'open' });
+    //const slot = await DutySlot.findOne({ _id: _id}); //mtlk debug aid
+
+    // Log the slot
+    console.log(`Slot:`, slot);
+
+    if (slot) {
+      slot.status = 'pending';
+      slot.assignedDoctorId = sendingDoctorId; // Assuming sendingDoctorId is the _id of the doctor being assigned
+
+      await slot.save();
+
+      res.status(200).send({ message: 'Duty slot updated successfully', slot });
     }
+    else {
+      res.status(404).send({ message: 'Duty slot not found or already assigned' });
+    }
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Server error', error: error.message });
+  }
 
 });
 
-router.post('/give-consent', async (req, res) => 
-{
-    console.log('Executing /give-consent');
-    try 
-    {
-        const { _id } = req.body; // Expecting the duty slot ID to be passed in the request body
-        
-        const slot = await DutySlot.findOne({ _id: _id, status: 'pending' }); // Only allow updating slots that are in 'pending' status
-        
-        if (slot) 
-        {
-            slot.status = 'filled'; // Update the status to 'filled' to indicate consent has been given
-            
-            await slot.save(); // Save the updated slot
-            
-            res.status(200).send({ message: 'Consent given successfully, duty slot updated', slot });
-        } 
-        else 
-        {
-            res.status(404).send({ message: 'Duty slot not found or not in pending status' });
-        }
-    } 
-    catch (error) 
-    {
-        console.error(error);
-        res.status(500).send({ message: 'Server error', error: error.message });
+router.post('/give-consent', async (req, res) => {
+  console.log('Executing /give-consent');
+  try {
+    const { _id } = req.body; // Expecting the duty slot ID to be passed in the request body
+
+    const slot = await DutySlot.findOne({ _id: _id, status: 'pending' }); // Only allow updating slots that are in 'pending' status
+
+    if (slot) {
+      slot.status = 'filled'; // Update the status to 'filled' to indicate consent has been given
+
+      await slot.save(); // Save the updated slot
+
+      res.status(200).send({ message: 'Consent given successfully, duty slot updated', slot });
     }
+    else {
+      res.status(404).send({ message: 'Duty slot not found or not in pending status' });
+    }
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Server error', error: error.message });
+  }
 });
 
 router.post('/revoke-assignment', async (req, res) => {
   console.log('Executing /revoke-assignment');
   try {
-      const { _id } = req.body; // Extract the slot ID from the request body
-      
-      const slot = await DutySlot.findOne({ _id: _id });
-      if (slot) {
-          slot.status = 'open'; // Set the slot status back to 'open'
-          slot.assignedDoctorId = null; // Remove the assigned doctor
-          
-          await slot.save();
-          res.status(200).send({ message: 'Assignment revoked successfully', slot });
-      } else {
-          res.status(404).send({ message: 'Duty slot not found' });
-      }
+    const { _id } = req.body; // Extract the slot ID from the request body
+
+    const slot = await DutySlot.findOne({ _id: _id });
+    if (slot) {
+      slot.status = 'open'; // Set the slot status back to 'open'
+      slot.assignedDoctorId = null; // Remove the assigned doctor
+
+      await slot.save();
+      res.status(200).send({ message: 'Assignment revoked successfully', slot });
+    } else {
+      res.status(404).send({ message: 'Duty slot not found' });
+    }
   } catch (error) {
-      console.error(error);
-      res.status(500).send({ message: 'Server error', error: error.message });
+    console.error(error);
+    res.status(500).send({ message: 'Server error', error: error.message });
   }
 });
 
