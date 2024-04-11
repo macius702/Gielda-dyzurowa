@@ -49,7 +49,7 @@ npm install cypress --save-dev
 
 ### Todo
 
-assure that tests have always a duty entry qqq
+DONE assure that tests have always a duty entry qqq
 DONE remove duty vacancy 
 remove doctor availability
 /duty/find_by_specialty change into general finding endpoint
@@ -64,6 +64,7 @@ DONE Button logic dependent automatically on status
 Formatter
 fix passsword in open text (OAuth2 ?2)
 malignant doctor can occupy all slots, and assign to all duties
+show internet connection is online - especially on start, before login, etc
 
 
 ### License
