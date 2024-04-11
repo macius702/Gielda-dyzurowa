@@ -163,6 +163,20 @@
                     waitingButton.className = 'btn btn-secondary disabled';
                     waitingButton.textContent = 'Waiting';
                     container.appendChild(waitingButton);
+
+                    // Add a Remove button when currentUserId == slot.hospitalId
+                    if (currentUserId === slot.hospitalId._id) {
+                        const removeButton = document.createElement('div');
+                        removeButton.className = 'btn btn-danger';
+                        removeButton.textContent = 'Remove';
+                        removeButton.onclick = () => {
+                            removeSlot(slot._id, removeButton);
+                        };
+                        container.appendChild(removeButton);
+                    } else {
+                        console.log('Current user is not the hospital for this slot');
+                    }
+
                 } else if (slot.status === 'pending') {
                     const consentButton = document.createElement('div');
                     consentButton.className = 'btn btn-primary';
@@ -303,6 +317,31 @@
 
 
 
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        
+        // Implement removeSlot function        
+        function removeSlot(slot_id, button) {
+            const data = {
+                dutySlotId: slot_id
+            };
+
+            fetch('/duty/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(consentData => {
+                console.log('Remove Success:', consentData);
+                document.querySelector(`.status-display[data-slot-id="${slot_id}"]`).innerText = 'open'; 
+                button.disabled = true;
+                button.classList.add('disabled');
+                button.innerText = 'Removed'
+                sendMessage(JSON.stringify(data));
             })
             .catch(error => console.error('Error:', error));
         }
