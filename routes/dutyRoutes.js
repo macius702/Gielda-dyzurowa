@@ -45,6 +45,40 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
     res.status(500).send('Error while publishing duty slot. Please try again later.');
   }
 });
+
+// Find duties by specialty
+router.get('/duty/find_by_specialty', isAuthenticated, async (req, res) => {
+  try {
+    const { specialty } = req.query;
+
+    const dutySlots = await DutySlot.find({ requiredSpecialty: specialty }).populate('hospitalId');
+
+    res.json({ dutySlots: dutySlots });
+  } catch (error) {
+    console.error('Error fetching duty slots:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).send('Error fetching duty slots');
+  }
+});
+
+
+// Remove duty slot by ID
+router.post('/duty/remove', isAuthenticated, isHospital, async (req, res) => {
+  try {
+    const { dutySlotId } = req.body;
+    const result = await DutySlot.findByIdAndDelete(dutySlotId);
+    if (!result) {
+      return res.status(404).send('Duty slot not found.');
+    }
+    res.redirect('/');
+  } catch (error) {
+    console.error('Error removing duty slot:', error);
+    console.error(error.stack);
+    res.status(500).send('Error removing duty slot');
+  }
+});
+
+
 router.get('/duty/browse', isAuthenticated, isDoctor, async (req, res) => {
   try {
     const dutySlots = await DutySlot.find().populate('hospitalId');

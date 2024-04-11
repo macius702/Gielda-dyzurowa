@@ -23,3 +23,13 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('hospital_login', () => {
+    cy.visit('/auth/login');
+    cy.get('input[name="username"]').type('H1');
+    cy.get('input[name="password"]').type('alamakota');
+    cy.get('form').submit();
+    cy.visit('duty/slots/rendered');
+    cy.wait(1000);  
+});
+

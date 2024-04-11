@@ -6,7 +6,7 @@ describe('Rename buttons Test', () => {
         cy.visit('/auth/logout');        
 
 
-        hotel_login()
+        cy.hospital_login()
         assertHasButtonWithText('Waiting');
         cy.visit('/auth/logout');        
 
@@ -14,7 +14,7 @@ describe('Rename buttons Test', () => {
         assertHasButtonWithText('Assign', true)
         cy.visit('/auth/logout');        
 
-        hotel_login()
+        cy.hospital_login()
         assertHasButtonWithText('Consent', true);
         cy.visit('/auth/logout');        
         
@@ -23,12 +23,15 @@ describe('Rename buttons Test', () => {
         assertHasButtonWithText('Revoke', true)
         cy.visit('/auth/logout');        
 
-        hotel_login()
+        cy.hospital_login()
         assertHasButtonWithText('Waiting');
         cy.visit('/auth/logout');        
 
     });
 });
+
+
+
 
 
 function assertHasButtonWithText(btnText, shouldClick = false) {
@@ -79,11 +82,4 @@ function doctor_login() {
     cy.wait(1000);  
 }
 
-function hotel_login() {
-    cy.visit('/auth/login');
-    cy.get('input[name="username"]').type('H1');
-    cy.get('input[name="password"]').type('alamakota');
-    cy.get('form').submit();
-    cy.visit('duty/slots/rendered');
-    cy.wait(1000);  
-}  
+
