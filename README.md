@@ -52,7 +52,7 @@ npm install cypress --save-dev
 assure that tests have always a duty entry qqq
 DONE remove duty vacancy 
 remove doctor availability
-/duty/find_by_specialty cvhange into general finding endpoint
+/duty/find_by_specialty change into general finding endpoint
 .populate more specific or not needed - use database view - generally send only the relevant information, no extras
 some unique index - adding the same duty slot  is ok now!
 show only my hospital duty records - or enable buttons only on my duty slots
