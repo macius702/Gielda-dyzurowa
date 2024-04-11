@@ -52,7 +52,7 @@ npm install cypress --save-dev
 remove duty vacancy 
 remove doctor availability
 /duty/find_by_specialty cvhange into general finding endpoint
-.populate more specific or not needed - use database view
+.populate more specific or not needed - use database view - generally send only the relevant information, no extras
 show only my hospital duty records - or enable buttons only on my duty slots
 price
 languages
