@@ -2,6 +2,12 @@
 // Use router.get('/duty/find'
 // And use router.post('/duty/remove'
 describe('Remove buttons Test', () => {
+    
+    before(() => {
+        // Performing this before all the tests hopefully will make the test more stable
+        cy.assureDutySlotQqqExists();
+    });
+
     it('Finds and removes a duty vacancy', () => {
 
         cy.hospital_login()

@@ -33,3 +33,26 @@ Cypress.Commands.add('hospital_login', () => {
     cy.wait(1000);  
 });
 
+
+Cypress.Commands.add('assureDutySlotQqqExists', () => {
+    // Check if the duty slot exists
+    cy.hospital_login();
+    cy.request('/duty/find_by_specialty?specialty=qqq').then((response) => {
+        const dutySlots = response.body.dutySlots;
+
+        // If the duty slot does not exist, create it
+        if (dutySlots.length === 0) {
+            // Visit the page containing the form
+            cy.visit('/duty/publish');
+
+            // Fill out the form
+            cy.get('#date').type('2024-12-31');
+            cy.get('#dutyHours').type('20:00 - 08:00');
+            cy.get('#requiredSpecialty').type('qqq');
+
+            // Submit the form
+            cy.get('form').submit();
+        }
+    });
+    cy.visit('/auth/logout');
+});
