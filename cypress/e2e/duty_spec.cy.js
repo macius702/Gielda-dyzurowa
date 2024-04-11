@@ -2,7 +2,7 @@
 // Use router.get('/duty/find'
 // And use router.post('/duty/remove'
 describe('Remove buttons Test', () => {
-    it('Finds an removes a duty vacancy', () => {
+    it('Finds and removes a duty vacancy', () => {
 
         cy.hospital_login()
 

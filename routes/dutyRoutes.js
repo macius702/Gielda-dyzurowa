@@ -114,16 +114,10 @@ router.post('/duty/interest/:id', isAuthenticated, isDoctor, async (req, res) =>
 });
 // Common function to fetch and log duty slots
 async function fetch_and_log_duty_slots(req, res, respond) {
-  console.log('Incoming Request:',
-    {
-      method: req.method,
-      url: req.originalUrl,
-      headers: req.headers
-    });
 
   try {
     const duty_slots = await DutySlot.find().populate('hospitalId').populate('assignedDoctorId');
-    console.log('Outgoing Response (Data):', duty_slots);
+    
 
     // Respond using the provided callback function (either render or JSON)
     respond(res, duty_slots);
