@@ -16,6 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.ListItem
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.DropdownMenu
@@ -70,6 +71,8 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
 import android.app.DatePickerDialog
+import androidx.compose.foundation.background
+import androidx.compose.material.ExperimentalMaterialApi
 import com.example.gieldadyzurowa.network.UserroleAndId
 import com.example.gieldadyzurowa.network.AssignDutySlotRequest
 import com.example.gieldadyzurowa.network.DutySlotActionRequest
@@ -329,24 +332,34 @@ fun AppContent() {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        // Populate your drawer content here
-        Button(onClick = { onNavSelected("Login") }) { Text("Login") }
-        Button(onClick = { onNavSelected("Register") }) { Text("Register") }
-        Button(onClick = { onNavSelected("Doctor Availabilities") }) { Text("Doctor Availabilities") }
-        if (isLoggedIn) {
-            Button(onClick = { onNavSelected("Add Doctor Availability") }) { Text("Add Doctor Availability") }
+    val drawerItems = listOf("Login", "Register", "Doctor Availabilities")
+    val loggedInItems = listOf("Add Doctor Availability", "Duty Vacancies", "Publish Duty Vacancy", "Logout")
+
+    LazyColumn(
+        modifier = Modifier
+            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.background) // Set background color
+    ) {
+        items(count = drawerItems.size) { index ->
+            ListItem(
+                text = { Text(drawerItems[index], style = MaterialTheme.typography.titleLarge) }, // Increase text size
+                modifier = Modifier.clickable { onNavSelected(drawerItems[index]) }
+            )
         }
-        Button(onClick = { onNavSelected("Duty Vacancies") }) { Text("Duty Vacancies") }
+
         if (isLoggedIn) {
-            Button(onClick = { onNavSelected("Publish Duty Vacancy") }) { Text("Publish Duty Vacancy") }
-            Button(onClick = { onNavSelected("Logout") }) { Text("Logout") }
+            items(count = loggedInItems.size) { index ->
+                ListItem(
+                    text = { Text(loggedInItems[index], style = MaterialTheme.typography.titleLarge) }, // Increase text size
+                    modifier = Modifier.clickable { onNavSelected(loggedInItems[index]) }
+                )
+            }
         }
     }
 }
-
 // Ensure you define or adapt LoginScreen, RegisterScreen, DutyVacanciesScreen, and MainContent for compatibility with your app's logic and Material 3 components.
 
 
