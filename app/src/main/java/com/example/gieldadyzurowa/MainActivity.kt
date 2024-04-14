@@ -380,6 +380,9 @@ fun Header(isLoggedIn: Boolean, username: String) {
 fun LoginScreen(onLoginSuccess: (String) -> Unit) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var showError by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
+
 
     Column(modifier = Modifier.padding(PaddingValues(16.dp))) {
         OutlinedTextField(
@@ -398,14 +401,29 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { /* Handle login */ })
         )
-        Button(
+    Button(
             onClick = {
-                performLogin(username, password, onLoginSuccess) // Call performLogin on click
-
+                performLogin(username, password, onLoginSuccess) { error ->
+                    // Show the error message in a Snackbar
+                    showError = true
+                    errorMessage = error
+                }
             },
             modifier = Modifier.padding(top = 16.dp)
         ) {
             Text("Login")
+        }
+        if (showError) {
+            Snackbar(
+                modifier = Modifier.padding(16.dp),
+                action = {
+                    TextButton(onClick = { showError = false }) {
+                        Text("Dismiss")
+                    }
+                }
+            ) {
+                Text(errorMessage)
+            }
         }
     }
 }
@@ -845,7 +863,7 @@ fun performRegistration(
 }
 
 // This function can be called within the onClick listener of the login button
-fun performLogin(username: String, password: String, onLoginSuccess: (String) -> Unit) {
+fun performLogin(username: String, password: String, onLoginSuccess: (String) -> Unit, onLoginFailure: (String) -> Unit) {
     val loginRequest = LoginRequest(username, password)
     RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<Unit> {
         override fun onResponse(call: Call<Unit>, response: RetrofitResponse<Unit>) {
@@ -858,6 +876,7 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String) ->
                 } ?: run {
                     // Handle the case where response is successful but the body is null
                     Log.e("LoginError", "Login was successful but no user info was received")
+                    onLoginFailure("Login was successful but no user info was received")
                 }
             } else {
                 // Handle unsuccessful response, e.g., wrong credentials
@@ -865,11 +884,14 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String) ->
                     "LoginError",
                     "Failed to log in user. Response code: ${response.code()}, message: ${response.errorBody()?.string() ?: "Unknown error"}"
                 )
+                onLoginFailure("Invalid username or password.")
             }
         }
         override fun onFailure(call: Call<Unit>, t: Throwable) {
             Log.e("LoginFailure", "Failed to log in user: $username", t)
             // Handle the failure, e.g., show an error message
+            onLoginFailure("Failed to log in user: $username")
+
         }
     })
 }

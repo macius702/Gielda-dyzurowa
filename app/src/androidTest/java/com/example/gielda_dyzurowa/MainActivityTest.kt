@@ -23,33 +23,64 @@ class NavigationDrawerTest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     @Test
-    fun testLoginPage() {
-        // Click on the navigation item
-        composeTestRule.onNodeWithText("Login").performClick()
+    fun testLoginPageOK() {
+        navigateToLoginPage()
 
         val username = "abba"
         val password = "alamakota"
 
-        // Enter the username
-        composeTestRule.onNodeWithText("Username")
-            .performTextInput(username)
+        enterCredentials(username, password)
+        submitLoginForm()
 
-        // Enter the password
-        composeTestRule.onNodeWithText("Password")
-            .performTextInput(password)
+        assertErrorMessageDisplayed("Logged in as $username")
+    }
 
-        // Initiate the login process by clicking the login button.
-        // Note that there are two elements with the text "Login" in the current UI.
-        // However, the one located in the drawer is a ListItem, not a Button.
-        // Therefore, the click action will be performed on the Button element with the text "Login".
+    @Test
+    fun testLoginFailureWrongPassword() {
+        navigateToLoginPage()
+
+        val username = "abba"
+        val wrongPassword = "wrong_password"
+
+        enterCredentials(username, wrongPassword)
+        submitLoginForm()
+
+        assertErrorMessageDisplayed("Invalid username or password.")
+    }
+
+    @Test
+    fun testLoginFailureWrongUsername() {
+        navigateToLoginPage()
+
+        val wrongUsername = "wrong_username"
+        val password = "alamakota"
+
+        enterCredentials(wrongUsername, password)
+        submitLoginForm()
+
+        assertErrorMessageDisplayed("Invalid username or password.")
+    }
+
+
+    private fun navigateToLoginPage() {
+        composeTestRule.onNodeWithText("Login").performClick()
+    }
+
+    private fun enterCredentials(username: String, password: String) {
+        composeTestRule.onNodeWithText("Username").performTextInput(username)
+        composeTestRule.onNodeWithText("Password").performTextInput(password)
+    }
+
+    private fun submitLoginForm() {
         composeTestRule.onNode(
             matcher = hasText("Login") and hasButton()
         ).performClick()
+    }
 
-        // Wait until the logged text is displayed
+    private fun assertErrorMessageDisplayed(errorMessage: String) {
         composeTestRule.waitUntil {
             try {
-                composeTestRule.onNodeWithText("Logged in as abba").assertExists()
+                composeTestRule.onNodeWithText(errorMessage).assertExists()
                 true
             } catch (e: AssertionError) {
                 false
@@ -58,14 +89,13 @@ class NavigationDrawerTest {
     }
 
     // This function logs all nodes in the Compose hierarchy that have any text.
-    fun logAllNodesWithAnyText() {
+    private fun logAllNodesWithAnyText() {
         // Find all nodes that have any text
         val nodes = composeTestRule.onAllNodes(hasAnyText())
 
         nodes.fetchSemanticsNodes().forEach { node ->
             Log.d("MainActivityTest", "Node:")
             node.config.iterator().forEach { entry ->
-                // Extract the key and value
                 val key = entry.key.name
                 val value = entry.value
                 Log.d("MainActivityTest", "\t $key: $value")
@@ -81,9 +111,6 @@ fun hasAnyText() = SemanticsMatcher("has any text") {
 // Define a SemanticsMatcher that matches nodes with a button role, without using 'hasSemanticNodeWithRole'
 fun hasButton() = SemanticsMatcher("has button") { node ->
     node.config.any { entry ->
-        val key = entry.key.name
-        val value = entry.value
-        Log.d("MainActivityTest", "\t $key: $value")
-        key == "Role" && value == Role.Button
+        entry.key.name == "Role" && entry.value == Role.Button
     }
 }
