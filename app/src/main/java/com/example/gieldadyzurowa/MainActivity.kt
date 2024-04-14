@@ -223,12 +223,12 @@ fun AppContent() {
 
 
 
-    // debug aid debugging
-     performLogin("abba", "alamakota",
-         onLoginSuccess = { user  ->
-             fetchAndAssignUserData(user)
-         }
-     )
+//    // debug aid debugging
+//     performLogin("abba", "alamakota",
+//         onLoginSuccess = { user  ->
+//             fetchAndAssignUserData(user)
+//         }
+//     )
 
     ModalNavigationDrawer(
         drawerState = drawerState,

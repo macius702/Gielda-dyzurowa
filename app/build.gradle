@@ -74,12 +74,14 @@ dependencies {
 
     implementation 'androidx.activity:activity-compose:1.5.1'
 
-    implementation 'androidx.annotation:annotation:1.6.0'// Same as above
+    implementation 'androidx.annotation:annotation:1.6.0'
+    implementation 'androidx.test.espresso:espresso-contrib:3.5.1'// Same as above
     testImplementation 'junit:junit:4.13.2' // This version is fine as it's for testing
     androidTestImplementation 'androidx.test.ext:junit:1.1.5' // This version should be compatible
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1' // This version is also fine
 
     debugImplementation 'androidx.compose.ui:ui-tooling:1.1.0'
+    androidTestImplementation 'androidx.compose.ui:ui-test-junit4:1.0.1'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.0")
