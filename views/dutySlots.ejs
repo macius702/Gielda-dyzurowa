@@ -1,205 +1,198 @@
 <!DOCTYPE html>
 <html lang="en">
 <%- include('partials/_head.ejs') %>
-<body>
 
-    <script>
-        // Example of passing a server-side variable into JavaScript
-        const currentUsername = "<%= locals.username %>";
-        const currentUserId =  "<%= locals.userId %>";
-        const userRole = "<%= locals.role %>";
-    </script>
+    <body>
 
-    <script>
-        // Establish the WebSocket connection
-        const socket = new WebSocket('ws://localhost:8080');
-  
-        // Event listener for when the connection opens
-        socket.addEventListener('open', function (event) {
-            // Connection opened
-  
-            // Send a message
-            socket.send('your initial message');
-        });
-  
-        // Event listener for incoming messages
-        socket.addEventListener('message', function (event) {
+        <script>
+            // Passing a server-side variable into JavaScript
+            const currentUsername = "<%= locals.username %>";
+            const currentUserId = "<%= locals.userId %>";
+            const userRole = "<%= locals.role %>";
+        </script>
 
-            // Log the type of event.data
-            console.log('Type of data received:', typeof event.data);
+        <script>
+            const socket = new WebSocket('ws://localhost:8080');
 
-            console.log("Signal received to update dutySlots. Fetching new data...");
+            // Event listener for when the connection opens
+            socket.addEventListener('open', function (event) {
+                // Connection opened
 
+                // Send a message
 
-        // Call function to fetch updated dutySlots from the server
-            fetchUpdatedDutySlots();            
+                // TODO(mtlk) this message sometimes triggers parse error in ejs
+                socket.send('your initial message');
+            });
 
-            // Further type checking if event.data is an object
-            if (typeof event.data === "object") {
-                console.log('The data is of object type. Checking instanceof...');
-                if (event.data instanceof Blob) {
-                    console.log('Data is a Blob');
-                } else if (event.data instanceof ArrayBuffer) {
-                    console.log('Data is an ArrayBuffer');
-                } else {
-                    console.log('Data is an object, but not a Blob or ArrayBuffer');
-                }
-            }            
-            // Check if the incoming message is a Blob
+            // Event listener for incoming messages
+            socket.addEventListener('message', function (event) {
 
-        if (event.data instanceof Blob) 
-        {
-            // Convert Blob to text to parse as JSON
-            const reader = new FileReader();
-            reader.onload = function() 
-            {
-                // Parse the text as JSON
-                const jsonObj = JSON.parse(reader.result);
+                console.log("Signal received to update dutySlots. Fetching new data...");
+                console.log('Type of data received:', typeof event.data);
 
-                // Check if the jsonObj contains the sendingDoctor property
-                if (jsonObj.hasOwnProperty('hospitalUsername')) {
-                    // Check if sendingDoctor is for the current user
-                    console.log('currentUsername:', currentUsername)
-                    const notificationIndicator = document.querySelector('.notification-indicator');
-                    if (jsonObj.hospitalUsername === currentUsername) {
-                        console.log('This message is for us:', jsonObj);
+                fetchUpdatedDutySlots();
 
-                        notificationIndicator.style.display = 'block';
-                        // notificationIndicator.innerHTML = '<p>New message: ' + JSON.stringify(jsonObj, null, 2) + '</p>';
-
-                        //const messagesDiv = document.getElementById('messages');
-
-                        //messagesDiv.innerHTML = '<p>New message: ' + JSON.stringify(jsonObj, null, 2) + '</p>';
-
+                // Further type checking if event.data is an object
+                if (typeof event.data === "object") {
+                    console.log('The data is of object type. Checking instanceof...');
+                    if (event.data instanceof Blob) {
+                        console.log('Data is a Blob');
+                    } else if (event.data instanceof ArrayBuffer) {
+                        console.log('Data is an ArrayBuffer');
                     } else {
-                        console.log('This message is not for us.');
-                        notificationIndicator.style.display = 'none';
-                        notificationIndicator.innerHTML = '';
+                        console.log('Data is an object, but not a Blob or ArrayBuffer');
                     }
-                } else {
-                    console.log('JSON message from server does not contain a sendingDoctor property.');
-                }    
-                console.log('JSON message from server:', jsonObj);
-            
-            };
-            reader.onerror = function(error) 
-            {
-                console.error('Error reading the Blob:', error);
-            };
-            reader.readAsText(event.data);
-        }
-        else 
-        {
-            // Handle non-Blob data (e.g., text)
-            console.log('Message from server:', event.data);
-        }
-});
+                }
+                // Check if the incoming message is a Blob
 
-        function fetchUpdatedDutySlots() {
-            fetch('/duty/slots/json')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // Assuming 'data' contains the updated dutySlots array
-                    dutySlots = data
-                    updateChangedDutySlots(dutySlots, userRole); // You need to obtain `userRole` appropriately
-                })
-                .catch(error => {
-                    console.error('Failed to fetch updated dutySlots:', error);
-                });
-        }
+                if (event.data instanceof Blob) {
+                    // Convert Blob to text to parse as JSON
+                    const reader = new FileReader();
+                    reader.onload = function () {
+                        // Parse the text as JSON
+                        const jsonObj = JSON.parse(reader.result);
 
+                        // Check if the jsonObj contains the sendingDoctor property
+                        if (jsonObj.hasOwnProperty('hospitalUsername')) {
+                            // Check if sendingDoctor is for the current user
+                            console.log('currentUsername:', currentUsername)
+                            const notificationIndicator = document.querySelector('.notification-indicator');
+                            if (jsonObj.hospitalUsername === currentUsername) {
+                                console.log('This message is for us:', jsonObj);
 
-        function updateChangedDutySlots(dutySlots, userRole) {
+                                notificationIndicator.style.display = 'block';
+                                // notificationIndicator.innerHTML = '<p>New message: ' + JSON.stringify(jsonObj, null, 2) + '</p>';
 
-            dutySlots.forEach(slot => {
-                const existingSlotElement = document.querySelector(`li[data-slot-id="${slot._id}"]`);
+                                //const messagesDiv = document.getElementById('messages');
 
-                // If the slot already exists in the DOM, update it. Otherwise, create a new one.
-                if (existingSlotElement) {
-                    // Optionally, you can compare the current data with the new data to see if an update is necessary
-                    // This step is skipped here for brevity but can be implemented based on your data structure
-                    setSlotElementContent(existingSlotElement, slot, userRole);
-                    
-                } else {
-                    // The slot does not exist, so create and append it
-                    const listElement = document.getElementById('dutySlotsList');
-                    const newSlotElement = createSlotElement(slot);
-                    listElement.appendChild(newSlotElement);
+                                //messagesDiv.innerHTML = '<p>New message: ' + JSON.stringify(jsonObj, null, 2) + '</p>';
+
+                            } else {
+                                console.log('This message is not for us.');
+                                notificationIndicator.style.display = 'none';
+                                notificationIndicator.innerHTML = '';
+                            }
+                        } else {
+                            console.log('JSON message from server does not contain a sendingDoctor property.');
+                        }
+                        console.log('JSON message from server:', jsonObj);
+
+                    };
+                    reader.onerror = function (error) {
+                        console.error('Error reading the Blob:', error);
+                    };
+                    reader.readAsText(event.data);
+                }
+                else {
+                    // Handle non-Blob data (e.g., text)
+                    console.log('Message from server:', event.data);
                 }
             });
-        }
 
-
-        function getButtons(slot, role) {
-            const container = document.createElement('div');
-
-            if (role === 'doctor') {
-                if (slot.status === 'open') {
-                    const assignButton = document.createElement('div');
-                    assignButton.className = 'btn btn-primary';
-                    assignButton.textContent = 'Assign';
-                    assignButton.onclick = () => assignAndSendMessage(slot._id, currentUserId, currentUsername, slot.hospitalId.username, new Date(slot.date).toDateString(), slot.dutyHours, slot.requiredSpecialty, assignButton);
-                    container.appendChild(assignButton);
-                } else if (slot.status === 'pending') {
-                    const waitingButton = document.createElement('div');
-                    waitingButton.className = 'btn btn-secondary disabled';
-                    waitingButton.textContent = 'Waiting for Consent';
-                    container.appendChild(waitingButton);
-                } else if (slot.status === 'filled') {
-                    const revokeButton = document.createElement('div');
-                    revokeButton.className = 'btn btn-primary';
-                    revokeButton.textContent = 'Revoke';
-                    revokeButton.onclick = () => revoke_assignment(slot._id, revokeButton);
-                    container.appendChild(revokeButton);
-                }
-            } else if (role === 'hospital') {
-                if (slot.status === 'open') {
-                    const waitingButton = document.createElement('div');
-                    waitingButton.className = 'btn btn-secondary disabled';
-                    waitingButton.textContent = 'Waiting';
-                    container.appendChild(waitingButton);
-
-                    // Add a Remove button when currentUserId == slot.hospitalId
-                    if (currentUserId === slot.hospitalId._id) {
-                        const removeButton = document.createElement('div');
-                        removeButton.className = 'btn btn-danger';
-                        removeButton.textContent = 'Remove';
-                        removeButton.onclick = () => {
-                            removeSlot(slot._id, removeButton);
-                        };
-                        container.appendChild(removeButton);
-                    } else {
-                        console.log('Current user is not the hospital for this slot');
-                    }
-
-                } else if (slot.status === 'pending') {
-                    const consentButton = document.createElement('div');
-                    consentButton.className = 'btn btn-primary';
-                    consentButton.textContent = 'Consent';
-                    consentButton.onclick = () => give_consent(slot._id, consentButton);
-                    container.appendChild(consentButton);
-                } else if (slot.status === 'filled') {
-                    const filledButton = document.createElement('div');
-                    filledButton.className = 'btn btn-secondary disabled';
-                    filledButton.textContent = 'Filled';
-                    container.appendChild(filledButton);
-                }
+            function fetchUpdatedDutySlots() {
+                fetch('/duty/slots/json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        dutySlots = data
+                        updateChangedDutySlots(dutySlots, userRole);
+                    })
+                    .catch(error => {
+                        console.error('Failed to fetch updated dutySlots:', error);
+                    });
             }
 
-            return container;
-        }
 
-        function setSlotElementContent(element, slot, role) {
-            // Clear previous content
-            element.innerHTML = '';
+            function updateChangedDutySlots(dutySlots, userRole) {
 
-            // Create and append the basic slot information
-            const infoHTML = `
+                dutySlots.forEach(slot => {
+                    const existingSlotElement = document.querySelector(`li[data-slot-id="${slot._id}"]`);
+
+                    // If the slot already exists in the DOM, update it. Otherwise, create a new one.
+                    if (existingSlotElement) {
+                        // Optionally, you can compare the current data with the new data to see if an update is necessary
+                        // This step is skipped here for brevity but can be implemented based on your data structure
+                        setSlotElementContent(existingSlotElement, slot, userRole);
+
+                    } else {
+                        // The slot does not exist, so create and append it
+                        const listElement = document.getElementById('dutySlotsList');
+                        const newSlotElement = createSlotElement(slot);
+                        listElement.appendChild(newSlotElement);
+                    }
+                });
+            }
+
+
+            function getButtons(slot, role) {
+                const container = document.createElement('div');
+
+                if (role === 'doctor') {
+                    if (slot.status === 'open') {
+                        const assignButton = document.createElement('div');
+                        assignButton.className = 'btn btn-primary';
+                        assignButton.textContent = 'Assign';
+                        assignButton.onclick = () => assignAndSendMessage(slot._id, currentUserId, currentUsername, slot.hospitalId.username, new Date(slot.date).toDateString(), slot.dutyHours, slot.requiredSpecialty, assignButton);
+                        container.appendChild(assignButton);
+                    } else if (slot.status === 'pending') {
+                        const waitingButton = document.createElement('div');
+                        waitingButton.className = 'btn btn-secondary disabled';
+                        waitingButton.textContent = 'Waiting for Consent';
+                        container.appendChild(waitingButton);
+                    } else if (slot.status === 'filled') {
+                        const revokeButton = document.createElement('div');
+                        revokeButton.className = 'btn btn-primary';
+                        revokeButton.textContent = 'Revoke';
+                        revokeButton.onclick = () => revoke_assignment(slot._id, revokeButton);
+                        container.appendChild(revokeButton);
+                    }
+                } else if (role === 'hospital') {
+                    if (slot.status === 'open') {
+                        const waitingButton = document.createElement('div');
+                        waitingButton.className = 'btn btn-secondary disabled';
+                        waitingButton.textContent = 'Waiting';
+                        container.appendChild(waitingButton);
+
+                        // Add a Remove button when currentUserId == slot.hospitalId
+                        if (currentUserId === slot.hospitalId._id) {
+                            const removeButton = document.createElement('div');
+                            removeButton.className = 'btn btn-danger';
+                            removeButton.textContent = 'Remove';
+                            removeButton.onclick = () => {
+                                removeSlot(slot._id, removeButton);
+                            };
+                            container.appendChild(removeButton);
+                        } else {
+                            console.log('Current user is not the hospital for this slot');
+                        }
+
+                    } else if (slot.status === 'pending') {
+                        const consentButton = document.createElement('div');
+                        consentButton.className = 'btn btn-primary';
+                        consentButton.textContent = 'Consent';
+                        consentButton.onclick = () => give_consent(slot._id, consentButton);
+                        container.appendChild(consentButton);
+                    } else if (slot.status === 'filled') {
+                        const filledButton = document.createElement('div');
+                        filledButton.className = 'btn btn-secondary disabled';
+                        filledButton.textContent = 'Filled';
+                        container.appendChild(filledButton);
+                    }
+                }
+
+                return container;
+            }
+
+            function setSlotElementContent(element, slot, role) {
+                // Clear previous content
+                element.innerHTML = '';
+
+                // Create and append the basic slot information
+                const infoHTML = `
                 Hospital: <span class="hospital-username" data-slot-id="${slot._id}">${slot.hospitalId.username}</span><br>
                 Date: <span class="slot-date" data-slot-id="${slot._id}">${new Date(slot.date).toDateString()}</span><br>
                 Duty Hours: <span class="duty-hours" data-slot-id="${slot._id}">${slot.dutyHours}</span><br>
@@ -207,15 +200,15 @@
                 Status: <span class="status-display" data-slot-id="${slot._id}">${slot.status}</span><br>
                 Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="${slot._id}">${slot.assignedDoctorId ? slot.assignedDoctorId.username : 'None'}</span><br>
             `;
-            // Append the information as a new node
-            const infoNode = document.createElement('span');
-            infoNode.innerHTML = infoHTML;
-            element.appendChild(infoNode);
+                // Append the information as a new node
+                const infoNode = document.createElement('span');
+                infoNode.innerHTML = infoHTML;
+                element.appendChild(infoNode);
 
-            // Append the buttons as elements
-            const buttonsContainer = getButtons(slot, role, currentUserId, currentUsername);
-            element.appendChild(buttonsContainer);
-        }
+                // Append the buttons as elements
+                const buttonsContainer = getButtons(slot, role, currentUserId, currentUsername);
+                element.appendChild(buttonsContainer);
+            }
 
             // Function to fetch duty slots and render them
             function fetchAndRenderDutySlots() {
@@ -240,180 +233,178 @@
             // Call fetchAndRenderDutySlots at appropriate time, e.g., after DOM is fully loaded
             document.addEventListener('DOMContentLoaded', fetchAndRenderDutySlots);
 
-        // Example function to send messages
-        function sendMessage(message) {
-            socket.send(message);
-        }
+            // Example function to send messages
+            function sendMessage(message) {
+                socket.send(message);
+            }
 
 
-        function assignAndSendMessage(slotId, sendingDoctorId, sendingDoctorName, hospitalUsername, date, dutyHours, requiredSpecialty, element) {
-            const data = {
-                _id: slotId,
-                sendingDoctorId: sendingDoctorId,
-                sendingDoctorName: sendingDoctorName,
-                hospitalUsername: hospitalUsername,
-                date: date,
-                dutyHours: dutyHours,
-                requiredSpecialty: requiredSpecialty
-            };
+            function assignAndSendMessage(slotId, sendingDoctorId, sendingDoctorName, hospitalUsername, date, dutyHours, requiredSpecialty, element) {
+                const data = {
+                    _id: slotId,
+                    sendingDoctorId: sendingDoctorId,
+                    sendingDoctorName: sendingDoctorName,
+                    hospitalUsername: hospitalUsername,
+                    date: date,
+                    dutyHours: dutyHours,
+                    requiredSpecialty: requiredSpecialty
+                };
 
-            fetch('/assign-duty-slot', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(assignData => {
-                console.log('Assignment Success:', assignData);
+                fetch('/assign-duty-slot', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then(response => response.json())
+                    .then(assignData => {
+                        console.log('Assignment Success:', assignData);
 
-                // Update status display
-                document.querySelector(`.status-display[data-slot-id="${slotId}"]`).innerText = 'pending'; // or assignData.status if your API responds with it
+                        // Update status display
+                        document.querySelector(`.status-display[data-slot-id="${slotId}"]`).innerText = 'pending'; // or assignData.status if your API responds with it
 
-                // Update assigned doctor display
-                document.querySelector(`.assigned-doctor-display[data-slot-id="${slotId}"]`).innerText = sendingDoctorName; // Assuming your API responds with the doctor's name under assignedDoctorName
+                        // Update assigned doctor display
+                        document.querySelector(`.assigned-doctor-display[data-slot-id="${slotId}"]`).innerText = sendingDoctorName; // Assuming your API responds with the doctor's name under assignedDoctorName
 
 
-                // Disable the button and update its text
-                element.disabled = true;
-                element.innerText = 'Waiting for Consent';
-                element.classList.add('disabled'); // Optionally add 'disabled' class for styling
+                        // Disable the button and update its text
+                        element.disabled = true;
+                        element.innerText = 'Waiting for Consent';
+                        element.classList.add('disabled'); // Optionally add 'disabled' class for styling
 
-                sendMessage(JSON.stringify(data)); // Call sendMessage on success
-            })
-            .catch(error => console.error('Error:', error));
-        }
+                        sendMessage(JSON.stringify(data)); // Call sendMessage on success
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
 
-        function give_consent(slot_id, button)
-        {
-            const data =
-            {
-                _id: slot_id
-            };
-
-            fetch('/give-consent',
-            {
-                method: 'POST',
-                headers:
+            function give_consent(slot_id, button) {
+                const data =
                 {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(consentData =>
-            {
-                console.log('Consent Success:', consentData);
+                    _id: slot_id
+                };
 
-                // Assuming your API responds with the updated slot status, update the UI accordingly
-                document.querySelector(`.status-display[data-slot-id="${slot_id}"]`).innerText = 'filled'; 
+                fetch('/give-consent',
+                    {
+                        method: 'POST',
+                        headers:
+                        {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(data),
+                    })
+                    .then(response => response.json())
+                    .then(consentData => {
+                        console.log('Consent Success:', consentData);
 
-                // Disable the button
-                button.disabled = true; // Disable the button to prevent further clicks
-                button.classList.add('disabled'); // Optionally add 'disabled' class for styling
-                button.innerText = 'Filled'
-                sendMessage(JSON.stringify(data)); // Call sendMessage on success
+                        // Assuming your API responds with the updated slot status, update the UI accordingly
+                        document.querySelector(`.status-display[data-slot-id="${slot_id}"]`).innerText = 'filled';
 
-
-
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        
-        // Implement removeSlot function        
-        function removeSlot(slot_id, button) {
-            const data = {
-                dutySlotId: slot_id
-            };
-
-            fetch('/duty/remove', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-            .then(consentData => {
-                console.log('Remove Success:', consentData);
-                document.querySelector(`.status-display[data-slot-id="${slot_id}"]`).innerText = 'open'; 
-                button.disabled = true;
-                button.classList.add('disabled');
-                button.innerText = 'Removed'
-                sendMessage(JSON.stringify(data));
-            })
-            .catch(error => console.error('Error:', error));
-        }
-
-        function revoke_assignment(slot_id, element) {
-            const data = { _id: slot_id };
-
-            fetch('/revoke-assignment', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Revoke Success:', data);
-
-                // Update the slot status display to 'open'
-                document.querySelector(`.status-display[data-slot-id="${slot_id}"]`).innerText = 'open';
-
-                // Update the assigned doctor display to 'None'
-                document.querySelector(`.assigned-doctor-display[data-slot-id="${slot_id}"]`).innerText = 'None';
-
-
-                const hospitalElement = document.querySelector(`.hospital-username[data-slot-id="${slot_id}"]`);
-                const hospitalUsername = hospitalElement ? hospitalElement.textContent : null;
-
-                // For Date
-                const slotDateElement = document.querySelector(`.slot-date[data-slot-id="${slot_id}"]`);
-                const slotDate = slotDateElement ? slotDateElement.textContent : null;
-
-                // For Duty Hours
-                const dutyHoursElement = document.querySelector(`.duty-hours[data-slot-id="${slot_id}"]`);
-                const dutyHours = dutyHoursElement ? dutyHoursElement.textContent : null;
-
-                // For Required Specialty
-                const requiredSpecialtyElement = document.querySelector(`.required-specialty[data-slot-id="${slot_id}"]`);
-                const requiredSpecialty = requiredSpecialtyElement ? requiredSpecialtyElement.textContent : null;
-
-                // Update the button to allow new assignments
-                element.innerText = 'Assign'; // Change button text back to "Assign"
-                //element.setAttribute('onclick', `assignAndSendMessage('${slot_id}', ...)`);
-                element.setAttribute('onclick', `assignAndSendMessage('${slot_id}', '${currentUserId}', '${currentUsername}', '${hospitalUsername}', '${new Date(slotDate).toDateString()}', '${dutyHours}', '${requiredSpecialty}', this)`);
-
-                element.classList.remove('disabled'); // Remove 'disabled' class if exists
-                element.disabled = false; // Enable the button
-                sendMessage(JSON.stringify(data)); // Call sendMessage on success
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
+                        // Disable the button
+                        button.disabled = true; // Disable the button to prevent further clicks
+                        button.classList.add('disabled'); // Optionally add 'disabled' class for styling
+                        button.innerText = 'Filled'
+                        sendMessage(JSON.stringify(data)); // Call sendMessage on success
 
 
 
-    </script>
-  
-  
-  <%- include('partials/_header.ejs') %>
-<main class="container mt-5">
-    <h2>Duty Slots</h2>
-    <div class="mb-3">
-        <input type="date" id="dateFilter" class="form-control" placeholder="Filter by Date">
-        <input type="text" id="specialtyFilter" class="form-control mt-2" placeholder="Filter by Specialty">
-    </div>
-    <ul id="dutySlotsList" class="list-group"></ul>
-    <% if (dutySlots.length === 0) { %>
-    <p>No duty slots found.</p>
-    <% } %>
-    <a href="/" class="btn btn-primary mt-3">Back to Home</a>
-    <a href="/doctor/availabilities/rendered" class="btn btn-secondary mt-3">View Doctor Availabilities</a>
-</main>
-</body>
-<%- include('partials/_footer.ejs') %>
-<script src="/js/filterDutySlots.js"></script>
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+
+            // Implement removeSlot function        
+            function removeSlot(slot_id, button) {
+                const data = { _id: slot_id };
+
+                fetch('/duty/remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+                })
+                    .then(consentData => {
+                        console.log('Remove Success:', consentData);
+                        document.querySelector(`.status-display[data-slot-id="${slot_id}"]`).innerText = 'open';
+                        button.disabled = true;
+                        button.classList.add('disabled');
+                        button.innerText = 'Removed'
+                        sendMessage(JSON.stringify(data));
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+
+            function revoke_assignment(slot_id, element) {
+                const data = { _id: slot_id };
+
+                fetch('/revoke-assignment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Revoke Success:', data);
+
+                        // Update the slot status display to 'open'
+                        document.querySelector(`.status-display[data-slot-id="${slot_id}"]`).innerText = 'open';
+
+                        // Update the assigned doctor display to 'None'
+                        document.querySelector(`.assigned-doctor-display[data-slot-id="${slot_id}"]`).innerText = 'None';
+
+
+                        const hospitalElement = document.querySelector(`.hospital-username[data-slot-id="${slot_id}"]`);
+                        const hospitalUsername = hospitalElement ? hospitalElement.textContent : null;
+
+                        // For Date
+                        const slotDateElement = document.querySelector(`.slot-date[data-slot-id="${slot_id}"]`);
+                        const slotDate = slotDateElement ? slotDateElement.textContent : null;
+
+                        // For Duty Hours
+                        const dutyHoursElement = document.querySelector(`.duty-hours[data-slot-id="${slot_id}"]`);
+                        const dutyHours = dutyHoursElement ? dutyHoursElement.textContent : null;
+
+                        // For Required Specialty
+                        const requiredSpecialtyElement = document.querySelector(`.required-specialty[data-slot-id="${slot_id}"]`);
+                        const requiredSpecialty = requiredSpecialtyElement ? requiredSpecialtyElement.textContent : null;
+
+                        // Update the button to allow new assignments
+                        element.innerText = 'Assign'; // Change button text back to "Assign"
+                        //element.setAttribute('onclick', `assignAndSendMessage('${slot_id}', ...)`);
+                        element.setAttribute('onclick', `assignAndSendMessage('${slot_id}', '${currentUserId}', '${currentUsername}', '${hospitalUsername}', '${new Date(slotDate).toDateString()}', '${dutyHours}', '${requiredSpecialty}', this)`);
+
+                        element.classList.remove('disabled'); // Remove 'disabled' class if exists
+                        element.disabled = false; // Enable the button
+                        sendMessage(JSON.stringify(data)); // Call sendMessage on success
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+
+
+
+        </script>
+
+
+        <%- include('partials/_header.ejs') %>
+            <main class="container mt-5">
+                <h2>Duty Slots</h2>
+                <div class="mb-3">
+                    <input type="date" id="dateFilter" class="form-control" placeholder="Filter by Date">
+                    <input type="text" id="specialtyFilter" class="form-control mt-2" placeholder="Filter by Specialty">
+                </div>
+                <ul id="dutySlotsList" class="list-group"></ul>
+                <% if (dutySlots.length===0) { %>
+                    <p>No duty slots found.</p>
+                    <% } %>
+                        <a href="/" class="btn btn-primary mt-3">Back to Home</a>
+                        <a href="/doctor/availabilities/rendered" class="btn btn-secondary mt-3">View Doctor
+                            Availabilities</a>
+            </main>
+    </body>
+    <%- include('partials/_footer.ejs') %>
+        <script src="/js/filterDutySlots.js"></script>
+
 </html>

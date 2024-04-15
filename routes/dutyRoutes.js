@@ -65,8 +65,8 @@ router.get('/duty/find_by_specialty', isAuthenticated, async (req, res) => {
 // Remove duty slot by ID
 router.post('/duty/remove', isAuthenticated, isHospital, async (req, res) => {
   try {
-    const { dutySlotId } = req.body;
-    const result = await DutySlot.findByIdAndDelete(dutySlotId);
+    const { _id } = req.body;
+    const result = await DutySlot.findByIdAndDelete(_id);
     if (!result) {
       return res.status(404).send('Duty slot not found.');
     }

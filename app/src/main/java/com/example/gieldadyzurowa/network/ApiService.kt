@@ -47,8 +47,14 @@ interface ApiService {
         @Body request: DutySlotActionRequest
     ): Response<Unit> // Adjust the return type as needed
 
+    @POST("/duty/remove")
+    suspend fun removeDutySlot(
+        @Body request: DutySlotActionRequest
+    ): Response<Unit> 
+
+
 }
-    
+
 
 
 data class LoginRequest(val username: String, val password: String)

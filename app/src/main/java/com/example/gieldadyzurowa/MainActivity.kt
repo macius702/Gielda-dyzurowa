@@ -914,6 +914,7 @@ fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, username: String, use
                     DutyVacancyCard(
                         dutyVacancy = dutyVacancy,
                         userrole = userrole,
+                        userId = userId,
                         onAssign = { viewModel.assignDutySlot(
                             dutySlotId = dutyVacancy._id!!, 
                             doctorId = userId, 
@@ -924,7 +925,8 @@ fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, username: String, use
                         )
                         },
                         onGiveConsent = { viewModel.giveConsent(dutyVacancy._id!!)},
-                        onRevoke = { viewModel.revokeAssignment(dutyVacancy._id!!) }
+                        onRevoke = { viewModel.revokeAssignment(dutyVacancy._id!!)},
+                        onRemoveSlot = { viewModel.removeDutySlot(dutyVacancy._id!!) }
                     )
 
                 })
@@ -995,7 +997,7 @@ class DutyVacanciesViewModel : ViewModel() {
         }
     }
 
-    fun publishDutyVacancy(date: String, dutyHours: String, requiredSpecialty: String) = viewModelScope.launch {
+    fun publishDutyVacancy(date: String, dutyHours: String, requiredSpecialty: String, onPublishSuccess: () -> Unit) = viewModelScope.launch {
         try {
             val dutyVacancy = DutyVacancy(
                 date = date,
@@ -1011,6 +1013,7 @@ class DutyVacanciesViewModel : ViewModel() {
                 // Handle successful publish
                 Log.d("DutyVacanciesViewModel", "Duty vacancy published successfully")
                 // Optionally, refresh the list of vacancies or navigate the user
+                onPublishSuccess()
             } else {
                 // Log error or handle error state
                 Log.e("DutyVacanciesViewModel", "Error publishing duty vacancy: ${response.errorBody()?.string()}")
@@ -1085,15 +1088,29 @@ class DutyVacanciesViewModel : ViewModel() {
             Log.e("DutyVacanciesViewModel", "Exception when revoking assignment", e)
         }
     }
-    
+
+    fun removeDutySlot(dutySlotId: String) = viewModelScope.launch {
+        val request = DutySlotActionRequest(_id = dutySlotId)
+        try {
+            val response = RetrofitClient.apiService.removeDutySlot(request)
+            if (response.isSuccessful) {
+                Log.d("DutyVacanciesViewModel", "Duty slot removed successfully")
+                _dutyVacancies.value = _dutyVacancies.value.filter { it._id != dutySlotId }
+            } else {
+                Log.e("DutyVacanciesViewModel", "Error removing duty slot: ${response.errorBody()?.string()}")
+            }
+        } catch (e: Exception) {
+            Log.e("DutyVacanciesViewModel", "Exception when removing duty slot", e)
+        }
+    }
 }
 
 
 
 
 @Composable
-fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String
-                    , onAssign: () -> Unit, onGiveConsent: () -> Unit, onRevoke: () -> Unit
+fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String, userId: String,
+                    onAssign: () -> Unit, onGiveConsent: () -> Unit, onRevoke: () -> Unit, onRemoveSlot: () -> Unit
 )
 {
     Card(
@@ -1127,13 +1144,23 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String
                 }
                 "hospital" ->
                 {
-                    when (dutyVacancy.status)
-                    {
-                        DutySlotStatus.OPEN -> Button(onClick = {}, enabled = false) { Text("Waiting") }
+                    when (dutyVacancy.status) {
+                        DutySlotStatus.OPEN -> {
+                            Button(onClick = {}, enabled = false) { 
+                                Text("Waiting") 
+                            }
+
+                            // Add a Remove button if the user is the hospital owner of the slot
+                            if (userId == dutyVacancy.hospitalId!!._id) {
+                                Button(onClick = onRemoveSlot) {
+                                    Text("Remove")
+                                }
+                            }
+                        }
+
                         DutySlotStatus.PENDING -> Button(onClick = onGiveConsent) { Text("Consent") }
                         DutySlotStatus.FILLED -> Button(onClick = {}, enabled = false) { Text("Filled") }
                         else -> {} // Handle unexpected status
-
                     }
                 }
                 else -> {} // Handle unexpected
@@ -1178,9 +1205,15 @@ fun DutyVacancyPublishScreen(
     }
 
     Column {
-        // Use a Button for the date selection
+     // Use a TextField for the date display and a Button for the date selection
+        TextField(
+            value = date,
+            onValueChange = { date = it },
+            label = { Text("Date") },
+            modifier = Modifier.padding(PaddingValues(all = 8.dp))
+        )
         Button(onClick = { showDatePicker() }) {
-            Text(text = if (date.isBlank()) "Select Date" else date)
+            Text(text = "Select Date")
         }
     
         OutlinedTextField(
@@ -1198,8 +1231,7 @@ fun DutyVacancyPublishScreen(
         Button(
             onClick = {
                 coroutineScope.launch {
-                    viewModel.publishDutyVacancy(date, dutyHours, requiredSpecialty)
-                    onPublishSuccess()
+                    viewModel.publishDutyVacancy(date, dutyHours, requiredSpecialty, onPublishSuccess)
                 }
             },
             modifier = Modifier.padding(PaddingValues(all = 8.dp))

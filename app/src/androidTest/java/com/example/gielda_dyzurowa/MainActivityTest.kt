@@ -61,6 +61,55 @@ class NavigationDrawerTest {
         assertErrorMessageDisplayed("Invalid username or password.")
     }
 
+    // test on Remove Duty Vacancy:
+    @Test
+    fun testRemoveDutyVacancy() {
+        navigateToLoginPage()
+
+        val username = "H1"
+        val password = "alamakota"
+
+        enterCredentials(username, password)
+        submitLoginForm()
+
+        // Wait for the login to complete and show the Duty slots automatically
+        Thread.sleep(1000)
+
+        composeTestRule.waitUntil {
+            try {
+                composeTestRule.onNodeWithText("Required Specialty: qqq").assertExists()
+                true
+            } catch (e: AssertionError) {
+                // If the node is not found, we will add it
+                addDutyVacancy()
+
+                Thread.sleep(3000)
+
+                composeTestRule.onNodeWithText("Required Specialty: qqq").assertExists()
+
+                true
+            }
+        }
+        composeTestRule.onNodeWithText("Remove").performClick()
+        composeTestRule.onNodeWithText("Required Specialty: qqq").assertDoesNotExist()
+        //TODO(mtlk): add Snack or Alert after  assertErrorMessageDisplayed("Duty Vacancy removed.")
+
+        addDutyVacancy()
+
+    }
+
+    private fun addDutyVacancy() {
+        publishDutyVacancy("2024-12-20", "20-8", "qqq")
+    }
+
+    private fun publishDutyVacancy(date: String, dutyHours: String, requiredSpecialty: String) {
+        composeTestRule.onNodeWithText("Publish Duty Vacancy").performClick()
+        composeTestRule.onNodeWithText("Date").performTextInput(date)
+        composeTestRule.onNodeWithText("Duty Hours").performTextInput(dutyHours)
+        composeTestRule.onNodeWithText("Required Specialty").performTextInput(requiredSpecialty)
+        composeTestRule.onNodeWithText("Publish").performClick()
+        composeTestRule.waitForIdle()
+    }
 
     private fun navigateToLoginPage() {
         composeTestRule.onNodeWithText("Login").performClick()

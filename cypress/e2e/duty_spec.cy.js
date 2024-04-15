@@ -26,11 +26,11 @@ describe('Remove buttons Test', () => {
             const dutySlot = dutySlots[0];
             cy.log('dutySlot:', dutySlot);
 
-            const dutySlotId = dutySlot._id;
-            cy.log('dutySlotId:', dutySlotId);
+            const _id = dutySlot._id;
+            cy.log('_id:', _id);
 
-            //invoke router.post('/duty/remove' with parameter dutySlotId
-            cy.request('POST', '/duty/remove', { dutySlotId }).then((response) => {
+            //invoke router.post('/duty/remove' with parameter _id
+            cy.request('POST', '/duty/remove', { _id }).then((response) => {
                 cy.log('response:', response);
                 expect(response.status).to.eq(200);
             });
