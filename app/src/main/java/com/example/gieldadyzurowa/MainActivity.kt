@@ -2,86 +2,83 @@ package com.example.gieldadyzurowa
 
 
 
+
+
+import android.app.DatePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
+
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-
-
-import androidx.compose.material3.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.ListItem
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.ListItem
+import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+
 import androidx.lifecycle.ViewModel
-
-
-
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewModelScope
+
+import com.example.gieldadyzurowa.network.AssignDutySlotRequest
+import com.example.gieldadyzurowa.network.DutySlotActionRequest
 import com.example.gieldadyzurowa.network.LoginRequest
 import com.example.gieldadyzurowa.network.RegistrationRequest
 import com.example.gieldadyzurowa.network.RetrofitClient
+import com.example.gieldadyzurowa.network.UserroleAndId
+
+import com.google.gson.JsonDeserializationContext
+import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
+import com.google.gson.JsonParseException
+
+import java.lang.reflect.Type
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
+
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import okhttp3.*
 
+import okhttp3.*
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
-import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import okhttp3.OkHttpClient
 
+import okio.ByteString
 
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response as RetrofitResponse
 
-
-
-
-import java.text.SimpleDateFormat
-import java.util.Locale
-
-
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.filled.Menu
-
-
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.ui.platform.LocalContext
-import java.util.Calendar
-import android.app.DatePickerDialog
-import androidx.compose.foundation.background
-import androidx.compose.material.ExperimentalMaterialApi
-import com.example.gieldadyzurowa.network.UserroleAndId
-import com.example.gieldadyzurowa.network.AssignDutySlotRequest
-import com.example.gieldadyzurowa.network.DutySlotActionRequest
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
-import com.google.gson.JsonParseException
-import okio.ByteString
-import java.lang.reflect.Type
 
 const val LANDING_SCREEN = "Duty Vacancies"
 
