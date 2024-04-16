@@ -9,7 +9,6 @@ const authRoutes = require("./routes/authRoutes");
 const dutyRoutes = require('./routes/dutyRoutes');
 const doctorAvailabilityRoutes = require('./routes/doctorAvailabilityRoutes');
 const profileRoutes = require('./routes/profileRoutes');
-const shiftSwapRoutes = require('./routes/shiftSwapRoutes'); // Added for shift swap feature
 const availabilityRoutes = require('./routes/availabilityRoutes'); // Added for doctor availability viewing feature
 const sessionDataMiddleware = require('./routes/middleware/sessionDataMiddleware');
 
@@ -89,9 +88,6 @@ app.use(doctorAvailabilityRoutes);
 
 // Profile Routes
 app.use(profileRoutes);
-
-// Shift Swap Routes
-app.use(shiftSwapRoutes); // Using the shift swap routes
 
 // Doctor Availabilities Viewing Routes
 app.use(availabilityRoutes); // Added for doctor availability viewing feature

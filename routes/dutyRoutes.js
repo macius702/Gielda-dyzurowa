@@ -1,6 +1,5 @@
 const express = require('express');
 const DutySlot = require('../models/DutySlot');
-const InterestMessage = require('../models/InterestMessage'); // Added for task #4
 const { isAuthenticated } = require('./middleware/authMiddleware');
 
 const router = express.Router();
@@ -90,28 +89,7 @@ router.get('/duty/browse', isAuthenticated, isDoctor, async (req, res) => {
   }
 });
 
-router.post('/duty/interest/:id', isAuthenticated, isDoctor, async (req, res) => {
-  try {
-    const dutySlotId = req.params.id;
-    const doctorId = req.session.userId;
-    const dutySlot = await DutySlot.findById(dutySlotId).populate('hospitalId');
-    if (!dutySlot || !dutySlot.hospitalId) {
-      console.log('Duty slot or hospital not found.');
-      return res.status(404).send('Duty slot or hospital not found.');
-    }
-    await InterestMessage.create({
-      dutySlotId,
-      doctorId,
-      hospitalId: dutySlot.hospitalId._id,
-    });
-    console.log(`Interest message sent successfully for Duty Slot ID: ${dutySlotId} by Doctor ID: ${doctorId}`);
-    res.redirect('/duty/browse');
-  } catch (error) {
-    console.error('Error sending interest message:', error);
-    console.error(error.stack);
-    res.status(500).send('Error sending interest message');
-  }
-});
+
 // Common function to fetch and log duty slots
 async function fetch_and_log_duty_slots(req, res, respond) {
 
