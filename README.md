@@ -49,22 +49,27 @@ npm install cypress --save-dev
 
 ### Todo
 
-DONE assure that tests have always a duty entry qqq
-DONE remove duty vacancy 
+1. Remove unnmecessary code
+2. Format
+3. Missing Fields - price, hour?
+4. Look and feel
+
+some unique index - adding the same duty slot  is ok now! - referential integrity
 remove doctor availability
 /duty/find_by_specialty change into general finding endpoint
 .populate more specific or not needed - use database view - generally send only the relevant information, no extras
-some unique index - adding the same duty slot  is ok now!
 show only my hospital duty records - or enable buttons only on my duty slots
 price
 languages
-gui changes on notification
 Doctors should be able to publish their unavailabilities as well
-DONE Button logic dependent automatically on status
 Formatter
-fix passsword in open text (OAuth2 ?2)
 malignant doctor can occupy all slots, and assign to all duties
 show internet connection is online - especially on start, before login, etc
+DONE assure that tests have always a duty entry qqq
+DONE remove duty vacancy 
+DONE gui changes on notification
+DONE Button logic dependent automatically on status
+NOT DOING, https is fine - fix passsword in open text (OAuth2 ?2)
 
 
 ### License
