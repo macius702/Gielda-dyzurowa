@@ -58,6 +58,6 @@ interface ApiService {
     @POST("/duty/remove")
     suspend fun removeDutySlot(
         @Body request: DutySlotActionRequest
-    ): Response<Unit> 
+    ): Response<Unit>
 
 }

@@ -9,7 +9,6 @@ data class Hospital(
 )
 
 
-
 data class Doctor(
     val _id: String,
     val username: String,
@@ -22,9 +21,7 @@ data class Doctor(
 
 
 data class DoctorAvailability(
-    val doctorId: Doctor?,
-    val date: String,
-    val availableHours: String
+    val doctorId: Doctor?, val date: String, val availableHours: String
 )
 
 
@@ -39,13 +36,11 @@ data class DutyVacancy(
 )
 
 enum class DutySlotStatus(val status: String) {
-    OPEN("open"),
-    PENDING("pending"),
-    FILLED("filled");
+    OPEN("open"), PENDING("pending"), FILLED("filled");
 
     companion object {
         fun from(status: String): DutySlotStatus {
-            return when(status) {
+            return when (status) {
                 "open" -> OPEN
                 "pending" -> PENDING
                 "filled" -> FILLED
@@ -67,8 +62,7 @@ data class RegistrationRequest(
 
 
 data class UserroleAndId(
-    val _id: String,
-    val role : String
+    val _id: String, val role: String
 )
 
 data class AssignDutySlotRequest(

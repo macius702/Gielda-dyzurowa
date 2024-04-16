@@ -1,9 +1,8 @@
 package com.example.gielda_dyzurowa
 
 import android.util.Log
-import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.Role
-
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -155,7 +154,8 @@ class NavigationDrawerTest {
 
 // Define a SemanticsMatcher that matches nodes with any text
 fun hasAnyText() = SemanticsMatcher("has any text") {
-    it.config.contains(SemanticsProperties.Text) }
+    it.config.contains(SemanticsProperties.Text)
+}
 
 // Define a SemanticsMatcher that matches nodes with a button role, without using 'hasSemanticNodeWithRole'
 fun hasButton() = SemanticsMatcher("has button") { node ->

@@ -93,18 +93,14 @@ fun formatDate(dateStr: String): String {
 }
 
 
-class MainActivity : ComponentActivity()
-{
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent()
-        {
+        setContent() {
             AppContent()
         }
     }
 }
-
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -116,22 +112,20 @@ fun AppContent() {
     var selectedNav by remember { mutableStateOf(LANDING_SCREEN) }
     var username by remember { mutableStateOf("") }
     var userrole by remember { mutableStateOf("") }
-    var userId by remember  { mutableStateOf("") }
+    var userId by remember { mutableStateOf("") }
     var showRegistrationSuccessDialog by remember { mutableStateOf(false) }
     val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
     val doctorAvailabilitiesViewModel = viewModel<DoctorAvailabilitiesViewModel>()
 
-    fun fetchAndAssignUserData(user: String)
-    {
-        RetrofitClient.apiService.fetchUserData().enqueue(object : Callback<UserroleAndId>
-        {
-            override fun onResponse(call: Call<UserroleAndId>, response: RetrofitResponse<UserroleAndId>)
-            {
-                if (response.isSuccessful)
-                {
+    fun fetchAndAssignUserData(user: String) {
+        RetrofitClient.apiService.fetchUserData().enqueue(object : Callback<UserroleAndId> {
+            override fun onResponse(
+                call: Call<UserroleAndId>,
+                response: RetrofitResponse<UserroleAndId>
+            ) {
+                if (response.isSuccessful) {
                     val userInfo = response.body()
-                    if (userInfo != null)
-                    {
+                    if (userInfo != null) {
                         userrole = userInfo.role
                         userId = userInfo._id
                         isLoggedIn = true
@@ -139,20 +133,16 @@ fun AppContent() {
                         selectedNav = LANDING_SCREEN
                         Log.d("fetchUserData", "Successfully fetched userrole and Id")
                     }
-                }
-                else
-                {
+                } else {
                     Log.e("fetchUserData", "Failed to fetch user info: ${response.code()}")
                 }
             }
 
-            override fun onFailure(call: Call<UserroleAndId>, t: Throwable)
-            {
+            override fun onFailure(call: Call<UserroleAndId>, t: Throwable) {
                 Log.e("fetchUserData", "Failed to fetch user info", t)
             }
         })
     }
-
 
 
 //    // debug aid debugging
@@ -162,60 +152,48 @@ fun AppContent() {
 //         }
 //     )
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            DrawerContent(
-                onNavSelected = { nav ->
-                    selectedNav = nav
-                    coroutineScope.launch {
-                        drawerState.close()
-                    }
-                    if (nav == "Logout") {
-                        isLoggedIn = false
-                        username = ""
-                        selectedNav = "Login"
-                    }
-                },
-                isLoggedIn = isLoggedIn
-            )
-        }
-    ) {
+    ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
+        DrawerContent(
+            onNavSelected = { nav ->
+                selectedNav = nav
+                coroutineScope.launch {
+                    drawerState.close()
+                }
+                if (nav == "Logout") {
+                    isLoggedIn = false
+                    username = ""
+                    selectedNav = "Login"
+                }
+            }, isLoggedIn = isLoggedIn
+        )
+    }) {
         // Scaffold and your app's content go here
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = { 
-                        Text(
-                            text = if (isLoggedIn && username.isNotEmpty()) "Logged in as $username" else "Not Logged In"
-                        )
-                    },                    navigationIcon = {
-                        if (drawerState.isClosed) {
-                            IconButton(onClick = {
-                                coroutineScope.launch { drawerState.open() }
-                            }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu")
-                            }
-                        }
-                    }
+        Scaffold(topBar = {
+            TopAppBar(title = {
+                Text(
+                    text = if (isLoggedIn && username.isNotEmpty()) "Logged in as $username" else "Not Logged In"
                 )
-            }
-        ) { padding ->
+            }, navigationIcon = {
+                if (drawerState.isClosed) {
+                    IconButton(onClick = {
+                        coroutineScope.launch { drawerState.open() }
+                    }) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                    }
+                }
+            })
+        }) { padding ->
             Column(modifier = Modifier.padding(padding)) {
                 if (showRegistrationSuccessDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showRegistrationSuccessDialog = false },
+                    AlertDialog(onDismissRequest = { showRegistrationSuccessDialog = false },
                         title = { Text("Registration Successful") },
                         text = { Text("You've successfully registered. Please log in.") },
                         confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    showRegistrationSuccessDialog = false
-                                    selectedNav = "Login"
-                                }
-                            ) { Text("OK") }
-                        }
-                    )
+                            TextButton(onClick = {
+                                showRegistrationSuccessDialog = false
+                                selectedNav = "Login"
+                            }) { Text("OK") }
+                        })
                 }
 
                 // The rest of your conditional content logic
@@ -225,36 +203,42 @@ fun AppContent() {
                             fetchAndAssignUserData(user)
                         })
                     }
+
                     "Register" -> if (!isLoggedIn) {
                         RegisterScreen(onRegistrationSuccess = {
                             showRegistrationSuccessDialog = true
                         })
                     }
-                    "Duty Vacancies" -> DutyVacanciesScreen(viewModel = dutyVacanciesViewModel, username = username, userrole = userrole, userId = userId)
+
+                    "Duty Vacancies" -> DutyVacanciesScreen(
+                        viewModel = dutyVacanciesViewModel,
+                        username = username,
+                        userrole = userrole,
+                        userId = userId
+                    )
+
                     "Doctor Availabilities" -> DoctorAvailabilitiesScreen(viewModel = doctorAvailabilitiesViewModel)
 
 
                     "Publish Duty Vacancy" -> if (isLoggedIn) {
                         // Ensure only logged in users can access the publish screen
-                        DutyVacancyPublishScreen(
-                            viewModel = dutyVacanciesViewModel,
+                        DutyVacancyPublishScreen(viewModel = dutyVacanciesViewModel,
                             onPublishSuccess = {
                                 // Handle what happens after a successful publish
                                 // For example, you could navigate back to the Duty Vacancies list
                                 selectedNav = "Duty Vacancies"
-                            }
-                        )
+                            })
                     }
 
                     "Add Doctor Availability" -> if (isLoggedIn) {
                         val viewModel: DoctorAvailabilitiesViewModel = viewModel()
-                        AddDoctorAvailabilityScreen(viewModel)
-                        {
+                        AddDoctorAvailabilityScreen(viewModel) {
                             selectedNav = "Doctor Availabilities"
                         }
 
                     }
-                    else ->             Text("Select an option from the navigation.")
+
+                    else -> Text("Select an option from the navigation.")
 
                 }
             }
@@ -266,7 +250,8 @@ fun AppContent() {
 @Composable
 fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
     val drawerItems = listOf("Login", "Register", "Doctor Availabilities")
-    val loggedInItems = listOf("Add Doctor Availability", "Duty Vacancies", "Publish Duty Vacancy", "Logout")
+    val loggedInItems =
+        listOf("Add Doctor Availability", "Duty Vacancies", "Publish Duty Vacancy", "Logout")
 
     LazyColumn(
         modifier = Modifier
@@ -274,18 +259,24 @@ fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
             .background(MaterialTheme.colorScheme.background) // Set background color
     ) {
         items(count = drawerItems.size) { index ->
-            ListItem(
-                text = { Text(drawerItems[index], style = MaterialTheme.typography.titleLarge) }, // Increase text size
-                modifier = Modifier.clickable { onNavSelected(drawerItems[index]) }
-            )
+            ListItem(text = {
+                Text(
+                    drawerItems[index],
+                    style = MaterialTheme.typography.titleLarge
+                )
+            }, // Increase text size
+                modifier = Modifier.clickable { onNavSelected(drawerItems[index]) })
         }
 
         if (isLoggedIn) {
             items(count = loggedInItems.size) { index ->
-                ListItem(
-                    text = { Text(loggedInItems[index], style = MaterialTheme.typography.titleLarge) }, // Increase text size
-                    modifier = Modifier.clickable { onNavSelected(loggedInItems[index]) }
-                )
+                ListItem(text = {
+                    Text(
+                        loggedInItems[index],
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                }, // Increase text size
+                    modifier = Modifier.clickable { onNavSelected(loggedInItems[index]) })
             }
         }
     }
@@ -301,15 +292,13 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
 
 
     Column(modifier = Modifier.padding(PaddingValues(16.dp))) {
-        OutlinedTextField(
-            value = username,
+        OutlinedTextField(value = username,
             onValueChange = { username = it },
             label = { Text("Username") },
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
         )
-        OutlinedTextField(
-            value = password,
+        OutlinedTextField(value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
             singleLine = true,
@@ -317,27 +306,23 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { /* Handle login */ })
         )
-    Button(
+        Button(
             onClick = {
                 performLogin(username, password, onLoginSuccess) { error ->
                     // Show the error message in a Snackbar
                     showError = true
                     errorMessage = error
                 }
-            },
-            modifier = Modifier.padding(top = 16.dp)
+            }, modifier = Modifier.padding(top = 16.dp)
         ) {
             Text("Login")
         }
         if (showError) {
-            Snackbar(
-                modifier = Modifier.padding(16.dp),
-                action = {
-                    TextButton(onClick = { showError = false }) {
-                        Text("Dismiss")
-                    }
+            Snackbar(modifier = Modifier.padding(16.dp), action = {
+                TextButton(onClick = { showError = false }) {
+                    Text("Dismiss")
                 }
-            ) {
+            }) {
                 Text(errorMessage)
             }
         }
@@ -351,31 +336,23 @@ fun ExampleDropdownMenu() {
     var selectedRole by remember { mutableStateOf("") }
 
     Column {
-        OutlinedTextField(
-            value = selectedRole,
+        OutlinedTextField(value = selectedRole,
             onValueChange = { selectedRole = it },
             label = { Text("Role") },
             readOnly = true,
             trailingIcon = {
-                Icon(
-                    imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
+                Icon(imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
                     contentDescription = "Dropdown",
-                    Modifier.clickable { expanded = !expanded }
-                )
+                    Modifier.clickable { expanded = !expanded })
             },
             modifier = Modifier.fillMaxWidth()
         )
-        DropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             roles.forEach { role ->
-                DropdownMenuItem(
-                    onClick = {
-                        selectedRole = role
-                        expanded = false
-                    }
-                ) {
+                DropdownMenuItem(onClick = {
+                    selectedRole = role
+                    expanded = false
+                }) {
                     // Ensure the Text composable is correctly receiving a string for its 'text' parameter
                     Text(text = role.replaceFirstChar { it.uppercase() })
                 }
@@ -398,14 +375,12 @@ fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
     val roles = listOf("doctor", "hospital") // Your roles
 
     Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(
-            value = username,
+        OutlinedTextField(value = username,
             onValueChange = { username = it },
             label = { Text("Username") },
             singleLine = true
         )
-        OutlinedTextField(
-            value = password,
+        OutlinedTextField(value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
             singleLine = true,
@@ -413,34 +388,25 @@ fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
         )
 
         Box {
-            OutlinedTextField(
-                readOnly = true,
+            OutlinedTextField(readOnly = true,
                 value = role.ifEmpty { "Select Role" },
                 onValueChange = {},
                 label = { Text("Role") },
                 trailingIcon = {
-                    Icon(
-                        imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                    Icon(imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
                         contentDescription = null,
-                        Modifier.clickable { expanded = !expanded }
-                    )
+                        Modifier.clickable { expanded = !expanded })
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { expanded = !expanded }
-            )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
+                    .clickable { expanded = !expanded })
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 roles.forEach { selectionOption ->
-                    DropdownMenuItem(
-                        onClick = {
-                            role = selectionOption
+                    DropdownMenuItem(onClick = {
+                        role = selectionOption
 
-                            expanded = false
-                        }
-                    ) {
+                        expanded = false
+                    }) {
                         Text(text = selectionOption.replaceFirstChar { it.uppercase() })
                     }
                 }
@@ -448,14 +414,12 @@ fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
         }
 
         if (showSpecialtyLocalization) {
-            OutlinedTextField(
-                value = specialty,
+            OutlinedTextField(value = specialty,
                 onValueChange = { specialty = it },
                 label = { Text("Specialty (Doctors only)") },
                 singleLine = true
             )
-            OutlinedTextField(
-                value = localization,
+            OutlinedTextField(value = localization,
                 onValueChange = { localization = it },
                 label = { Text("Localization (Doctors only)") },
                 singleLine = true
@@ -465,15 +429,11 @@ fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
         Button(
             onClick = {
 
-                performRegistration(username,
-                    password,
-                    role,
-                    specialty,
-                    localization,
-                    onRegistrationSuccess)
+                performRegistration(
+                    username, password, role, specialty, localization, onRegistrationSuccess
+                )
 
-            },
-            modifier = Modifier.padding(top = 16.dp)
+            }, modifier = Modifier.padding(top = 16.dp)
         ) {
             Text("Register")
         }
@@ -490,7 +450,10 @@ class DoctorAvailabilitiesViewModel : ViewModel() {
             if (response.isSuccessful) {
                 _doctorAvailabilities.value = response.body() ?: emptyList()
             } else {
-                Log.e("DoctorAvailViewModel", "Error fetching availabilities: ${response.errorBody()?.string()}")
+                Log.e(
+                    "DoctorAvailViewModel",
+                    "Error fetching availabilities: ${response.errorBody()?.string()}"
+                )
             }
         } catch (e: Exception) {
             Log.e("DoctorAvailViewModel", "Exception when fetching availabilities", e)
@@ -507,7 +470,10 @@ class DoctorAvailabilitiesViewModel : ViewModel() {
                 // Optionally, update your UI or state here
             } else {
                 // Handle API error response
-                Log.e("DoctorAvailability", "Error adding doctor availability: ${response.errorBody()?.string()}")
+                Log.e(
+                    "DoctorAvailability",
+                    "Error adding doctor availability: ${response.errorBody()?.string()}"
+                )
             }
         } catch (e: Exception) {
             // Handle exceptions
@@ -575,8 +541,7 @@ fun DoctorAvailabilityCard(doctorAvailability: DoctorAvailability) {
 fun AddDoctorAvailabilityScreen(
     viewModel: DoctorAvailabilitiesViewModel, // Assume this ViewModel handles the logic
     onAddSuccess: () -> Unit // Callback for successful addition
-)
-{
+) {
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -616,9 +581,8 @@ fun AddDoctorAvailabilityScreen(
         }
 
         // Placeholder for Available Hours Input
-        OutlinedTextField(
-            value = availableHours,
-            onValueChange = {availableHours = it},
+        OutlinedTextField(value = availableHours,
+            onValueChange = { availableHours = it },
             label = { Text("Available Hours") },
             modifier = Modifier.fillMaxWidth()
         )
@@ -629,8 +593,7 @@ fun AddDoctorAvailabilityScreen(
                 viewModel.addDoctorAvailability(date, availableHours)
                 onAddSuccess()
 
-            },
-            modifier = Modifier.align(Alignment.End)
+            }, modifier = Modifier.align(Alignment.End)
         ) {
             Text("Submit")
         }
@@ -638,8 +601,7 @@ fun AddDoctorAvailabilityScreen(
 }
 
 @Composable
-fun Footer()
-{
+fun Footer() {
     BottomAppBar {
         Text("Footer", modifier = Modifier.padding(16.dp))
     }
@@ -652,41 +614,40 @@ fun performRegistration(
     specialty: String?,
     localization: String?,
     onRegistrationSuccess: () -> Unit
-)
-{
-    val registrationRequest = RegistrationRequest(
-        username = username,
+) {
+    val registrationRequest = RegistrationRequest(username = username,
         password = password,
         role = role,
         specialty = specialty?.takeIf { it.isNotEmpty() },
-        localization = localization?.takeIf { it.isNotEmpty() }
-    )
+        localization = localization?.takeIf { it.isNotEmpty() })
 
-    RetrofitClient.apiService.registerUser(registrationRequest).enqueue(object : Callback<Void>
-    {
-        override fun onResponse(call: Call<Void>, response: RetrofitResponse<Void>)
-        {
-            if (response.isSuccessful)
-            {
+    RetrofitClient.apiService.registerUser(registrationRequest).enqueue(object : Callback<Void> {
+        override fun onResponse(call: Call<Void>, response: RetrofitResponse<Void>) {
+            if (response.isSuccessful) {
                 Log.d("RegistrationSuccess", "Successfully registered user: $username")
                 onRegistrationSuccess()
-            }
-            else
-            {
-                Log.e("RegistrationError", "Failed to register user: $username. Response code: ${response.code()}")
+            } else {
+                Log.e(
+                    "RegistrationError",
+                    "Failed to register user: $username. Response code: ${response.code()}"
+                )
                 // Here you can handle different HTTP codes and give feedback to the user accordingly
             }
         }
 
-        override fun onFailure(call: Call<Void>, t: Throwable)
-        {
+        override fun onFailure(call: Call<Void>, t: Throwable) {
             Log.e("RegistrationFailure", "Failed to register user: $username", t)
             // Handle the failure, for example, by showing an error message to the user
         }
     })
 }
 
-fun performLogin(username: String, password: String, onLoginSuccess: (String) -> Unit, onLoginFailure: (String) -> Unit) {
+fun performLogin(
+    username: String,
+    password: String,
+    onLoginSuccess: (String) -> Unit,
+    onLoginFailure: (String) -> Unit
+) {
     val loginRequest = LoginRequest(username, password)
     RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<Unit> {
         override fun onResponse(call: Call<Unit>, response: RetrofitResponse<Unit>) {
@@ -704,11 +665,14 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String) ->
                 // Handle unsuccessful response, e.g., wrong credentials
                 Log.e(
                     "LoginError",
-                    "Failed to log in user. Response code: ${response.code()}, message: ${response.errorBody()?.string() ?: "Unknown error"}"
+                    "Failed to log in user. Response code: ${response.code()}, message: ${
+                        response.errorBody()?.string() ?: "Unknown error"
+                    }"
                 )
                 onLoginFailure("Invalid username or password.")
             }
         }
+
         override fun onFailure(call: Call<Unit>, t: Throwable) {
             Log.e("LoginFailure", "Failed to log in user: $username", t)
             // Handle the failure, e.g., show an error message
@@ -719,7 +683,12 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String) ->
 
 
 @Composable
-fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, username: String, userrole: String, userId: String) {
+fun DutyVacanciesScreen(
+    viewModel: DutyVacanciesViewModel,
+    username: String,
+    userrole: String,
+    userId: String
+) {
     viewModel.fetchDutyVacancies()
     val dutyVacancies = viewModel.dutyVacancies.collectAsState().value
     Column(modifier = Modifier.padding(16.dp)) {
@@ -730,26 +699,26 @@ fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, username: String, use
             LazyColumn {
                 items(count = dutyVacancies.size, itemContent = { index ->
                     val dutyVacancy = dutyVacancies[index]
-                    DutyVacancyCard(
-                        dutyVacancy = dutyVacancy,
+                    DutyVacancyCard(dutyVacancy = dutyVacancy,
                         userrole = userrole,
                         userId = userId,
-                        onAssign = { viewModel.assignDutySlot(
-                            dutySlotId = dutyVacancy._id!!, 
-                            doctorId = userId, 
-                            doctorName = username,
-                            date = dutyVacancy.date, 
-                            dutyHours = dutyVacancy.dutyHours, 
-                            requiredSpecialty = dutyVacancy.requiredSpecialty
-                        )
+                        onAssign = {
+                            viewModel.assignDutySlot(
+                                dutySlotId = dutyVacancy._id!!,
+                                doctorId = userId,
+                                doctorName = username,
+                                date = dutyVacancy.date,
+                                dutyHours = dutyVacancy.dutyHours,
+                                requiredSpecialty = dutyVacancy.requiredSpecialty
+                            )
                         },
-                        onGiveConsent = { viewModel.giveConsent(dutyVacancy._id!!)},
-                        onRevoke = { viewModel.revokeAssignment(dutyVacancy._id!!)},
-                        onRemoveSlot = { viewModel.removeDutySlot(dutyVacancy._id!!) }
-                    )
+                        onGiveConsent = { viewModel.giveConsent(dutyVacancy._id!!) },
+                        onRevoke = { viewModel.revokeAssignment(dutyVacancy._id!!) },
+                        onRemoveSlot = { viewModel.removeDutySlot(dutyVacancy._id!!) })
 
                 })
-            }}
+            }
+        }
     }
 }
 
@@ -774,6 +743,7 @@ class DutyVacanciesViewModel : ViewModel() {
                 // This is a simplified example; you'll need to parse the JSON and update the list appropriately
                 Log.d("WebSocket", "Message received: $text")
             }
+
             override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
                 val jsonString = bytes.utf8()
                 Log.d("WebSocket", "JSON message received: $jsonString")
@@ -787,14 +757,17 @@ class DutyVacanciesViewModel : ViewModel() {
         webSocket.close(1000, null)
     }
 
-     fun fetchDutyVacancies() = viewModelScope.launch {
+    fun fetchDutyVacancies() = viewModelScope.launch {
         try {
             val response = RetrofitClient.apiService.fetchDutyVacancies()
             if (response.isSuccessful) {
                 _dutyVacancies.value = response.body() ?: emptyList()
             } else {
                 // Log error or handle error state
-                Log.e("DutyVacanciesViewModel", "Error fetching duty vacancies: ${response.errorBody()?.string()}")
+                Log.e(
+                    "DutyVacanciesViewModel",
+                    "Error fetching duty vacancies: ${response.errorBody()?.string()}"
+                )
             }
         } catch (e: Exception) {
             // Handle exceptions from network call
@@ -802,7 +775,12 @@ class DutyVacanciesViewModel : ViewModel() {
         }
     }
 
-    fun publishDutyVacancy(date: String, dutyHours: String, requiredSpecialty: String, onPublishSuccess: () -> Unit) = viewModelScope.launch {
+    fun publishDutyVacancy(
+        date: String,
+        dutyHours: String,
+        requiredSpecialty: String,
+        onPublishSuccess: () -> Unit
+    ) = viewModelScope.launch {
         try {
             val dutyVacancy = DutyVacancy(
                 date = date,
@@ -821,7 +799,10 @@ class DutyVacanciesViewModel : ViewModel() {
                 // Optionally, refresh the list of vacancies or navigate the user
             } else {
                 // Log error or handle error state
-                Log.e("DutyVacanciesViewModel", "Error publishing duty vacancy: ${response.errorBody()?.string()}")
+                Log.e(
+                    "DutyVacanciesViewModel",
+                    "Error publishing duty vacancy: ${response.errorBody()?.string()}"
+                )
             }
         } catch (e: Exception) {
             // Handle exceptions
@@ -840,13 +821,23 @@ class DutyVacanciesViewModel : ViewModel() {
         }
     }
 
-    fun assignDutySlot(dutySlotId: String, doctorId: String, doctorName: String, date: String, dutyHours: String, requiredSpecialty: String) = viewModelScope.launch {
+    fun assignDutySlot(
+        dutySlotId: String,
+        doctorId: String,
+        doctorName: String,
+        date: String,
+        dutyHours: String,
+        requiredSpecialty: String
+    ) = viewModelScope.launch {
         val data = AssignDutySlotRequest(
             _id = dutySlotId,
             sendingDoctorId = doctorId,
         )
         try {
-            Log.d("AssignDutySlotRequest", "Created with slotId: $dutySlotId, sendingDoctorId: $doctorId")
+            Log.d(
+                "AssignDutySlotRequest",
+                "Created with slotId: $dutySlotId, sendingDoctorId: $doctorId"
+            )
 
             val response = RetrofitClient.apiService.assignDutySlot(data)
             if (response.isSuccessful) {
@@ -855,7 +846,10 @@ class DutyVacanciesViewModel : ViewModel() {
                 updateDutyVacancyStatus(dutySlotId, DutySlotStatus.PENDING)
 
             } else {
-                Log.e("DutyVacanciesViewModel", "Error assigning duty slot: ${response.errorBody()?.string()}")
+                Log.e(
+                    "DutyVacanciesViewModel",
+                    "Error assigning duty slot: ${response.errorBody()?.string()}"
+                )
             }
         } catch (e: Exception) {
             Log.e("DutyVacanciesViewModel", "Exception when assigning duty slot", e)
@@ -870,7 +864,10 @@ class DutyVacanciesViewModel : ViewModel() {
                 Log.d("DutyVacanciesViewModel", "Consent given successfully")
                 updateDutyVacancyStatus(dutySlotId, DutySlotStatus.FILLED)
             } else {
-                Log.e("DutyVacanciesViewModel", "Error giving consent: ${response.errorBody()?.string()}")
+                Log.e(
+                    "DutyVacanciesViewModel",
+                    "Error giving consent: ${response.errorBody()?.string()}"
+                )
             }
         } catch (e: Exception) {
             Log.e("DutyVacanciesViewModel", "Exception when giving consent", e)
@@ -885,7 +882,10 @@ class DutyVacanciesViewModel : ViewModel() {
                 Log.d("DutyVacanciesViewModel", "Assignment revoked successfully")
                 updateDutyVacancyStatus(dutySlotId, DutySlotStatus.OPEN)
             } else {
-                Log.e("DutyVacanciesViewModel", "Error revoking assignment: ${response.errorBody()?.string()}")
+                Log.e(
+                    "DutyVacanciesViewModel",
+                    "Error revoking assignment: ${response.errorBody()?.string()}"
+                )
             }
         } catch (e: Exception) {
             Log.e("DutyVacanciesViewModel", "Exception when revoking assignment", e)
@@ -900,7 +900,10 @@ class DutyVacanciesViewModel : ViewModel() {
                 Log.d("DutyVacanciesViewModel", "Duty slot removed successfully")
                 _dutyVacancies.value = _dutyVacancies.value.filter { it._id != dutySlotId }
             } else {
-                Log.e("DutyVacanciesViewModel", "Error removing duty slot: ${response.errorBody()?.string()}")
+                Log.e(
+                    "DutyVacanciesViewModel",
+                    "Error removing duty slot: ${response.errorBody()?.string()}"
+                )
             }
         } catch (e: Exception) {
             Log.e("DutyVacanciesViewModel", "Exception when removing duty slot", e)
@@ -910,10 +913,15 @@ class DutyVacanciesViewModel : ViewModel() {
 
 
 @Composable
-fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String, userId: String,
-                    onAssign: () -> Unit, onGiveConsent: () -> Unit, onRevoke: () -> Unit, onRemoveSlot: () -> Unit
-)
-{
+fun DutyVacancyCard(
+    dutyVacancy: DutyVacancy,
+    userrole: String,
+    userId: String,
+    onAssign: () -> Unit,
+    onGiveConsent: () -> Unit,
+    onRevoke: () -> Unit,
+    onRemoveSlot: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -921,31 +929,41 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String, userId: String,
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text("Hospital: ${dutyVacancy.hospitalId!!.username}", style = MaterialTheme.typography.bodyLarge)
-            Text("Date: ${formatDate(dutyVacancy.date)}", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                "Hospital: ${dutyVacancy.hospitalId!!.username}",
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Text(
+                "Date: ${formatDate(dutyVacancy.date)}",
+                style = MaterialTheme.typography.bodyLarge
+            )
             Text("Duty Hours: ${dutyVacancy.dutyHours}", style = MaterialTheme.typography.bodyLarge)
-            Text("Required Specialty: ${dutyVacancy.requiredSpecialty}", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                "Required Specialty: ${dutyVacancy.requiredSpecialty}",
+                style = MaterialTheme.typography.bodyLarge
+            )
             Text("Status: ${dutyVacancy.status}", style = MaterialTheme.typography.bodyLarge)
 
-            when (userrole)
-            {
-                "doctor" ->
-                {
-                    when (dutyVacancy.status)
-                    {
+            when (userrole) {
+                "doctor" -> {
+                    when (dutyVacancy.status) {
                         DutySlotStatus.OPEN -> Button(onClick = onAssign) { Text("Assign") }
-                        DutySlotStatus.PENDING -> Button(onClick = {}, enabled = false) { Text("Waiting for Consent") }
+                        DutySlotStatus.PENDING -> Button(
+                            onClick = {},
+                            enabled = false
+                        ) { Text("Waiting for Consent") }
+
                         DutySlotStatus.FILLED -> Button(onClick = onRevoke) { Text("Revoke") }
                         else -> {} // Handle unexpected status
 
                     }
                 }
-                "hospital" ->
-                {
+
+                "hospital" -> {
                     when (dutyVacancy.status) {
                         DutySlotStatus.OPEN -> {
-                            Button(onClick = {}, enabled = false) { 
-                                Text("Waiting") 
+                            Button(onClick = {}, enabled = false) {
+                                Text("Waiting")
                             }
 
                             // Add a Remove button if the user is the hospital owner of the slot
@@ -957,13 +975,17 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String, userId: String,
                         }
 
                         DutySlotStatus.PENDING -> Button(onClick = onGiveConsent) { Text("Consent") }
-                        DutySlotStatus.FILLED -> Button(onClick = {}, enabled = false) { Text("Filled") }
+                        DutySlotStatus.FILLED -> Button(
+                            onClick = {},
+                            enabled = false
+                        ) { Text("Filled") }
+
                         else -> {} // Handle unexpected status
                     }
                 }
+
                 else -> {} // Handle unexpected
             }
-
 
 
         }
@@ -973,8 +995,7 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String, userId: String,
 
 @Composable
 fun DutyVacancyPublishScreen(
-    viewModel: DutyVacanciesViewModel = viewModel(),
-    onPublishSuccess: () -> Unit
+    viewModel: DutyVacanciesViewModel = viewModel(), onPublishSuccess: () -> Unit
 ) {
     var date by remember { mutableStateOf("") }
     var dutyHours by remember { mutableStateOf("") }
@@ -1002,8 +1023,7 @@ fun DutyVacancyPublishScreen(
 
     Column {
         // Use a TextField for the date display and a Button for the date selection
-        TextField(
-            value = date,
+        TextField(value = date,
             onValueChange = { date = it },
             label = { Text("Date") },
             modifier = Modifier.padding(PaddingValues(all = 8.dp))
@@ -1011,15 +1031,13 @@ fun DutyVacancyPublishScreen(
         Button(onClick = { showDatePicker() }) {
             Text(text = "Select Date")
         }
-    
-        OutlinedTextField(
-            value = dutyHours,
+
+        OutlinedTextField(value = dutyHours,
             onValueChange = { dutyHours = it },
             label = { Text("Duty Hours") },
             modifier = Modifier.padding(PaddingValues(all = 8.dp))
         )
-        OutlinedTextField(
-            value = requiredSpecialty,
+        OutlinedTextField(value = requiredSpecialty,
             onValueChange = { requiredSpecialty = it },
             label = { Text("Required Specialty") },
             modifier = Modifier.padding(PaddingValues(all = 8.dp))
@@ -1027,10 +1045,14 @@ fun DutyVacancyPublishScreen(
         Button(
             onClick = {
                 coroutineScope.launch {
-                    viewModel.publishDutyVacancy(date, dutyHours, requiredSpecialty, onPublishSuccess)
+                    viewModel.publishDutyVacancy(
+                        date,
+                        dutyHours,
+                        requiredSpecialty,
+                        onPublishSuccess
+                    )
                 }
-            },
-            modifier = Modifier.padding(PaddingValues(all = 8.dp))
+            }, modifier = Modifier.padding(PaddingValues(all = 8.dp))
         ) {
             Text("Publish")
         }
