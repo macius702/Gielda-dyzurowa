@@ -65,6 +65,8 @@ Doctors should be able to publish their unavailabilities as well
 Formatter
 malignant doctor can occupy all slots, and assign to all duties
 show internet connection is online - especially on start, before login, etc
+CI/CD
+unit tests
 DONE assure that tests have always a duty entry qqq
 DONE remove duty vacancy 
 DONE gui changes on notification
