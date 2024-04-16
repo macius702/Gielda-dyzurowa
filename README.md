@@ -53,7 +53,8 @@ npm install cypress --save-dev
 2. Format
 3. Missing Fields - price, hour?
 4. Look and feel
-
+5. Swagger
+6. showDatePicker is twice
 some unique index - adding the same duty slot  is ok now! - referential integrity
 remove doctor availability
 /duty/find_by_specialty change into general finding endpoint
@@ -65,6 +66,7 @@ Doctors should be able to publish their unavailabilities as well
 Formatter
 malignant doctor can occupy all slots, and assign to all duties
 show internet connection is online - especially on start, before login, etc
+keyboard handling
 CI/CD
 unit tests
 DONE assure that tests have always a duty entry qqq
