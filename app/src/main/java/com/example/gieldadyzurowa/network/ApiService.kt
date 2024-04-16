@@ -1,14 +1,22 @@
 package com.example.gieldadyzurowa.network
 
-import com.example.gieldadyzurowa.DoctorAvailability
-import com.example.gieldadyzurowa.DutyVacancy
+import com.example.gieldadyzurowa.types.AssignDutySlotRequest
+import com.example.gieldadyzurowa.types.DoctorAvailability
+import com.example.gieldadyzurowa.types.DutySlotActionRequest
+import com.example.gieldadyzurowa.types.DutyVacancy
+import com.example.gieldadyzurowa.types.LoginRequest
+import com.example.gieldadyzurowa.types.RegistrationRequest
+import com.example.gieldadyzurowa.types.UserroleAndId
+
 import retrofit2.Call
 import retrofit2.Response
-import retrofit2.http.*
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
 
 interface ApiService {
     @POST("/auth/login")
-    fun loginUser(@Body loginRequest: LoginRequest): Call<Unit> // Or Call<ResponseType> if your API returns a response
+    fun loginUser(@Body loginRequest: LoginRequest): Call<Unit>
 
     @GET("/user/data")
     fun fetchUserData(): Call<UserroleAndId>
@@ -22,7 +30,7 @@ interface ApiService {
     @POST("duty/publish")
     suspend fun publishDutyVacancy(
         @Body dutyVacancy: DutyVacancy
-    ): Response<Unit> // Adjust return type based on your API response
+    ): Response<Unit>
 
     @GET("/doctor/availabilities/json")
     suspend fun fetchDoctorAvailabilities(): Response<List<DoctorAvailability>>
@@ -35,50 +43,21 @@ interface ApiService {
     @POST("/assign-duty-slot")
     suspend fun assignDutySlot(
         @Body assignDutySlotRequest: AssignDutySlotRequest
-    ): Response<Unit> // Adjust the return type as needed based on your API response
+    ): Response<Unit>
 
     @POST("/give-consent")
     suspend fun giveConsent(
         @Body request: DutySlotActionRequest
-    ): Response<Unit> // Adjust the return type as needed
+    ): Response<Unit>
 
     @POST("/revoke-assignment")
     suspend fun revokeAssignment(
         @Body request: DutySlotActionRequest
-    ): Response<Unit> // Adjust the return type as needed
+    ): Response<Unit>
 
     @POST("/duty/remove")
     suspend fun removeDutySlot(
         @Body request: DutySlotActionRequest
     ): Response<Unit> 
 
-
 }
-
-
-
-data class LoginRequest(val username: String, val password: String)
-data class RegistrationRequest(
-    val username: String,
-    val password: String,
-    val role: String,
-    val specialty: String?,
-    val localization: String?
-)
-
-
-data class UserroleAndId(
-    val _id: String,
-    val role : String
-    // Add other fields that your backend might return
-)
-
-data class AssignDutySlotRequest(
-    val _id: String,
-    val sendingDoctorId: String,
-)
-
-data class DutySlotActionRequest(
-    val _id: String
-)
-

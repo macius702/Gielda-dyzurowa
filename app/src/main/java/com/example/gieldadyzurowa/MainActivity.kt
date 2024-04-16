@@ -1,7 +1,9 @@
 package com.example.gieldadyzurowa
 
 
-
+import com.example.gieldadyzurowa.types.DoctorAvailability
+import com.example.gieldadyzurowa.types.DutySlotStatus
+import com.example.gieldadyzurowa.types.DutyVacancy
 
 
 import android.app.DatePickerDialog
@@ -46,19 +48,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewModelScope
 
-import com.example.gieldadyzurowa.network.AssignDutySlotRequest
-import com.example.gieldadyzurowa.network.DutySlotActionRequest
-import com.example.gieldadyzurowa.network.LoginRequest
-import com.example.gieldadyzurowa.network.RegistrationRequest
 import com.example.gieldadyzurowa.network.RetrofitClient
-import com.example.gieldadyzurowa.network.UserroleAndId
 
-import com.google.gson.JsonDeserializationContext
-import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
-import com.google.gson.JsonParseException
+import com.example.gieldadyzurowa.types.AssignDutySlotRequest
+import com.example.gieldadyzurowa.types.DutySlotActionRequest
+import com.example.gieldadyzurowa.types.LoginRequest
+import com.example.gieldadyzurowa.types.RegistrationRequest
+import com.example.gieldadyzurowa.types.UserroleAndId
 
-import java.lang.reflect.Type
+
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -106,69 +104,6 @@ class MainActivity : ComponentActivity()
         }
     }
 }
-
-data class Hospital(
-    val _id: String,
-    val username: String,
-    val password: String, // Note: It's unusual and insecure to handle passwords in client-side code.
-    val role: String,
-    val profileVisible: Boolean
-    // Add other fields as necessary...
-)
-
-enum class DutySlotStatus(val status: String) {
-    OPEN("open"),
-    PENDING("pending"),
-    FILLED("filled");
-
-    companion object {
-        fun from(status: String): DutySlotStatus {
-            return when(status) {
-                "open" -> OPEN
-                "pending" -> PENDING
-                "filled" -> FILLED
-                else -> throw IllegalArgumentException("Unknown status: $status")
-            }
-        }
-    }
-}
-
-class DutySlotStatusDeserializer : JsonDeserializer<DutySlotStatus> {
-    override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): DutySlotStatus {
-        val status = json?.asString
-        return DutySlotStatus.from(status ?: throw JsonParseException("Null or invalid status value"))
-    }
-}
-
-
-data class Doctor(
-    val _id: String,
-    val username: String,
-    val password: String, // Note: Handling passwords like this is insecure, especially on client-side.
-    val role: String,
-    val specialty: String,
-    val localization: String,
-    val profileVisible: Boolean
-    // Add other fields as necessary...
-)
-
-data class DutyVacancy(
-    val _id: String?,
-    val hospitalId: Hospital?,
-    val date: String,
-    val dutyHours: String,
-    val requiredSpecialty: String,
-    val status: DutySlotStatus, // Use enum type here
-    val assignedDoctorId: Doctor? = null
-)
-
-
-data class DoctorAvailability(
-    val doctorId: Doctor?,
-    val date: String, // Depending on your use case, you might want to parse this into a Date object
-    val availableHours: String
-)
-
 
 
 
@@ -319,8 +254,6 @@ fun AppContent() {
                         }
 
                     }
-
-
                     else ->             Text("Select an option from the navigation.")
 
                 }
@@ -357,20 +290,6 @@ fun DrawerContent(onNavSelected: (String) -> Unit, isLoggedIn: Boolean) {
         }
     }
 }
-// Ensure you define or adapt LoginScreen, RegisterScreen, DutyVacanciesScreen, and MainContent for compatibility with your app's logic and Material 3 components.
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Header(isLoggedIn: Boolean, username: String) {
-    TopAppBar(
-        title = {
-            Text(text = if (isLoggedIn) username else "Not Logged In")
-        }
-    )
-}
-
-
 
 
 @Composable
@@ -652,7 +571,6 @@ fun DoctorAvailabilityCard(doctorAvailability: DoctorAvailability) {
 }
 
 
-
 @Composable
 fun AddDoctorAvailabilityScreen(
     viewModel: DoctorAvailabilitiesViewModel, // Assume this ViewModel handles the logic
@@ -719,101 +637,11 @@ fun AddDoctorAvailabilityScreen(
     }
 }
 
-//
-//@Composable
-//fun AddDoctorAvailabilityScreen(
-//    viewModel: DoctorAvailabilitiesViewModel, // Assume this ViewModel handles the logic
-//    onAddSuccess: () -> Unit // Callback for successful addition
-//) {
-//    var date by remember { mutableStateOf("") }
-//    var availableHours by remember { mutableStateOf("") }
-//    val context = LocalContext.current
-//
-//    Column(
-//        modifier = Modifier
-//            .padding(16.dp)
-//            .fillMaxWidth(),
-//        verticalArrangement = Arrangement.spacedBy(8.dp)
-//    ) {
-//        Text("Add Availability", style = MaterialTheme.typography.h6)
-//
-//        // Date Picker
-//        OutlinedButton(
-//            onClick = { showDatePicker(context, date) { selectedDate -> date = selectedDate } }
-//        ) {
-//            Text(if (date.isNotEmpty()) date else "Select Date")
-//        }
-//
-//        // Available Hours
-//        OutlinedTextField(
-//            value = availableHours,
-//            onValueChange = { availableHours = it },
-//            label = { Text("Available Hours") },
-//            singleLine = true
-//        )
-//
-//        // Submit Button
-//        Button(
-//            onClick = {
-//                // Assume viewModel.addDoctorAvailability triggers necessary logic and updates state
-//                viewModel.addDoctorAvailability(date, availableHours)
-//                // For mockup purposes, we assume success and directly call onAddSuccess
-//                onAddSuccess()
-//            },
-//            modifier = Modifier.align(Alignment.End)
-//        ) {
-//            Text("Submit")
-//        }
-//    }
-//}
-//
-fun showDatePicker(
-    context: Context,
-    initialDate: String,
-    onDateSelected: (String) -> Unit
-) {
-    val calendar = Calendar.getInstance()
-    DatePickerDialog(
-        context,
-        { _, year, month, dayOfMonth ->
-            // Update the `date` state with the new date
-            calendar.set(year, month, dayOfMonth)
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            onDateSelected(dateFormat.format(calendar.time))
-        },
-        calendar.get(Calendar.YEAR),
-        calendar.get(Calendar.MONTH),
-        calendar.get(Calendar.DAY_OF_MONTH)
-    ).show()
-}
-
 @Composable
 fun Footer()
 {
     BottomAppBar {
         Text("Footer", modifier = Modifier.padding(16.dp))
-    }
-}
-
-
-object OkHttpClientInstance {
-    val client: OkHttpClient by lazy {
-        OkHttpClient.Builder()
-            .cookieJar(object : CookieJar {
-                private val cookieStore = mutableMapOf<String, List<Cookie>>()
-
-                override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
-                    cookieStore[url.toString()] = cookies
-                }
-
-                override fun loadForRequest(url: HttpUrl): List<Cookie> {
-                    return cookieStore[url.toString()] ?: listOf()
-                }
-            })
-            .addInterceptor(HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            })
-            .build()
     }
 }
 
@@ -833,7 +661,6 @@ fun performRegistration(
         specialty = specialty?.takeIf { it.isNotEmpty() },
         localization = localization?.takeIf { it.isNotEmpty() }
     )
-
 
     RetrofitClient.apiService.registerUser(registrationRequest).enqueue(object : Callback<Void>
     {
@@ -859,13 +686,11 @@ fun performRegistration(
     })
 }
 
-// This function can be called within the onClick listener of the login button
 fun performLogin(username: String, password: String, onLoginSuccess: (String) -> Unit, onLoginFailure: (String) -> Unit) {
     val loginRequest = LoginRequest(username, password)
     RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<Unit> {
         override fun onResponse(call: Call<Unit>, response: RetrofitResponse<Unit>) {
             if (response.isSuccessful) {
-                // Assuming response.body() is not null, let's use it.
                 response.body()?.let { userInfo ->
                     Log.d("LoginSuccess", "Successfully logged in user: $username")
                     // Proceed with login success logic, e.g., updating UI or navigating to another activity
@@ -888,7 +713,6 @@ fun performLogin(username: String, password: String, onLoginSuccess: (String) ->
             Log.e("LoginFailure", "Failed to log in user: $username", t)
             // Handle the failure, e.g., show an error message
             onLoginFailure("Failed to log in user: $username")
-
         }
     })
 }
@@ -906,8 +730,6 @@ fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, username: String, use
             LazyColumn {
                 items(count = dutyVacancies.size, itemContent = { index ->
                     val dutyVacancy = dutyVacancies[index]
-
-
                     DutyVacancyCard(
                         dutyVacancy = dutyVacancy,
                         userrole = userrole,
@@ -931,11 +753,11 @@ fun DutyVacanciesScreen(viewModel: DutyVacanciesViewModel, username: String, use
     }
 }
 
+
 class DutyVacanciesViewModel : ViewModel() {
     private val _dutyVacancies = MutableStateFlow<List<DutyVacancy>>(emptyList())
     val dutyVacancies: StateFlow<List<DutyVacancy>> = _dutyVacancies
     private lateinit var webSocket: WebSocket
-
 
     init {
         fetchDutyVacancies()
@@ -951,32 +773,18 @@ class DutyVacanciesViewModel : ViewModel() {
                 // Update your duty vacancies list here based on the message content
                 // This is a simplified example; you'll need to parse the JSON and update the list appropriately
                 Log.d("WebSocket", "Message received: $text")
-
-
             }
             override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
                 val jsonString = bytes.utf8()
                 Log.d("WebSocket", "JSON message received: $jsonString")
                 fetchDutyVacancies()
-
-
-
             }
-
-                // Handle other WebSocket events as needed
         })
     }
 
-
-    fun sendMessage(message: String) {
-        webSocket.send(message)
-    }
-
-    // Existing functions (fetchDutyVacancies, publishDutyVacancy, etc.)
-
     override fun onCleared() {
         super.onCleared()
-        webSocket.close(1000, null) // Properly close the WebSocket when the ViewModel is cleared
+        webSocket.close(1000, null)
     }
 
      fun fetchDutyVacancies() = viewModelScope.launch {
@@ -1009,8 +817,8 @@ class DutyVacanciesViewModel : ViewModel() {
             if (response.isSuccessful) {
                 // Handle successful publish
                 Log.d("DutyVacanciesViewModel", "Duty vacancy published successfully")
-                // Optionally, refresh the list of vacancies or navigate the user
                 onPublishSuccess()
+                // Optionally, refresh the list of vacancies or navigate the user
             } else {
                 // Log error or handle error state
                 Log.e("DutyVacanciesViewModel", "Error publishing duty vacancy: ${response.errorBody()?.string()}")
@@ -1032,7 +840,6 @@ class DutyVacanciesViewModel : ViewModel() {
         }
     }
 
-
     fun assignDutySlot(dutySlotId: String, doctorId: String, doctorName: String, date: String, dutyHours: String, requiredSpecialty: String) = viewModelScope.launch {
         val data = AssignDutySlotRequest(
             _id = dutySlotId,
@@ -1047,7 +854,6 @@ class DutyVacanciesViewModel : ViewModel() {
 
                 updateDutyVacancyStatus(dutySlotId, DutySlotStatus.PENDING)
 
-                // Handle successful assignment
             } else {
                 Log.e("DutyVacanciesViewModel", "Error assigning duty slot: ${response.errorBody()?.string()}")
             }
@@ -1103,8 +909,6 @@ class DutyVacanciesViewModel : ViewModel() {
 }
 
 
-
-
 @Composable
 fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String, userId: String,
                     onAssign: () -> Unit, onGiveConsent: () -> Unit, onRevoke: () -> Unit, onRemoveSlot: () -> Unit
@@ -1121,10 +925,7 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String, userId: String,
             Text("Date: ${formatDate(dutyVacancy.date)}", style = MaterialTheme.typography.bodyLarge)
             Text("Duty Hours: ${dutyVacancy.dutyHours}", style = MaterialTheme.typography.bodyLarge)
             Text("Required Specialty: ${dutyVacancy.requiredSpecialty}", style = MaterialTheme.typography.bodyLarge)
-
-            // Status display
             Text("Status: ${dutyVacancy.status}", style = MaterialTheme.typography.bodyLarge)
-
 
             when (userrole)
             {
@@ -1170,8 +971,6 @@ fun DutyVacancyCard(dutyVacancy: DutyVacancy, userrole: String, userId: String,
 }
 
 
-
-
 @Composable
 fun DutyVacancyPublishScreen(
     viewModel: DutyVacanciesViewModel = viewModel(),
@@ -1202,7 +1001,7 @@ fun DutyVacancyPublishScreen(
     }
 
     Column {
-     // Use a TextField for the date display and a Button for the date selection
+        // Use a TextField for the date display and a Button for the date selection
         TextField(
             value = date,
             onValueChange = { date = it },
@@ -1237,4 +1036,3 @@ fun DutyVacancyPublishScreen(
         }
     }
 }
-

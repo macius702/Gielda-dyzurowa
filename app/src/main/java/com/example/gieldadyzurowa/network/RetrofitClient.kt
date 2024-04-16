@@ -1,7 +1,7 @@
 package com.example.gieldadyzurowa.network
 
-import com.example.gieldadyzurowa.DutySlotStatus
-import com.example.gieldadyzurowa.DutySlotStatusDeserializer
+import com.example.gieldadyzurowa.types.DutySlotStatus
+import com.example.gieldadyzurowa.types.DutySlotStatusDeserializer
 import com.google.gson.GsonBuilder
 import okhttp3.Cookie
 import okhttp3.CookieJar
@@ -28,7 +28,7 @@ val okHttpClient = OkHttpClient.Builder()
 
 
 object RetrofitClient {
-    //private const val BASE_URL = "https://powerful-sea-67789-a7c9da8bf02d.herokuapp.com/"
+    //private const val BASE_URL = "https://powerful-sea-67789-a7c9da8bf02d.herokuapp.com/" //TODO(mtlk): into an env variable
     private const val BASE_URL = "http://10.0.2.2:3000"
 
     val gson = GsonBuilder()
