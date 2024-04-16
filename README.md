@@ -48,10 +48,14 @@ npm install cypress --save-dev
 
 
 ### Todo
+FAILED Publish duty vacancy in Kotlin - don't drag specialtyviewmodel  everywhere, specialties list is enough
+Also the SpecialtyDropdownMenu is awful
 
-1. Remove unnmecessary code
-2. Format
-3. Missing Fields - price, hour?
+Test for Register in Kotlin
+
+
+
+3. Missing Fields - price PLN, hour, specialty enum ?
 4. Look and feel
 5. Swagger
 6. showDatePicker is twice
@@ -74,6 +78,8 @@ DONE remove duty vacancy
 DONE gui changes on notification
 DONE Button logic dependent automatically on status
 NOT DOING, https is fine - fix passsword in open text (OAuth2 ?2)
+DONE Remove unnmecessary code
+DONE Format
 
 
 ### License
