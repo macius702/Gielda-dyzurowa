@@ -52,6 +52,8 @@ FAILED Publish duty vacancy in Kotlin - don't drag specialtyviewmodel  everywher
 Also the SpecialtyDropdownMenu is awful
 
 Test for Register in Kotlin
+Specialty master table - the sole source of truth
+Fix look of Refister Kotlin dialog
 
 
 
