@@ -1040,7 +1040,6 @@ fun SpecialtyDropdownMenu(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(32.dp)
     ) {
         ExposedDropdownMenuBox(
             expanded = expanded,
@@ -1048,14 +1047,15 @@ fun SpecialtyDropdownMenu(
                 expanded = !expanded
             }
         ) {
-            TextField(
+            OutlinedTextField(
                 value = selectedText,
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier.menuAnchor()
+                modifier = Modifier.menuAnchor(),
+                placeholder = { if (selectedText.isEmpty()) Text("Enter specialty") },
+                label = { Text("Specialty") },
             )
-
             ExposedDropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false }
