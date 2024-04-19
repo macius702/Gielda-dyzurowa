@@ -46,42 +46,56 @@ heroku apps
 
 npm install cypress --save-dev
 
+npm install swagger-jsdoc swagger-ui-express
+
 
 ### Todo
-FAILED Publish duty vacancy in Kotlin - don't drag specialtyviewmodel  everywhere, specialties list is enough
-Also the SpecialtyDropdownMenu is awful
-
-Test for Register in Kotlin
-Specialty master table - the sole source of truth
-Fix look of Refister Kotlin dialog
 
 
 
-3. Missing Fields - price PLN, hour, specialty enum ?
-4. Look and feel
-5. Swagger
-6. showDatePicker is twice
-some unique index - adding the same duty slot  is ok now! - referential integrity
-remove doctor availability
-/duty/find_by_specialty change into general finding endpoint
-.populate more specific or not needed - use database view - generally send only the relevant information, no extras
-show only my hospital duty records - or enable buttons only on my duty slots
-price
-languages
-Doctors should be able to publish their unavailabilities as well
-Formatter
-malignant doctor can occupy all slots, and assign to all duties
-show internet connection is online - especially on start, before login, etc
-keyboard handling
-CI/CD
-unit tests
-DONE assure that tests have always a duty entry qqq
-DONE remove duty vacancy 
-DONE gui changes on notification
-DONE Button logic dependent automatically on status
-NOT DOING, https is fine - fix passsword in open text (OAuth2 ?2)
-DONE Remove unnmecessary code
-DONE Format
+
+- Missing Fields - price range, PLN, hour
+- Look and feel
+- Swagger
+- showDatePicker is twice
+- ExposedDropdownMenuBox is twice
+- Test for Register in Kotlin RegisterScreen - onfailure -> snack, GUI test -> delete user needed first
+
+
+- some unique index - adding the same duty slot  is ok now! - referential integrity
+- remove doctor availability
+- /duty/find_by_specialty change into general finding endpoint
+- .populate more specific or not needed - use database view - generally send only the relevant information, no extras
+- show only my hospital duty records - or enable buttons only on my duty slots
+- languages
+- const Holidays = require('date-holidays');
+- Kotlin is not sending broadcast on publishDutyVacancy
+- remove in publish : date: String, dutyHours: String,
+
+
+- Doctors should be able to publish their unavailabilities as well
+- Formatter
+- malignant doctor can occupy all slots, and assign to all duties
+- show internet connection is online - especially on start, before login, etc
+- keyboard handling
+- CI/CD
+- unit tests
+- Specialty master table - the sole source of truth
+- Separate datamodel from routes
+
+
+- DONE assure that tests have always a duty entry qqq
+- DONE remove duty vacancy 
+- DONE gui changes on notification
+- DONE Button logic dependent automatically on status
+- NOT DOING, https is fine - fix passsword in open text (OAuth2 ?2)
+- DONE Remove unnmecessary code
+- DONE Format
+- FAILED Publish duty vacancy in Kotlin - don't drag specialtyviewmodel  everywhere, specialties list is enough
+- DONE Fix look of Refister Kotlin dialog, Register error - toast or snack
+- DONE specialty enum
+
+
 
 
 ### License
