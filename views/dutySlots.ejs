@@ -193,22 +193,22 @@
 
                 // Create and append the basic slot information
                 const infoHTML = `
-                Hospital: <span class="hospital-username" data-slot-id="${slot._id}">${slot.hospitalId.username}</span><br>
-                Date: <span class="slot-date" data-slot-id="${slot._id}">${new Date(slot.date).toDateString()}</span><br>
-                Duty Hours: <span class="duty-hours" data-slot-id="${slot._id}">${slot.dutyHours}</span><br>
-                Required Specialty: <span class="required-specialty" data-slot-id="${slot._id}">${slot.requiredSpecialty}</span><br>
-                Status: <span class="status-display" data-slot-id="${slot._id}">${slot.status}</span><br>
-                Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="${slot._id}">${slot.assignedDoctorId ? slot.assignedDoctorId.username : 'None'}</span><br>
-            `;
-                // Append the information as a new node
+                    Hospital: <span class="hospital-username" data-slot-id="${slot._id}">${slot.hospitalId.username}</span><br>
+                    Date: <span class="slot-date" data-slot-id="${slot._id}">${new Date(slot.date).toDateString()}</span><br>
+                    Duty Hours: <span class="duty-hours" data-slot-id="${slot._id}">${slot.dutyHours}</span><br>
+                    Required Specialty: <span class="required-specialty" data-slot-id="${slot._id}">${slot.requiredSpecialty.name}</span><br>
+                    Status: <span class="status-display" data-slot-id="${slot._id}">${slot.status}</span><br>
+                    Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="${slot._id}">${slot.assignedDoctorId ? slot.assignedDoctorId.username : 'None'}</span><br>
+                `;
+                                // Append the information as a new node
                 const infoNode = document.createElement('span');
                 infoNode.innerHTML = infoHTML;
                 element.appendChild(infoNode);
-
+                
                 // Append the buttons as elements
                 const buttonsContainer = getButtons(slot, role, currentUserId, currentUsername);
                 element.appendChild(buttonsContainer);
-            }
+                            }
 
             // Function to fetch duty slots and render them
             function fetchAndRenderDutySlots() {

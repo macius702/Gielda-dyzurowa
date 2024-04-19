@@ -14,7 +14,7 @@ describe('Remove buttons Test', () => {
 
         // Invoke router.get('/duty/find_by_specialty') with parameter 'qqq', 
         // then take the resulting ID using cy.request
-        cy.request('/duty/find_by_specialty?specialty=qqq').then((response) => {
+        cy.request('/duty/find_by_specialty?specialty=Choroby wewnętrzne').then((response) => {
             cy.log('Response:', response);
 
 
@@ -38,7 +38,7 @@ describe('Remove buttons Test', () => {
         );
 
         // Check that the duty slot is no longer in the database    
-        cy.request('/duty/find_by_specialty?specialty=qqq').then((response) => {
+        cy.request('/duty/find_by_specialty?specialty=Choroby wewnętrzne').then((response) => {
             const dutySlots = response.body.dutySlots;
             expect(dutySlots).to.have.length(0);
         });
@@ -51,14 +51,14 @@ describe('Remove buttons Test', () => {
         // Fill out the form
         cy.get('#date').type('2024-12-31');
         cy.get('#dutyHours').type('20:00 - 08:00');
-        cy.get('#requiredSpecialty').type('qqq');
+        cy.get('#requiredSpecialty').select('Choroby wewnętrzne');
 
         // Submit the form
         cy.get('form').submit();
 
 
         // Check that the duty slot appearedlonger in the database  
-        cy.request('/duty/find_by_specialty?specialty=qqq').then((response) => {
+        cy.request('/duty/find_by_specialty?specialty=Choroby wewnętrzne').then((response) => {
             const dutySlots = response.body.dutySlots;
             expect(dutySlots).to.have.length(1);
         });

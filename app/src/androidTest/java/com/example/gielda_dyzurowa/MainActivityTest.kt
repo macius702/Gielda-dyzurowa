@@ -6,6 +6,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
@@ -76,7 +77,7 @@ class NavigationDrawerTest {
 
         composeTestRule.waitUntil {
             try {
-                composeTestRule.onNodeWithText("Required Specialty: qqq").assertExists()
+                composeTestRule.onNodeWithText("Required Specialty: Choroby wewnętrzne").assertExists()
                 true
             } catch (e: AssertionError) {
                 // If the node is not found, we will add it
@@ -84,13 +85,14 @@ class NavigationDrawerTest {
 
                 Thread.sleep(3000)
 
-                composeTestRule.onNodeWithText("Required Specialty: qqq").assertExists()
+                logAllNodesWithAnyText()
+                composeTestRule.onNodeWithText("Required Specialty: Choroby wewnętrzne").assertExists()
 
                 true
             }
         }
         composeTestRule.onNodeWithText("Remove").performClick()
-        composeTestRule.onNodeWithText("Required Specialty: qqq").assertDoesNotExist()
+        composeTestRule.onNodeWithText("Required Specialty: Choroby wewnętrzne").assertDoesNotExist()
         //TODO(mtlk): add Snack or Alert after  assertErrorMessageDisplayed("Duty Vacancy removed.")
 
         addDutyVacancy()
@@ -98,14 +100,19 @@ class NavigationDrawerTest {
     }
 
     private fun addDutyVacancy() {
-        publishDutyVacancy("2024-12-20", "20-8", "qqq")
+        publishDutyVacancy("2024-12-20", "20-8", "Choroby wewnętrzne")
     }
 
     private fun publishDutyVacancy(date: String, dutyHours: String, requiredSpecialty: String) {
         composeTestRule.onNodeWithText("Publish Duty Vacancy").performClick()
         composeTestRule.onNodeWithText("Date").performTextInput(date)
         composeTestRule.onNodeWithText("Duty Hours").performTextInput(dutyHours)
-        composeTestRule.onNodeWithText("Required Specialty").performTextInput(requiredSpecialty)
+        composeTestRule.onNodeWithContentDescription("Dropdown menu").performClick()
+        Thread.sleep(1000)
+        composeTestRule.onNodeWithText(requiredSpecialty).performClick()
+        Thread.sleep(1000)
+        logAllNodesWithAnyText()
+
         composeTestRule.onNodeWithText("Publish").performClick()
         composeTestRule.waitForIdle()
     }

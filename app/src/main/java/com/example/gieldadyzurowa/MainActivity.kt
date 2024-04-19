@@ -1,41 +1,27 @@
 package com.example.gieldadyzurowa
 
 
-import com.example.gieldadyzurowa.types.DoctorAvailability
-import com.example.gieldadyzurowa.types.DutySlotStatus
-import com.example.gieldadyzurowa.types.DutyVacancy
-
-
 import android.app.DatePickerDialog
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
-
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ListItem
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.ListItem
 import androidx.compose.material3.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,38 +29,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewModelScope
-
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gieldadyzurowa.network.RetrofitClient
-
 import com.example.gieldadyzurowa.types.AssignDutySlotRequest
+import com.example.gieldadyzurowa.types.DoctorAvailability
 import com.example.gieldadyzurowa.types.DutySlotActionRequest
+import com.example.gieldadyzurowa.types.DutySlotStatus
+import com.example.gieldadyzurowa.types.DutyVacancy
 import com.example.gieldadyzurowa.types.LoginRequest
 import com.example.gieldadyzurowa.types.RegistrationRequest
+import com.example.gieldadyzurowa.types.Specialty
 import com.example.gieldadyzurowa.types.UserroleAndId
-
-
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
-
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-
 import okhttp3.*
-import okhttp3.CookieJar
-import okhttp3.HttpUrl
-import okhttp3.logging.HttpLoggingInterceptor
-import okhttp3.OkHttpClient
-
 import okio.ByteString
-
 import retrofit2.Call
 import retrofit2.Callback
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import retrofit2.Response as RetrofitResponse
 
 
@@ -96,7 +73,7 @@ fun formatDate(dateStr: String): String {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent() {
+        setContent {
             AppContent()
         }
     }
@@ -114,7 +91,8 @@ fun AppContent() {
     var userrole by remember { mutableStateOf("") }
     var userId by remember { mutableStateOf("") }
     var showRegistrationSuccessDialog by remember { mutableStateOf(false) }
-    val dutyVacanciesViewModel = viewModel<DutyVacanciesViewModel>()
+    val specialtyViewModel = viewModel<SpecialtyViewModel>()
+    val dutyVacanciesViewModel = DutyVacanciesViewModel(specialtyViewModel)
     val doctorAvailabilitiesViewModel = viewModel<DoctorAvailabilitiesViewModel>()
 
     fun fetchAndAssignUserData(user: String) {
@@ -146,11 +124,12 @@ fun AppContent() {
 
 
 //    // debug aid debugging
-//     performLogin("abba", "alamakota",
-//         onLoginSuccess = { user  ->
-//             fetchAndAssignUserData(user)
-//         }
-//     )
+//    performLogin("H1", "alamakota",
+//        onLoginSuccess = { user ->
+//            fetchAndAssignUserData(user)
+//        }
+//    )
+//    {}
 
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         DrawerContent(
@@ -205,9 +184,10 @@ fun AppContent() {
                     }
 
                     "Register" -> if (!isLoggedIn) {
-                        RegisterScreen(onRegistrationSuccess = {
-                            showRegistrationSuccessDialog = true
-                        })
+                        RegisterScreen(dutyVacanciesViewModel,
+                            onRegistrationSuccess = {
+                                showRegistrationSuccessDialog = true
+                            })
                     }
 
                     "Duty Vacancies" -> DutyVacanciesScreen(
@@ -292,13 +272,15 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
 
 
     Column(modifier = Modifier.padding(PaddingValues(16.dp))) {
-        OutlinedTextField(value = username,
+        OutlinedTextField(
+            value = username,
             onValueChange = { username = it },
             label = { Text("Username") },
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next)
         )
-        OutlinedTextField(value = password,
+        OutlinedTextField(
+            value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
             singleLine = true,
@@ -329,45 +311,16 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
     }
 }
 
-@Composable
-fun ExampleDropdownMenu() {
-    var expanded by remember { mutableStateOf(false) }
-    val roles = listOf("doctor", "hospital")
-    var selectedRole by remember { mutableStateOf("") }
-
-    Column {
-        OutlinedTextField(value = selectedRole,
-            onValueChange = { selectedRole = it },
-            label = { Text("Role") },
-            readOnly = true,
-            trailingIcon = {
-                Icon(imageVector = if (expanded) Icons.Default.ArrowDropUp else Icons.Default.ArrowDropDown,
-                    contentDescription = "Dropdown",
-                    Modifier.clickable { expanded = !expanded })
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            roles.forEach { role ->
-                DropdownMenuItem(onClick = {
-                    selectedRole = role
-                    expanded = false
-                }) {
-                    // Ensure the Text composable is correctly receiving a string for its 'text' parameter
-                    Text(text = role.replaceFirstChar { it.uppercase() })
-                }
-            }
-        }
-    }
-}
-
 
 @Composable
-fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
+fun RegisterScreen(
+    viewModel: DutyVacanciesViewModel,
+    onRegistrationSuccess: () -> Unit
+) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("") }
-    var specialty by remember { mutableStateOf("") }
+    val selectedSpecialty = remember { mutableStateOf(Specialty("", "")) }
     var localization by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     val showSpecialtyLocalization by remember { derivedStateOf { role == "doctor" } }
@@ -375,12 +328,14 @@ fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
     val roles = listOf("doctor", "hospital") // Your roles
 
     Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(value = username,
+        OutlinedTextField(
+            value = username,
             onValueChange = { username = it },
             label = { Text("Username") },
             singleLine = true
         )
-        OutlinedTextField(value = password,
+        OutlinedTextField(
+            value = password,
             onValueChange = { password = it },
             label = { Text("Password") },
             singleLine = true,
@@ -414,12 +369,11 @@ fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
         }
 
         if (showSpecialtyLocalization) {
-            OutlinedTextField(value = specialty,
-                onValueChange = { specialty = it },
-                label = { Text("Specialty (Doctors only)") },
-                singleLine = true
-            )
-            OutlinedTextField(value = localization,
+
+            SpecialtyDropdownMenu(viewModel.specialtiesViewModel, selectedSpecialty)
+
+            OutlinedTextField(
+                value = localization,
                 onValueChange = { localization = it },
                 label = { Text("Localization (Doctors only)") },
                 singleLine = true
@@ -430,7 +384,12 @@ fun RegisterScreen(onRegistrationSuccess: () -> Unit) {
             onClick = {
 
                 performRegistration(
-                    username, password, role, specialty, localization, onRegistrationSuccess
+                    username,
+                    password,
+                    role,
+                    selectedSpecialty.value._id,
+                    localization,
+                    onRegistrationSuccess
                 )
 
             }, modifier = Modifier.padding(top = 16.dp)
@@ -581,7 +540,8 @@ fun AddDoctorAvailabilityScreen(
         }
 
         // Placeholder for Available Hours Input
-        OutlinedTextField(value = availableHours,
+        OutlinedTextField(
+            value = availableHours,
             onValueChange = { availableHours = it },
             label = { Text("Available Hours") },
             modifier = Modifier.fillMaxWidth()
@@ -723,7 +683,7 @@ fun DutyVacanciesScreen(
 }
 
 
-class DutyVacanciesViewModel : ViewModel() {
+class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : ViewModel() {
     private val _dutyVacancies = MutableStateFlow<List<DutyVacancy>>(emptyList())
     val dutyVacancies: StateFlow<List<DutyVacancy>> = _dutyVacancies
     private lateinit var webSocket: WebSocket
@@ -778,19 +738,21 @@ class DutyVacanciesViewModel : ViewModel() {
     fun publishDutyVacancy(
         date: String,
         dutyHours: String,
-        requiredSpecialty: String,
+        requiredSpecialty: MutableState<Specialty>,
         onPublishSuccess: () -> Unit
     ) = viewModelScope.launch {
         try {
+            //val requiredSpecialtyId = specialtiesViewModel.specialties.value.find { it.name == requiredSpecialty }?._id ?: ""
+
             val dutyVacancy = DutyVacancy(
                 date = date,
                 dutyHours = dutyHours,
-                requiredSpecialty = requiredSpecialty,
+                requiredSpecialty = requiredSpecialty.value,
                 _id = null,
                 status = DutySlotStatus.from("open"),
                 hospitalId = null
-
             )
+
             val response = RetrofitClient.apiService.publishDutyVacancy(dutyVacancy)
             if (response.isSuccessful) {
                 // Handle successful publish
@@ -827,7 +789,7 @@ class DutyVacanciesViewModel : ViewModel() {
         doctorName: String,
         date: String,
         dutyHours: String,
-        requiredSpecialty: String
+        requiredSpecialty: Specialty?
     ) = viewModelScope.launch {
         val data = AssignDutySlotRequest(
             _id = dutySlotId,
@@ -939,7 +901,7 @@ fun DutyVacancyCard(
             )
             Text("Duty Hours: ${dutyVacancy.dutyHours}", style = MaterialTheme.typography.bodyLarge)
             Text(
-                "Required Specialty: ${dutyVacancy.requiredSpecialty}",
+                "Required Specialty: ${dutyVacancy.requiredSpecialty!!.name}",
                 style = MaterialTheme.typography.bodyLarge
             )
             Text("Status: ${dutyVacancy.status}", style = MaterialTheme.typography.bodyLarge)
@@ -967,7 +929,7 @@ fun DutyVacancyCard(
                             }
 
                             // Add a Remove button if the user is the hospital owner of the slot
-                            if (userId == dutyVacancy.hospitalId!!._id) {
+                            if (userId == dutyVacancy.hospitalId._id) {
                                 Button(onClick = onRemoveSlot) {
                                     Text("Remove")
                                 }
@@ -1003,6 +965,8 @@ fun DutyVacancyPublishScreen(
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val selectedSpecialty = remember { mutableStateOf(Specialty("", "")) }
+
 
     // Date picker dialog
     fun showDatePicker() {
@@ -1023,38 +987,91 @@ fun DutyVacancyPublishScreen(
 
     Column {
         // Use a TextField for the date display and a Button for the date selection
-        TextField(value = date,
+        TextField(
+            value = date,
             onValueChange = { date = it },
             label = { Text("Date") },
             modifier = Modifier.padding(PaddingValues(all = 8.dp))
         )
+
         Button(onClick = { showDatePicker() }) {
             Text(text = "Select Date")
         }
 
-        OutlinedTextField(value = dutyHours,
+        OutlinedTextField(
+            value = dutyHours,
             onValueChange = { dutyHours = it },
             label = { Text("Duty Hours") },
             modifier = Modifier.padding(PaddingValues(all = 8.dp))
         )
-        OutlinedTextField(value = requiredSpecialty,
-            onValueChange = { requiredSpecialty = it },
-            label = { Text("Required Specialty") },
-            modifier = Modifier.padding(PaddingValues(all = 8.dp))
-        )
+
+        SpecialtyDropdownMenu(viewModel.specialtiesViewModel, selectedSpecialty)
+
         Button(
             onClick = {
                 coroutineScope.launch {
                     viewModel.publishDutyVacancy(
                         date,
                         dutyHours,
-                        requiredSpecialty,
+                        selectedSpecialty,
                         onPublishSuccess
                     )
                 }
             }, modifier = Modifier.padding(PaddingValues(all = 8.dp))
         ) {
             Text("Publish")
+        }
+    }
+}
+
+// https://alexzh.com/jetpack-compose-dropdownmenu/ for ExposedDropdownMenuBox
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SpecialtyDropdownMenu(
+    specialtiesViewModel: SpecialtyViewModel,
+    selectedSpecialty: MutableState<Specialty>
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val specialties by specialtiesViewModel.specialties.collectAsState()
+    val context = LocalContext.current
+    var selectedText by remember { mutableStateOf("") }
+
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(32.dp)
+    ) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = {
+                expanded = !expanded
+            }
+        ) {
+            TextField(
+                value = selectedText,
+                onValueChange = {},
+                readOnly = true,
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                modifier = Modifier.menuAnchor()
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                specialties.forEach { specialty ->
+                    DropdownMenuItem(
+                        text = { Text(text = specialty.name) },
+                        onClick = {
+                            selectedSpecialty.value = specialty
+                            selectedText = specialty.name
+                            expanded = false
+                            Toast.makeText(context, specialty.name, Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            }
         }
     }
 }

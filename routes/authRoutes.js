@@ -1,26 +1,43 @@
 const express = require('express');
 const User = require('../models/User');
+const Specialty = require('../models/Specialty');
+
+
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 
-router.get('/auth/register', (req, res) => {
-  res.render('register');
+router.get('/auth/register', async (req, res) => {
+  try {
+    const specialties = await Specialty.find({});
+    res.render('register', { specialties });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
 });
 
 router.post('/auth/register', async (req, res) => {
   try {
     const { username, password, role, specialty, localization } = req.body;
+
     // Validate specialty and localization for doctors
     if(role === 'doctor' && (!specialty || !localization)) {
       throw new Error('Specialty and Localization are required for doctors.');
     }
+
     // Conditionally include specialty and localization based on role
     const userData = { username, password, role };
     if(role === 'doctor') {
-      userData.specialty = specialty;
+      // Find the Specialty document that matches the provided name
+      const specialtyDoc = await Specialty.findById(specialty);
+      if (!specialtyDoc) {
+        throw new Error(`Specialty ${specialty} not found.`);
+      }
+      // Use the ObjectId of the Specialty document
+      userData.specialty = specialtyDoc._id;
       userData.localization = localization;
     }
+
     const user = await User.create(userData);
     console.log(`New user registered: ${user.username}, Role: ${user.role}`);
     res.redirect('/auth/login');
@@ -30,7 +47,6 @@ router.post('/auth/register', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
-
 router.get('/auth/login', (req, res) => {
   res.render('login');
 });
@@ -130,6 +146,16 @@ router.post('/auth/mobile-login', async (req, res) => {
     console.error('Mobile login error:', error);
     console.error(error.stack);
     return res.status(500).json({ message: 'Internal server error' });
+  }
+});
+
+// for Kotlin/Swift
+router.get('/specialties', async (req, res) => {
+  try {
+    const specialties = await Specialty.find({});
+    res.json(specialties);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

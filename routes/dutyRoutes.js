@@ -1,5 +1,6 @@
 const express = require('express');
 const DutySlot = require('../models/DutySlot');
+const Specialty = require('../models/Specialty');
 const { isAuthenticated } = require('./middleware/authMiddleware');
 
 const router = express.Router();
@@ -22,18 +23,35 @@ const isDoctor = (req, res, next) => {
   }
 };
 
-router.get('/duty/publish', isAuthenticated, isHospital, (req, res) => {
-  res.render('dutyPublish');
+// This GET request is used to retrieve and display the list of specialties on the 'dutyPublish' page.
+// It is specifically utilized by the POST '/duty/publish' endpoint to populate the specialties dropdown menu.
+router.get('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
+  try {
+    const specialties = await Specialty.find({});
+    res.render('dutyPublish', { specialties });
+  } catch (error) {
+    console.error('Error fetching specialties:', error);
+    res.status(500).send(error.message);
+  }
 });
 
+// Uses the 'specialties' middleware variable introduced above
 router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
   try {
     const { date, dutyHours, requiredSpecialty } = req.body;
+
+    // Validate requiredSpecialty
+    const specialtyDoc = await Specialty.findById(requiredSpecialty);
+    if (!specialtyDoc) {
+      console.error('Invalid specialty:', requiredSpecialty);
+      return res.status(400).send('Invalid specialty.');
+    }
     const hospitalId = req.session.userId; // Assuming session stores userId
+    const specialty = specialtyDoc._id;
     const newDutySlot = await DutySlot.create({
       date,
       dutyHours,
-      requiredSpecialty,
+      requiredSpecialty: specialty,
       hospitalId,
     });
     console.log(`New duty slot created: ${newDutySlot}`);
@@ -44,13 +62,20 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
     res.status(500).send('Error while publishing duty slot. Please try again later.');
   }
 });
-
 // Find duties by specialty
 router.get('/duty/find_by_specialty', isAuthenticated, async (req, res) => {
   try {
     const { specialty } = req.query;
 
-    const dutySlots = await DutySlot.find({ requiredSpecialty: specialty }).populate('hospitalId');
+    // Find the Specialty document with the provided name
+    const specialtyDoc = await Specialty.findOne({ name: specialty });
+    if (!specialtyDoc) {
+      console.error('No specialty found with name:', specialty);
+      return res.status(400).send('Invalid specialty.');
+    }
+
+    // Use the _id of the specialtyDoc in the DutySlot.find() query
+    const dutySlots = await DutySlot.find({ requiredSpecialty: specialtyDoc._id }).populate('hospitalId');
 
     res.json({ dutySlots: dutySlots });
   } catch (error) {
@@ -59,8 +84,6 @@ router.get('/duty/find_by_specialty', isAuthenticated, async (req, res) => {
     res.status(500).send('Error fetching duty slots');
   }
 });
-
-
 // Remove duty slot by ID
 router.post('/duty/remove', isAuthenticated, isHospital, async (req, res) => {
   try {
@@ -92,11 +115,8 @@ router.get('/duty/browse', isAuthenticated, isDoctor, async (req, res) => {
 
 // Common function to fetch and log duty slots
 async function fetch_and_log_duty_slots(req, res, respond) {
-
   try {
-    const duty_slots = await DutySlot.find().populate('hospitalId').populate('assignedDoctorId');
-    
-
+    const duty_slots = await DutySlot.find().populate('hospitalId').populate('assignedDoctorId').populate('requiredSpecialty');
     // Respond using the provided callback function (either render or JSON)
     respond(res, duty_slots);
   }

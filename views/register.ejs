@@ -21,7 +21,14 @@
             </select>
           </div>
           <div class="mb-3" id="specialtyInput" style="display:none;">
-            <input type="text" name="specialty" placeholder="Specialty (Doctors only)" class="form-control">
+            <select name="specialty" class="form-control">
+              <option value="">Select Specialty (Doctors only)</option>
+              <% specialties.forEach(specialty=> { %>
+                <option value="<%= specialty._id %>">
+                  <%= specialty.name %>
+                </option>
+                <% }); %>
+            </select>
           </div>
           <div class="mb-3" id="localizationInput" style="display:none;">
             <input type="text" name="localization" placeholder="Localization (Doctors only)" class="form-control">

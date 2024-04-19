@@ -6,6 +6,7 @@ import com.example.gieldadyzurowa.types.DutySlotActionRequest
 import com.example.gieldadyzurowa.types.DutyVacancy
 import com.example.gieldadyzurowa.types.LoginRequest
 import com.example.gieldadyzurowa.types.RegistrationRequest
+import com.example.gieldadyzurowa.types.Specialty
 import com.example.gieldadyzurowa.types.UserroleAndId
 
 import retrofit2.Call
@@ -27,7 +28,7 @@ interface ApiService {
     @GET("/duty/slots/json")
     suspend fun fetchDutyVacancies(): Response<List<DutyVacancy>>
 
-    @POST("duty/publish")
+    @POST("/duty/publish")
     suspend fun publishDutyVacancy(
         @Body dutyVacancy: DutyVacancy
     ): Response<Unit>
@@ -60,4 +61,7 @@ interface ApiService {
         @Body request: DutySlotActionRequest
     ): Response<Unit>
 
+    @GET("/specialties")
+    suspend fun getSpecialties(
+    ): Response<List<Specialty>>
 }

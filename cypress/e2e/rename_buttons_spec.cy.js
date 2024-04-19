@@ -40,7 +40,7 @@ function assertHasButtonWithText(btnText, shouldClick = false) {
             const $el = Cypress.$(el);
             return (
                 $el.find('div.btn').length > 0 &&
-                $el.find('.required-specialty').text().trim() === 'qqq'
+                $el.find('.required-specialty').text().trim() === 'Choroby wewnętrzne'
             );
         })
         .then(($el) => {

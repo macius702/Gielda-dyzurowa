@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const dutySlotSchema = new mongoose.Schema({
     date: { type: Date, required: true },
     dutyHours: { type: String, required: true },
-    requiredSpecialty: { type: String, required: true },
+    requiredSpecialty: { type: mongoose.Schema.Types.ObjectId, ref: 'Specialty', required: true },
     hospitalId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     status: {
         type: String,

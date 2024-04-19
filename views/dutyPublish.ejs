@@ -16,8 +16,12 @@
         </div>
         <div class="mb-3">
           <label for="requiredSpecialty" class="form-label">Required Specialty</label>
-          <input type="text" name="requiredSpecialty" required class="form-control" id="requiredSpecialty">
-        </div>
+          <select name="requiredSpecialty" class="form-control" id="requiredSpecialty" required>
+            <option value="">Select Specialty</option>
+            <% specialties.forEach(specialty => { %>
+              <option value="<%= specialty._id %>"><%= specialty.name %></option>
+            <% }); %>
+          </select>        </div>
         <button type="submit" class="btn btn-primary">Publish</button>
       </form>
     </main>
