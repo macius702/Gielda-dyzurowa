@@ -312,6 +312,7 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RegisterScreen(
     viewModel: DutyVacanciesViewModel,
@@ -342,32 +343,45 @@ fun RegisterScreen(
             visualTransformation = PasswordVisualTransformation()
         )
 
-        Box {
-            OutlinedTextField(readOnly = true,
-                value = role.ifEmpty { "Select Role" },
-                onValueChange = {},
-                label = { Text("Role") },
-                trailingIcon = {
-                    Icon(imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
-                        contentDescription = null,
-                        Modifier.clickable { expanded = !expanded })
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = !expanded })
-            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                roles.forEach { selectionOption ->
-                    DropdownMenuItem(onClick = {
-                        role = selectionOption
-
-                        expanded = false
-                    }) {
-                        Text(text = selectionOption.replaceFirstChar { it.uppercase() })
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                OutlinedTextField(
+                    value = role.ifEmpty { "Select Role" },
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        Icon(
+                            imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                            contentDescription = null
+                        )
+                    },
+                    modifier = Modifier.menuAnchor(),
+                    placeholder = { if (role.isEmpty()) Text("Enter specialty") },
+                    label = { Text("Role") },
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    roles.forEach { selectionOption ->
+                        DropdownMenuItem(
+                            onClick = {
+                                role = selectionOption
+                                expanded = false
+                            }
+                        ) {
+                            Text(text = selectionOption)
+                        }
                     }
                 }
             }
         }
-
         if (showSpecialtyLocalization) {
 
             SpecialtyDropdownMenu(viewModel.specialtiesViewModel, selectedSpecialty)
