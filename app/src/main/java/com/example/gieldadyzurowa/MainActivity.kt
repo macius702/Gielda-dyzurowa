@@ -362,7 +362,6 @@ fun RegisterScreen(
                         )
                     },
                     modifier = Modifier.menuAnchor(),
-                    placeholder = { if (role.isEmpty()) Text("Enter specialty") },
                     label = { Text("Role") },
                 )
                 ExposedDropdownMenu(
@@ -389,27 +388,53 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = localization,
                 onValueChange = { localization = it },
-                label = { Text("Localization (Doctors only)") },
+                label = { Text("Localization") },
                 singleLine = true
             )
+        }
+
+        var showSnackbar by remember { mutableStateOf(false) }
+        var snackbarText by remember { mutableStateOf("") }
+
+        if (showSnackbar) {
+            Snackbar(
+                modifier = Modifier.padding(16.dp),
+                action = {
+                    TextButton(onClick = { showSnackbar = false }) {
+                        Text("Dismiss")
+                    }
+                }
+            ) {
+                Text(snackbarText)
+            }
         }
 
         Button(
             onClick = {
 
-                performRegistration(
-                    username,
-                    password,
-                    role,
-                    selectedSpecialty.value._id,
-                    localization,
-                    onRegistrationSuccess
-                )
+                if (username.isEmpty() || password.isEmpty() || role.isEmpty()) {
+                    snackbarText = "Username, password, and role are mandatory"
+                    showSnackbar = true
+                } else if (role == "doctor" && (selectedSpecialty.value._id.isEmpty() || localization.isEmpty())) {
+                    snackbarText = "Specialty and localization are mandatory for doctors"
+                    showSnackbar = true
+                } else {
+
+                    performRegistration(
+                        username,
+                        password,
+                        role,
+                        selectedSpecialty.value._id,
+                        localization,
+                        onRegistrationSuccess
+                    )
+                }
 
             }, modifier = Modifier.padding(top = 16.dp)
         ) {
             Text("Register")
         }
+
     }
 }
 
