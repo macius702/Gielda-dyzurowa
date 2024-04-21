@@ -25,6 +25,52 @@ const isDoctor = (req, res, next) => {
 
 // This GET request is used to retrieve and display the list of specialties on the 'dutyPublish' page.
 // It is specifically utilized by the POST '/duty/publish' endpoint to populate the specialties dropdown menu.
+
+/**
+ * @openapi
+ * /duty/publish:
+ *   get:
+ *     summary: Display the duty publishing form with specialties
+ *     operationId: getDutyPublishForm
+ *     security:
+ *       - sessionAuth: []
+ *       - hospitalRole: []
+ *     responses:
+ *       200:
+ *         description: Duty publishing form page rendered successfully
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *       500:
+ *         description: Error occurred while fetching specialties
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: sessionToken
+ *       description: Session token used for authenticating API requests
+ * 
+ *     hospitalRole:
+ *       type: apiKey
+ *       in: header
+ *       name: Role
+ *       description: Ensure the user role is 'hospital'
+ * 
+ *     doctorRole:
+ *       type: apiKey
+ *       in: header
+ *       name: Role
+ *       description: Ensure the user role is 'doctor'
+ * 
+ * security:
+ *   - sessionAuth: []
+ */
 router.get('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
   try {
     const specialties = await Specialty.find({});
@@ -36,9 +82,55 @@ router.get('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
 });
 
 // Uses the 'specialties' middleware variable introduced above
+/**
+ * @openapi
+ * /duty/publish:
+ *   post:
+ *     summary: Publish a new duty slot
+ *     operationId: publishDutySlot
+ *     security:
+ *       - sessionAuth: []
+ *       - hospitalRole: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/PublishDutySlotRequest'
+ *     responses:
+ *       303:
+ *         description: Redirects after publishing duty slot
+ *         headers:
+ *           Location:
+ *             description: URL to redirect to after successful publishing
+ *             schema:
+ *               type: string
+ *               example: '/'
+ *       500:
+ *         description: Error occurred while publishing duty slot
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ * 
+ * components:
+ *   schemas:
+ *     PublishDutySlotRequest:
+ *       type: object
+ *       properties:
+ *         date:
+ *           type: string
+ *           format: date
+ *         dutyHours:
+ *           type: string
+ *         requiredSpecialty:
+ *           type: string
+ *           description: ID of the required specialty
+ */
 router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
   try {
-    const { date, dutyHours, requiredSpecialty } = req.body;
+    const PublishDutySlotRequest = req.body
+    const { date, dutyHours, requiredSpecialty } = PublishDutySlotRequest;
 
     // Validate requiredSpecialty
     const specialtyDoc = await Specialty.findById(requiredSpecialty);
@@ -63,6 +155,64 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
   }
 });
 // Find duties by specialty
+/** 
+ * @openapi
+ * /duty/find_by_specialty:
+ *   get:
+ *     summary: Find duty slots by specialty
+ *     operationId: findDutyBySpecialty
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - name: specialty
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Specialty to filter duty slots
+ *     responses:
+ *       200:
+ *         description: List of duty slots filtered by specialty
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 dutySlots:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/DutySlot'
+ *       400:
+ *         description: Invalid specialty provided
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *       500:
+ *         description: Error fetching duty slots
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ * components:
+ *  schemas:
+ *     DutySlot:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         hospitalId:
+ *           type: string
+ *           description: ID of the hospital that published the duty slot
+ *         date:
+ *           type: string
+ *           format: date
+ *         dutyHours:
+ *           type: string
+ *         requiredSpecialty:
+ *           type: string
+ *           description: ID of the required specialty
+ */
 router.get('/duty/find_by_specialty', isAuthenticated, async (req, res) => {
   try {
     const { specialty } = req.query;
@@ -84,7 +234,49 @@ router.get('/duty/find_by_specialty', isAuthenticated, async (req, res) => {
     res.status(500).send('Error fetching duty slots');
   }
 });
+
 // Remove duty slot by ID
+/**
+ * @openapi 
+ * /duty/remove:
+ *   post:
+ *     summary: Remove a duty slot by ID
+ *     operationId: removeDutySlot
+ *     security:
+ *       - sessionAuth: []
+ *       - hospitalRole: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               _id:
+ *                 type: string
+ *                 description: ID of the duty slot to remove
+ *     responses:
+ *       303:
+ *         description: Redirects after removing duty slot
+ *         headers:
+ *           Location:
+ *             description: URL to redirect to after successful removal
+ *             schema:
+ *               type: string
+ *               example: '/'
+ *       404:
+ *         description: Duty slot not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *       500:
+ *         description: Error occurred while removing duty slot
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ */
 router.post('/duty/remove', isAuthenticated, isHospital, async (req, res) => {
   try {
     const { _id } = req.body;
@@ -151,6 +343,25 @@ router.get('/duty/slots/rendered', isAuthenticated, (req, res) => {
 });
 
 // Endpoint for JSON response
+ /**
+ * @openapi
+ *   /duty/slots/json:
+ *     get:
+ *       summary: Retrieve all duty slots
+ *       operationId: getDutySlots
+ *       security:
+ *         - sessionAuth: []
+ *       responses:
+ *         200:
+ *           description: A list of duty slots
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: array
+ *                 items:
+ *                   $ref: '#/components/schemas/DutySlot'
+ * 
+ */
 router.get('/duty/slots/json', isAuthenticated, (req, res) => {
   fetch_and_log_duty_slots(req, res, (response, duty_slots) => {
     // Directly respond with JSON
@@ -158,6 +369,45 @@ router.get('/duty/slots/json', isAuthenticated, (req, res) => {
   });
 });
 
+
+/**
+ * @openapi
+ * /assign-duty-slot:
+ *   post:
+ *     summary: Assign a duty slot to a doctor
+ *     operationId: assignDutySlot
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AssignDutySlotRequest'
+ *     responses:
+ *       200:
+ *         description: Duty slot updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DutySlotResponse'
+ *       404:
+ *         description: Duty slot not found or already assigned
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 router.post('/assign-duty-slot', async (req, res) => {
 
   console.log('Executing /assign-duty-slot')
@@ -166,7 +416,8 @@ router.post('/assign-duty-slot', async (req, res) => {
   console.log('Request body:', req.body);
 
   try {
-    const { _id, sendingDoctorId, sendingDoctorName, hospitalUsername, date, dutyHours, requiredSpecialty } = req.body;
+    const AssignDutySlotRequest = req.body;
+    const { _id, sendingDoctorId } = AssignDutySlotRequest
 
     // Logging _id and sendingDoctorId
     console.log(`_id: ${_id}, sendingDoctorId: ${sendingDoctorId}`);
@@ -184,7 +435,11 @@ router.post('/assign-duty-slot', async (req, res) => {
 
       await slot.save();
 
-      res.status(200).send({ message: 'Duty slot updated successfully', slot });
+      let DutySlotResponse = {
+        message: 'Duty slot updated successfully',
+        slot: slot
+      };
+      res.status(200).send(DutySlotResponse);
     }
     else {
       res.status(404).send({ message: 'Duty slot not found or already assigned' });
@@ -197,6 +452,48 @@ router.post('/assign-duty-slot', async (req, res) => {
 
 });
 
+/**
+ * @openapi
+ * /give-consent:
+ *   post:
+ *     summary: Give consent for a duty slot
+ *     operationId: giveConsent
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               _id:
+ *                 type: string
+ *                 description: ID of the duty slot
+ *     responses:
+ *       200:
+ *         description: Consent given successfully, duty slot updated
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DutySlotResponse'
+ *       404:
+ *         description: Duty slot not found or not in pending status
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ */
 router.post('/give-consent', async (req, res) => {
   console.log('Executing /give-consent');
   try {
@@ -209,7 +506,12 @@ router.post('/give-consent', async (req, res) => {
 
       await slot.save(); // Save the updated slot
 
-      res.status(200).send({ message: 'Consent given successfully, duty slot updated', slot });
+      let DutySlotResponse = {
+        message: 'Consent given successfully, duty slot updated',
+        slot: slot
+      };
+
+      res.status(200).send(DutySlotResponse);
     }
     else {
       res.status(404).send({ message: 'Duty slot not found or not in pending status' });
@@ -221,6 +523,131 @@ router.post('/give-consent', async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * /revoke-assignment:
+ *   post:
+ *     summary: Revoke an assigned duty slot
+ *     operationId: revokeAssignment
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               _id:
+ *                 type: string
+ *                 description: ID of the duty slot
+ *     responses:
+ *       200:
+ *         description: Assignment revoked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DutySlotResponse'
+ *       404:
+ *         description: Duty slot not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ * 
+ * components:
+ *   schemas:
+ *     DutySlot:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         date:
+ *           type: string
+ *           format: date
+ *         dutyHours:
+ *           type: string
+ *         requiredSpecialty:
+ *           $ref: '#/components/schemas/Specialty'
+ *         hospitalId:
+ *           $ref: '#/components/schemas/User'
+ *         status:
+ *           type: string
+ *           enum:
+ *             - open
+ *             - pending
+ *             - filled
+ *         assignedDoctorId:
+ *           allOf:
+ *             - $ref: '#/components/schemas/User'
+ *           nullable: true
+ *
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         username:
+ *           type: string
+ *         role:
+ *           type: string
+ *           enum:
+ *             - doctor
+ *             - hospital
+ *         specialty:
+ *           type: string
+ *           nullable: true
+ *         localization:
+ *           type: string
+ *           nullable: true
+ *         profileVisible:
+ *           type: boolean
+ *
+ *     Specialty:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string 
+ *
+ * 
+ *     AssignDutySlotRequest:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         sendingDoctorId:
+ *           type: string
+ * 
+ *     DutySlotResponse:
+ *       type: object
+ *       properties:
+ *         message:
+ *           type: string
+ *         slot:
+ *           $ref: '#/components/schemas/DutySlot'
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: sessionToken
+ *       description: Session token used for authenticating API requests
+ * 
+ * security:
+ *   - sessionAuth: []
+ */
 router.post('/revoke-assignment', async (req, res) => {
   console.log('Executing /revoke-assignment');
   try {
@@ -232,8 +659,13 @@ router.post('/revoke-assignment', async (req, res) => {
       slot.assignedDoctorId = null; // Remove the assigned doctor
 
       await slot.save();
-      res.status(200).send({ message: 'Assignment revoked successfully', slot });
-    } else {
+      let DutySlotResponse = {
+        message: 'Assignment revoked successfully',
+        slot: slot
+      };
+
+      res.status(200).send(DutySlotResponse);
+     } else {
       res.status(404).send({ message: 'Duty slot not found' });
     }
   } catch (error) {

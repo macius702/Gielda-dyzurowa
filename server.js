@@ -11,6 +11,11 @@ const doctorAvailabilityRoutes = require('./routes/doctorAvailabilityRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const availabilityRoutes = require('./routes/availabilityRoutes'); // Added for doctor availability viewing feature
 const sessionDataMiddleware = require('./routes/middleware/sessionDataMiddleware');
+const fs = require('fs');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+
 
 if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET) {
   console.error("Error: config environment variables not set. Please create/edit .env configuration file.");
@@ -19,6 +24,37 @@ if (!process.env.DATABASE_URL || !process.env.SESSION_SECRET) {
 
 const app = express();
 const port = process.env.PORT || 3000;
+
+console.log('Setting up Swagger options...');
+
+const options = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Express API with Swagger',
+      version: '1.0.0',
+    },
+  },
+  apis: [
+    './routes/authRoutes.js'
+    ,
+    './routes/availabilityRoutes.js'
+    ,
+    './routes/doctorAvailabilityRoutes.js'
+    ,
+    './routes/dutyRoutes.js'
+    ,
+    './routes/profileRoutes.js'
+
+  ], // files containing annotations as above
+};
+
+const openapiSpecification = swaggerJsdoc(options);
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(openapiSpecification));
+// Save it to a JSON file
+fs.writeFileSync('swagger.json', JSON.stringify(openapiSpecification, null, 2));
+
+
 
 // Middleware to parse request bodies
 app.use(express.urlencoded({ extended: true }));

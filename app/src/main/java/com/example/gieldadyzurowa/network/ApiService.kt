@@ -5,6 +5,7 @@ import com.example.gieldadyzurowa.types.DoctorAvailability
 import com.example.gieldadyzurowa.types.DutySlotActionRequest
 import com.example.gieldadyzurowa.types.DutyVacancy
 import com.example.gieldadyzurowa.types.LoginRequest
+import com.example.gieldadyzurowa.types.PublishDutySlotRequest
 import com.example.gieldadyzurowa.types.RegistrationRequest
 import com.example.gieldadyzurowa.types.Specialty
 import com.example.gieldadyzurowa.types.UserroleAndId
@@ -30,7 +31,7 @@ interface ApiService {
 
     @POST("/duty/publish")
     suspend fun publishDutyVacancy(
-        @Body dutyVacancy: DutyVacancy
+        @Body dutyVacancy: PublishDutySlotRequest
     ): Response<Unit>
 
     @GET("/doctor/availabilities/json")

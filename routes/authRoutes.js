@@ -16,6 +16,60 @@ router.get('/auth/register', async (req, res) => {
   }
 });
 
+/**
+ * @openapi
+ * /auth/register:
+ *   get:
+ *     summary: Display registration page
+ *     responses:
+ *       200:
+ *         description: Successfully displays the registration page
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *   post:
+ *     summary: Register a new user
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterRequest'
+ *     responses:
+ *       302:
+ *         description: Redirects to login page after successful registration
+ *         headers:
+ *           Location:
+ *             schema:
+ *               type: string
+ *               example: '/auth/login'
+ *       500:
+ *         description: Error occurred during registration
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ * 
+ * components:
+ *  schemas:
+ *    RegisterRequest:
+ *      type: object
+ *      properties:
+ *        username:
+ *          type: string
+ *        password:
+ *          type: string
+ *        role:
+ *          type: string
+ *        specialty:
+ *          type: string
+ *        localization:
+ *          type: string
+ */
 router.post('/auth/register', async (req, res) => {
   try {
     const { username, password, role, specialty, localization } = req.body;
@@ -47,6 +101,63 @@ router.post('/auth/register', async (req, res) => {
     res.status(500).send(error.message);
   }
 });
+
+/**
+ * @openapi
+ * /auth/login:
+ *    get:
+ *      summary: Display login page
+ *      responses:
+ *        200:
+ *          description: Successfully displays the login page
+ *          content:
+ *            text/html:
+ *              schema:
+ *                type: string
+ *    post:
+ *      summary: User login
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/LoginRequest'
+ *      responses:
+ *        200:
+ *          description: Redirects to home page after successful login
+ *          headers:
+ *            Location:
+ *              schema:
+ *                type: string
+ *                example: '/'
+ *        400:
+ *          description: Invalid username or password
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *        500:
+ *          description: Error occurred during login
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ * components:
+ *  schemas:
+ *    LoginRequest:
+ *      type: object
+ *      properties:
+ *        username:
+ *          type: string
+ *        password:
+ *          type: string
+ */
 router.get('/auth/login', (req, res) => {
   res.render('login');
 });
@@ -115,6 +226,27 @@ router.post('/auth/login', async (req, res) =>
     }
 });
 
+/* auth/logout:
+   get:
+ *  summary: User logout
+ *  responses:
+ *    302:
+ *      description: Redirects to login page after logout
+ *      headers:
+ *        Location:
+ *          schema:
+ *            type: string
+ *            example: '/auth/login'
+ *    500:
+ *      description: Error logging out
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              message:
+ *                type: string
+ */
 router.get('/auth/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
@@ -128,6 +260,50 @@ router.get('/auth/logout', (req, res) => {
 });
 
 // New route for mobile login
+/**
+ * @openapi
+ * /auth/mobile-login:
+ *    post:
+ *      summary: Mobile user login
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#/components/schemas/LoginRequest'
+ *      responses:
+ *        200:
+ *          description: Returns JWT token
+ *          content:
+ *            application/json:
+ *              schema:
+ *                $ref: '#/components/schemas/TokenResponse'
+ *        400:
+ *          description: Invalid credentials
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ *        500:
+ *          description: Internal server error
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+ * components:
+ *   schemas:
+ *    TokenResponse:
+ *      type: object
+ *      properties:
+ *        token:
+ *          type: string
+ */
 router.post('/auth/mobile-login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -149,7 +325,40 @@ router.post('/auth/mobile-login', async (req, res) => {
   }
 });
 
-// for Kotlin/Swift
+/**
+ * @openapi
+ *  /specialties:
+ *      get:
+ *        summary: List all specialties
+ *        responses:
+ *          200:
+ *            description: List of all specialties
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: array
+ *                  items:
+ *                    $ref: '#/components/schemas/Specialty'
+ *          500:
+ *            description: Error fetching specialties
+ *            content:
+ *              application/json:
+ *                schema:
+ *                  type: object
+ *                  properties:
+ *                    message:
+ *                      type: string// for Kotlin/Swift
+ * components:
+ *  schemas:
+ *    Specialty:
+ *      type: object
+ *      properties:
+ *        _id:
+ *          type: string
+ *        name:
+ *          type: string* 
+ */
+
 router.get('/specialties', async (req, res) => {
   try {
     const specialties = await Specialty.find({});

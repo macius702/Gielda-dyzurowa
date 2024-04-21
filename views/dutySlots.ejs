@@ -52,12 +52,12 @@
                         // Parse the text as JSON
                         const jsonObj = JSON.parse(reader.result);
 
+                        console.log('JSON message from server:', jsonObj);
                         // Check if the jsonObj contains the sendingDoctor property
-                        if (jsonObj.hasOwnProperty('hospitalUsername')) {
+                        if (jsonObj.hasOwnProperty('hospitalId')) {
                             // Check if sendingDoctor is for the current user
-                            console.log('currentUsername:', currentUsername)
                             const notificationIndicator = document.querySelector('.notification-indicator');
-                            if (jsonObj.hospitalUsername === currentUsername) {
+                            if (jsonObj.hospitalId === currentUserId) {
                                 console.log('This message is for us:', jsonObj);
 
                                 notificationIndicator.style.display = 'block';
@@ -75,7 +75,6 @@
                         } else {
                             console.log('JSON message from server does not contain a sendingDoctor property.');
                         }
-                        console.log('JSON message from server:', jsonObj);
 
                     };
                     reader.onerror = function (error) {
@@ -136,7 +135,7 @@
                         const assignButton = document.createElement('div');
                         assignButton.className = 'btn btn-primary';
                         assignButton.textContent = 'Assign';
-                        assignButton.onclick = () => assignAndSendMessage(slot._id, currentUserId, currentUsername, slot.hospitalId.username, new Date(slot.date).toDateString(), slot.dutyHours, slot.requiredSpecialty, assignButton);
+                        assignButton.onclick = () => assignAndSendMessage(slot._id, currentUserId, currentUsername, assignButton);
                         container.appendChild(assignButton);
                     } else if (slot.status === 'pending') {
                         const waitingButton = document.createElement('div');
@@ -239,15 +238,10 @@
             }
 
 
-            function assignAndSendMessage(slotId, sendingDoctorId, sendingDoctorName, hospitalUsername, date, dutyHours, requiredSpecialty, element) {
-                const data = {
+            function assignAndSendMessage(slotId, sendingDoctorId, currentUserName, element) {
+                const AssignDutySlotRequest = {
                     _id: slotId,
-                    sendingDoctorId: sendingDoctorId,
-                    sendingDoctorName: sendingDoctorName,
-                    hospitalUsername: hospitalUsername,
-                    date: date,
-                    dutyHours: dutyHours,
-                    requiredSpecialty: requiredSpecialty
+                    sendingDoctorId: sendingDoctorId
                 };
 
                 fetch('/assign-duty-slot', {
@@ -255,7 +249,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(data),
+                    body: JSON.stringify(AssignDutySlotRequest),
                 })
                     .then(response => response.json())
                     .then(assignData => {
@@ -265,7 +259,7 @@
                         document.querySelector(`.status-display[data-slot-id="${slotId}"]`).innerText = 'pending'; // or assignData.status if your API responds with it
 
                         // Update assigned doctor display
-                        document.querySelector(`.assigned-doctor-display[data-slot-id="${slotId}"]`).innerText = sendingDoctorName; // Assuming your API responds with the doctor's name under assignedDoctorName
+                        document.querySelector(`.assigned-doctor-display[data-slot-id="${slotId}"]`).innerText = currentUserName; // Assuming your API responds with the doctor's name under assignedDoctorName
 
 
                         // Disable the button and update its text
@@ -273,7 +267,12 @@
                         element.innerText = 'Waiting for Consent';
                         element.classList.add('disabled'); // Optionally add 'disabled' class for styling
 
-                        sendMessage(JSON.stringify(data)); // Call sendMessage on success
+                        const SendMessageToserverAfterAssignDutySlot = {
+                            _id: slotId,
+                            sendingDoctorId: sendingDoctorId,
+                            hospitalId: assignData.slot.hospitalId
+                        };
+                        sendMessage(JSON.stringify(SendMessageToserverAfterAssignDutySlot)); // Call sendMessage on success
                     })
                     .catch(error => console.error('Error:', error));
             }
@@ -353,26 +352,9 @@
                         // Update the assigned doctor display to 'None'
                         document.querySelector(`.assigned-doctor-display[data-slot-id="${slot_id}"]`).innerText = 'None';
 
-
-                        const hospitalElement = document.querySelector(`.hospital-username[data-slot-id="${slot_id}"]`);
-                        const hospitalUsername = hospitalElement ? hospitalElement.textContent : null;
-
-                        // For Date
-                        const slotDateElement = document.querySelector(`.slot-date[data-slot-id="${slot_id}"]`);
-                        const slotDate = slotDateElement ? slotDateElement.textContent : null;
-
-                        // For Duty Hours
-                        const dutyHoursElement = document.querySelector(`.duty-hours[data-slot-id="${slot_id}"]`);
-                        const dutyHours = dutyHoursElement ? dutyHoursElement.textContent : null;
-
-                        // For Required Specialty
-                        const requiredSpecialtyElement = document.querySelector(`.required-specialty[data-slot-id="${slot_id}"]`);
-                        const requiredSpecialty = requiredSpecialtyElement ? requiredSpecialtyElement.textContent : null;
-
                         // Update the button to allow new assignments
                         element.innerText = 'Assign'; // Change button text back to "Assign"
-                        //element.setAttribute('onclick', `assignAndSendMessage('${slot_id}', ...)`);
-                        element.setAttribute('onclick', `assignAndSendMessage('${slot_id}', '${currentUserId}', '${currentUsername}', '${hospitalUsername}', '${new Date(slotDate).toDateString()}', '${dutyHours}', '${requiredSpecialty}', this)`);
+                        element.setAttribute('onclick', `assignAndSendMessage('${slot_id}', '${currentUserId}', '${currentUsername}', this)`);
 
                         element.classList.remove('disabled'); // Remove 'disabled' class if exists
                         element.disabled = false; // Enable the button

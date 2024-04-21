@@ -4,6 +4,170 @@ const User = require('../models/User');
 const { isAuthenticated } = require('./middleware/authMiddleware');
 
 // Hospital Profile Viewing Route
+/**
+ * @openapi
+ * /hospital/profile/{id}:
+ *   get:
+ *     summary: View hospital profile
+ *     operationId: getHospitalProfile
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Hospital user ID
+ *     responses:
+ *       200:
+ *         description: Hospital profile page rendered successfully
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *       404:
+ *         description: Profile not available
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *       500:
+ *         description: Error fetching profile
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ * /doctor/profile/{id}:
+ *   get:
+ *     summary: View doctor profile
+ *     operationId: getDoctorProfile
+ *     security:
+ *       - sessionAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Doctor user ID
+ *     responses:
+ *       200:
+ *         description: Doctor profile page rendered successfully
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *       404:
+ *         description: Profile not available
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *       500:
+ *         description: Error fetching profile
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ * /user/data:
+ *   get:
+ *     summary: Fetch user data
+ *     operationId: getUserData
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: User data returned successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UserData'
+ *       500:
+ *         description: Error fetching user data
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ * /user/settings:
+ *   get:
+ *     summary: Display user settings page
+ *     operationId: getUserSettingsPage
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: User settings page rendered successfully
+ *         content:
+ *           text/html:
+ *             schema:
+ *               type: string
+ *       404:
+ *         description: User not found
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *       500:
+ *         description: Error fetching user for settings page
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *   post:
+ *     summary: Update user settings
+ *     operationId: updateUserSettings
+ *     security:
+ *       - sessionAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/x-www-form-urlencoded:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               phoneNumber:
+ *                 type: string
+ *                 format: phone
+ *     responses:
+ *       303:
+ *         description: Redirects after updating settings
+ *         headers:
+ *           Location:
+ *             description: URL to redirect to after successful update
+ *             schema:
+ *               type: string
+ *               example: '/user/settings'
+ *       500:
+ *         description: Error while updating settings
+ *         content:
+ *           text/plain:
+ *             schema:
+ *               type: string
+ *
+ * components:
+ *   schemas:
+ *     UserroleAndId:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         role:
+ *           type: string
+ * 
+ *   securitySchemes:
+ *     sessionAuth:
+ *       type: apiKey
+ *       in: cookie
+ *       name: sessionToken
+ *       description: Session token used for authenticating API requests
+ * 
+ * security:
+ *   - sessionAuth: []
+ */
 router.get('/hospital/profile/:id', isAuthenticated, async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
@@ -37,7 +201,7 @@ router.get('/doctor/profile/:id', isAuthenticated, async (req, res) => {
   }
 });
 
-// Get user data like role, userId, etc
+// Only // for Kotlin/Swift
 router.get('/user/data', isAuthenticated, async (req, res) => {
   try {// add logging to see what is happening
     console.log('Fetching user data');
@@ -45,7 +209,12 @@ router.get('/user/data', isAuthenticated, async (req, res) => {
     const user = await User.findById(req.session  ? req.session.userId : null); // If session is not available, return null user
 
     console.log('User data:', user);
-    res.json({   _id: user._id, role: user.role } );
+    let UserroleAndId = {
+      _id: user._id,
+      role: user.role
+    };
+
+    res.json(UserroleAndId);
   } catch (error) {
     console.error('Error fetching user data:', error);
     console.error(error.stack);

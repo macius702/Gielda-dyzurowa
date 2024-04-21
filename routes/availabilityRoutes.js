@@ -37,6 +37,33 @@ async function fetch_doctor_availabilities()
     }
 }
 
+
+ /**
+ * @openapi
+ * /doctor/availabilities/rendered:
+ *    get:
+ *      summary: Fetch and render doctor availabilities
+ *      operationId: getRenderedDoctorAvailabilities
+ *      security:
+ *        - sessionAuth: []
+ *      responses:
+ *        200:
+ *          description: Doctor availabilities page rendered successfully
+ *          content:
+ *            text/html:
+ *              schema:
+ *                type: string
+ *        500:
+ *          description: Error occurred while fetching or rendering doctor availabilities
+ *          content:
+ *            application/json:
+ *              schema:
+ *                type: object
+ *                properties:
+ *                  message:
+ *                    type: string
+*/
+
 router.get('/doctor/availabilities/rendered', isAuthenticated, async (req, res) =>
 {
     try
@@ -51,6 +78,55 @@ router.get('/doctor/availabilities/rendered', isAuthenticated, async (req, res) 
 });
 
 // Usage of the middleware in your route
+
+/**
+ * @openapi
+ * /doctor/availabilities/json:
+ *   get:
+ *     summary: Fetch doctor availabilities in JSON format
+ *     operationId: getJsonDoctorAvailabilities
+ *     security:
+ *       - sessionAuth: []
+ *     responses:
+ *       200:
+ *         description: Doctor availabilities returned in JSON format
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/DoctorAvailability'
+ *       500:
+ *         description: Error occurred while fetching doctor availabilities
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ * components:
+ *   schemas:
+ *     DoctorAvailability:
+ *       type: object
+ *       properties:
+ *         doctorId:
+ *           type: string
+ *           description: The ID of the doctor
+ *         date:
+ *           type: string
+ *           format: date
+ *           description: The date of availability
+ *         availableHours:
+ *           type: string
+ *           description: Hours during the day the doctor is available
+ * securitySchemes:
+ *   sessionAuth:
+ *     type: apiKey
+ *     in: cookie
+ *     name: sessionToken
+ *     description: Session token used for authenticating API requests
+ */
 router.get('/doctor/availabilities/json', isAuthenticated, async (req, res) =>
 {
     try

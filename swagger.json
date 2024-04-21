@@ -1,0 +1,1305 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Express API with Swagger",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/auth/register": {
+      "get": {
+        "summary": "Display registration page",
+        "responses": {
+          "200": {
+            "description": "Successfully displays the registration page",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Register a new user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to login page after successful registration",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "example": "/auth/login"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error occurred during registration",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "get": {
+        "summary": "Display login page",
+        "responses": {
+          "200": {
+            "description": "Successfully displays the login page",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "User login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Redirects to home page after successful login",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string",
+                  "example": "/"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid username or password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error occurred during login",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/mobile-login": {
+      "post": {
+        "summary": "Mobile user login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns JWT token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid credentials",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/specialties": {
+      "get": {
+        "summary": "List all specialties",
+        "responses": {
+          "200": {
+            "description": "List of all specialties",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Specialty"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error fetching specialties",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string// for Kotlin/Swift"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doctor/availabilities/rendered": {
+      "get": {
+        "summary": "Fetch and render doctor availabilities",
+        "operationId": "getRenderedDoctorAvailabilities",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor availabilities page rendered successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error occurred while fetching or rendering doctor availabilities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doctor/availabilities/json": {
+      "get": {
+        "summary": "Fetch doctor availabilities in JSON format",
+        "operationId": "getJsonDoctorAvailabilities",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor availabilities returned in JSON format",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DoctorAvailability"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error occurred while fetching doctor availabilities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "sessionAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionToken",
+        "description": "Session token used for authenticating API requests"
+      }
+    },
+    "/doctor/availability": {
+      "get": {
+        "summary": "Display the doctor availability form",
+        "operationId": "getDoctorAvailability",
+        "security": [
+          {
+            "sessionAuth": []
+          },
+          {
+            "doctorRole": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor availability form page rendered successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied for non-doctors",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Access denied. Only doctors can perform this action."
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Post a doctor's availability",
+        "operationId": "postDoctorAvailability",
+        "security": [
+          {
+            "sessionAuth": []
+          },
+          {
+            "doctorRole": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "date": {
+                    "type": "string",
+                    "format": "date",
+                    "description": "Date for which availability is being posted."
+                  },
+                  "availableHours": {
+                    "type": "string",
+                    "description": "Hours during which the doctor is available."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirects after posting availability",
+            "headers": {
+              "Location": {
+                "description": "URL to redirect to after successful post",
+                "schema": {
+                  "type": "string",
+                  "example": "/"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error occurred while posting availability",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Error while posting availability. Please try again later."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "security": {
+      "0": {
+        "sessionAuth": []
+      },
+      "1": {
+        "doctorRole": []
+      }
+    },
+    "/duty/publish": {
+      "get": {
+        "summary": "Display the duty publishing form with specialties",
+        "operationId": "getDutyPublishForm",
+        "security": [
+          {
+            "sessionAuth": []
+          },
+          {
+            "hospitalRole": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Duty publishing form page rendered successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error occurred while fetching specialties",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "securitySchemes": {
+        "sessionAuth": {
+          "type": "apiKey",
+          "in": "cookie",
+          "name": "sessionToken",
+          "description": "Session token used for authenticating API requests"
+        },
+        "hospitalRole": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Role",
+          "description": "Ensure the user role is 'hospital'"
+        },
+        "doctorRole": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Role",
+          "description": "Ensure the user role is 'doctor'"
+        }
+      },
+      "post": {
+        "summary": "Publish a new duty slot",
+        "operationId": "publishDutySlot",
+        "security": [
+          {
+            "sessionAuth": []
+          },
+          {
+            "hospitalRole": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishDutySlotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirects after publishing duty slot",
+            "headers": {
+              "Location": {
+                "description": "URL to redirect to after successful publishing",
+                "schema": {
+                  "type": "string",
+                  "example": "/"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error occurred while publishing duty slot",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/duty/find_by_specialty": {
+      "get": {
+        "summary": "Find duty slots by specialty",
+        "operationId": "findDutyBySpecialty",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "specialty",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Specialty to filter duty slots"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of duty slots filtered by specialty",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "dutySlots": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/DutySlot"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid specialty provided",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error fetching duty slots",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/duty/remove": {
+      "post": {
+        "summary": "Remove a duty slot by ID",
+        "operationId": "removeDutySlot",
+        "security": [
+          {
+            "sessionAuth": []
+          },
+          {
+            "hospitalRole": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "description": "ID of the duty slot to remove"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirects after removing duty slot",
+            "headers": {
+              "Location": {
+                "description": "URL to redirect to after successful removal",
+                "schema": {
+                  "type": "string",
+                  "example": "/"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Duty slot not found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error occurred while removing duty slot",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/duty/slots/json": {
+      "get": {
+        "summary": "Retrieve all duty slots",
+        "operationId": "getDutySlots",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of duty slots",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DutySlot"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/assign-duty-slot": {
+      "post": {
+        "summary": "Assign a duty slot to a doctor",
+        "operationId": "assignDutySlot",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignDutySlotRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Duty slot updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DutySlotResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Duty slot not found or already assigned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/give-consent": {
+      "post": {
+        "summary": "Give consent for a duty slot",
+        "operationId": "giveConsent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "description": "ID of the duty slot"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Consent given successfully, duty slot updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DutySlotResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Duty slot not found or not in pending status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/revoke-assignment": {
+      "post": {
+        "summary": "Revoke an assigned duty slot",
+        "operationId": "revokeAssignment",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "description": "ID of the duty slot"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Assignment revoked successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DutySlotResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Duty slot not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hospital/profile/{id}": {
+      "get": {
+        "summary": "View hospital profile",
+        "operationId": "getHospitalProfile",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Hospital user ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hospital profile page rendered successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Profile not available",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error fetching profile",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doctor/profile/{id}": {
+      "get": {
+        "summary": "View doctor profile",
+        "operationId": "getDoctorProfile",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Doctor user ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor profile page rendered successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Profile not available",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error fetching profile",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/data": {
+      "get": {
+        "summary": "Fetch user data",
+        "operationId": "getUserData",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data returned successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserData"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error fetching user data",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/user/settings": {
+      "get": {
+        "summary": "Display user settings page",
+        "operationId": "getUserSettingsPage",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User settings page rendered successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error fetching user for settings page",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Update user settings",
+        "operationId": "updateUserSettings",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "phoneNumber": {
+                    "type": "string",
+                    "format": "phone"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirects after updating settings",
+            "headers": {
+              "Location": {
+                "description": "URL to redirect to after successful update",
+                "schema": {
+                  "type": "string",
+                  "example": "/user/settings"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error while updating settings",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "specialty": {
+            "type": "string"
+          },
+          "localization": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "TokenResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "Specialty": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "DoctorAvailability": {
+        "type": "object",
+        "properties": {
+          "doctorId": {
+            "type": "string",
+            "description": "The ID of the doctor"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "The date of availability"
+          },
+          "availableHours": {
+            "type": "string",
+            "description": "Hours during the day the doctor is available"
+          }
+        }
+      },
+      "PublishDutySlotRequest": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "dutyHours": {
+            "type": "string"
+          },
+          "requiredSpecialty": {
+            "type": "string",
+            "description": "ID of the required specialty"
+          }
+        }
+      },
+      "DutySlot": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "hospitalId": {
+            "type": "string",
+            "description": "ID of the hospital that published the duty slot",
+            "$ref": "#/components/schemas/User"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "dutyHours": {
+            "type": "string"
+          },
+          "requiredSpecialty": {
+            "type": "string",
+            "description": "ID of the required specialty",
+            "$ref": "#/components/schemas/Specialty"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "open",
+              "pending",
+              "filled"
+            ]
+          },
+          "assignedDoctorId": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/User"
+              }
+            ],
+            "nullable": true
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "doctor",
+              "hospital"
+            ]
+          },
+          "specialty": {
+            "type": "string",
+            "nullable": true
+          },
+          "localization": {
+            "type": "string",
+            "nullable": true
+          },
+          "profileVisible": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AssignDutySlotRequest": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "sendingDoctorId": {
+            "type": "string"
+          }
+        }
+      },
+      "DutySlotResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "slot": {
+            "$ref": "#/components/schemas/DutySlot"
+          }
+        }
+      },
+      "UserroleAndId": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "sessionAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionToken",
+        "description": "Session token used for authenticating API requests"
+      },
+      "doctorRole": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Role",
+        "description": "Ensure the user role is 'doctor'"
+      }
+    }
+  },
+  "tags": []
+}

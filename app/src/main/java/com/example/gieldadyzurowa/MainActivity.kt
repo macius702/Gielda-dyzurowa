@@ -39,6 +39,7 @@ import com.example.gieldadyzurowa.types.DutySlotActionRequest
 import com.example.gieldadyzurowa.types.DutySlotStatus
 import com.example.gieldadyzurowa.types.DutyVacancy
 import com.example.gieldadyzurowa.types.LoginRequest
+import com.example.gieldadyzurowa.types.PublishDutySlotRequest
 import com.example.gieldadyzurowa.types.RegistrationRequest
 import com.example.gieldadyzurowa.types.Specialty
 import com.example.gieldadyzurowa.types.UserroleAndId
@@ -192,7 +193,6 @@ fun AppContent() {
 
                     "Duty Vacancies" -> DutyVacanciesScreen(
                         viewModel = dutyVacanciesViewModel,
-                        username = username,
                         userrole = userrole,
                         userId = userId
                     )
@@ -651,7 +651,7 @@ fun performLogin(
     RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<Unit> {
         override fun onResponse(call: Call<Unit>, response: RetrofitResponse<Unit>) {
             if (response.isSuccessful) {
-                response.body()?.let { userInfo ->
+                response.body()?.let { _ ->
                     Log.d("LoginSuccess", "Successfully logged in user: $username")
                     // Proceed with login success logic, e.g., updating UI or navigating to another activity
                     onLoginSuccess(username)
@@ -684,7 +684,6 @@ fun performLogin(
 @Composable
 fun DutyVacanciesScreen(
     viewModel: DutyVacanciesViewModel,
-    username: String,
     userrole: String,
     userId: String
 ) {
@@ -703,17 +702,13 @@ fun DutyVacanciesScreen(
                         userId = userId,
                         onAssign = {
                             viewModel.assignDutySlot(
-                                dutySlotId = dutyVacancy._id!!,
-                                doctorId = userId,
-                                doctorName = username,
-                                date = dutyVacancy.date,
-                                dutyHours = dutyVacancy.dutyHours,
-                                requiredSpecialty = dutyVacancy.requiredSpecialty
+                                dutySlotId = dutyVacancy._id,
+                                doctorId = userId
                             )
                         },
-                        onGiveConsent = { viewModel.giveConsent(dutyVacancy._id!!) },
-                        onRevoke = { viewModel.revokeAssignment(dutyVacancy._id!!) },
-                        onRemoveSlot = { viewModel.removeDutySlot(dutyVacancy._id!!) })
+                        onGiveConsent = { viewModel.giveConsent(dutyVacancy._id) },
+                        onRevoke = { viewModel.revokeAssignment(dutyVacancy._id) },
+                        onRemoveSlot = { viewModel.removeDutySlot(dutyVacancy._id) })
 
                 })
             }
@@ -783,13 +778,10 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
         try {
             //val requiredSpecialtyId = specialtiesViewModel.specialties.value.find { it.name == requiredSpecialty }?._id ?: ""
 
-            val dutyVacancy = DutyVacancy(
+            val dutyVacancy = PublishDutySlotRequest(
                 date = date,
                 dutyHours = dutyHours,
-                requiredSpecialty = requiredSpecialty.value,
-                _id = null,
-                status = DutySlotStatus.from("open"),
-                hospitalId = null
+                requiredSpecialty = requiredSpecialty.value
             )
 
             val response = RetrofitClient.apiService.publishDutyVacancy(dutyVacancy)
@@ -824,11 +816,7 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
 
     fun assignDutySlot(
         dutySlotId: String,
-        doctorId: String,
-        doctorName: String,
-        date: String,
-        dutyHours: String,
-        requiredSpecialty: Specialty?
+        doctorId: String
     ) = viewModelScope.launch {
         val data = AssignDutySlotRequest(
             _id = dutySlotId,
@@ -931,7 +919,7 @@ fun DutyVacancyCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                "Hospital: ${dutyVacancy.hospitalId!!.username}",
+                "Hospital: ${dutyVacancy.hospitalId.username}",
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
@@ -940,7 +928,7 @@ fun DutyVacancyCard(
             )
             Text("Duty Hours: ${dutyVacancy.dutyHours}", style = MaterialTheme.typography.bodyLarge)
             Text(
-                "Required Specialty: ${dutyVacancy.requiredSpecialty!!.name}",
+                "Required Specialty: ${dutyVacancy.requiredSpecialty.name}",
                 style = MaterialTheme.typography.bodyLarge
             )
             Text("Status: ${dutyVacancy.status}", style = MaterialTheme.typography.bodyLarge)
@@ -955,7 +943,7 @@ fun DutyVacancyCard(
                         ) { Text("Waiting for Consent") }
 
                         DutySlotStatus.FILLED -> Button(onClick = onRevoke) { Text("Revoke") }
-                        else -> {} // Handle unexpected status
+
 
                     }
                 }
@@ -981,7 +969,7 @@ fun DutyVacancyCard(
                             enabled = false
                         ) { Text("Filled") }
 
-                        else -> {} // Handle unexpected status
+
                     }
                 }
 
@@ -1000,7 +988,6 @@ fun DutyVacancyPublishScreen(
 ) {
     var date by remember { mutableStateOf("") }
     var dutyHours by remember { mutableStateOf("") }
-    var requiredSpecialty by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
