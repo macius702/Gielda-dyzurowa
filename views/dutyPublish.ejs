@@ -21,10 +21,91 @@
             <% specialties.forEach(specialty => { %>
               <option value="<%= specialty._id %>"><%= specialty.name %></option>
             <% }); %>
-          </select>        </div>
+          </select>        
+        </div>
+        <div class="mb-3">
+          <label for="startDate" class="form-label">Start Date</label>
+          <input type="date" name="startDate" required class="form-control" id="startDate">
+        </div>
+        <div class="mb-3">
+          <label for="startTime" class="form-label">Start Time</label>
+          <input type="time" name="startTime" required class="form-control" id="startTime">
+        </div>
+        <div class="mb-3">
+          <label for="endDate" class="form-label">End Date</label>
+          <input type="date" name="endDate" required class="form-control" id="endDate">
+        </div>
+        <div class="mb-3">
+          <label for="endTime" class="form-label">End Time</label>
+          <input type="time" name="endTime" required class="form-control" id="endTime">
+        </div>
         <button type="submit" class="btn btn-primary">Publish</button>
       </form>
     </main>
+    <script>
+      window.onload = function() {
+        f1();
+        f2();
+      };
+
+      function f1() {
+        let now = new Date();
+        now.setDate(now.getDate() + 1); // Set 'now' to tomorrow's date
+
+        let startDate = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())); // Tomorrow
+        let endDate = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate() + 1)); // Day after tomorrow
+
+        let dayOfWeek = now.getDay(); // 0 (Sunday) to 6 (Saturday)
+        let startTime, endTime;
+
+        if (dayOfWeek === 0 || dayOfWeek === 6) {
+          // If it's Saturday or Sunday
+          startTime = "08:00";
+          endTime = "08:00";
+        } else {
+          // If it's a weekday
+          startTime = "16:00";
+          endTime = "08:00";
+        }
+        // Now you can set these values in your input fields
+        document.getElementById('startDate').value = formatDate(startDate)
+        document.getElementById('startTime').value = startTime;
+        document.getElementById('endDate').value = formatDate(endDate)
+        document.getElementById('endTime').value = endTime;
+      }
+
+      function f2() {
+        document.getElementById('startDate').addEventListener('change', function() {
+          let startDate = new Date(this.value);
+          let endDate = new Date(startDate.getTime()); // Copy startDate
+
+          let dayOfWeek = startDate.getDay(); // 0 (Sunday) to 6 (Saturday)
+          let endTime;
+
+          if (dayOfWeek === 0 || dayOfWeek === 6) {
+            startTime = "08:00";
+            // If it's Saturday or Sunday
+          } else {
+            // If it's a weekday
+            startTime = "16:00";
+          }
+
+          endDate.setDate(startDate.getDate() + 1);
+          endTime = "08:00";
+
+          document.getElementById('startTime').value = startTime;
+          document.getElementById('endDate').value = endDate.toISOString().substring(0, 10);
+          document.getElementById('endTime').value = endTime;
+        });
+      }
+      function formatDate(date) {
+        let day = String(date.getUTCDate()).padStart(2, '0');
+        let month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based, so we add 1
+        let year = date.getUTCFullYear();
+
+      return `${year}-${month}-${day}`;
+    }      
+    </script>    
   </body>
 <%- include('partials/_footer.ejs') %>
 </html>

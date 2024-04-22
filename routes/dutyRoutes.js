@@ -126,11 +126,33 @@ router.get('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
  *         requiredSpecialty:
  *           type: string
  *           description: ID of the required specialty
+ *         startDate:
+ *           type: string
+ *           format: date
+ *           description: Start date of the duty slot
+ *         startTime:
+ *           type: string
+ *           format: time
+ *           description: Start time of the duty slot
+ *         endDate:
+ *           type: string
+ *           format: date
+ *           description: End date of the duty slot
+ *         endTime:
+ *           type: string
+ *           format: time
+ *           description: End time of the duty slot
+ * 
  */
 router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
   try {
-    const PublishDutySlotRequest = req.body
-    const { date, dutyHours, requiredSpecialty } = PublishDutySlotRequest;
+    const PublishDutySlotRequest = req.body;
+    const { date, dutyHours, requiredSpecialty, startDate, startTime, endDate, endTime } = PublishDutySlotRequest;
+
+    // Combine date and time fields into a single Date object
+    const startDateTime = new Date(`${startDate}T${startTime}`);
+    const endDateTime = new Date(`${endDate}T${endTime}`);
+    
 
     // Validate requiredSpecialty
     const specialtyDoc = await Specialty.findById(requiredSpecialty);
@@ -145,6 +167,8 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
       dutyHours,
       requiredSpecialty: specialty,
       hospitalId,
+      startDateTime,
+      endDateTime
     });
     console.log(`New duty slot created: ${newDutySlot}`);
     res.redirect('/'); // Redirect to a confirmation page or back to the form

@@ -1179,6 +1179,26 @@
           "requiredSpecialty": {
             "type": "string",
             "description": "ID of the required specialty"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date of the duty slot"
+          },
+          "startTime": {
+            "type": "string",
+            "format": "time",
+            "description": "Start time of the duty slot"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "End date of the duty slot"
+          },
+          "endTime": {
+            "type": "string",
+            "format": "time",
+            "description": "End time of the duty slot"
           }
         }
       },

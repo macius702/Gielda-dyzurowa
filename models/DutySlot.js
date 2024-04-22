@@ -5,6 +5,10 @@ const dutySlotSchema = new mongoose.Schema({
     dutyHours: { type: String, required: true },
     requiredSpecialty: { type: mongoose.Schema.Types.ObjectId, ref: 'Specialty', required: true },
     hospitalId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+
+    startDateTime: { type: Date, required: true },
+    endDateTime: { type: Date, required: true },
+
     status: {
         type: String,
         required: true,
