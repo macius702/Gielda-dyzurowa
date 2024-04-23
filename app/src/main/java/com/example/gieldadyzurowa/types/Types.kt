@@ -39,6 +39,10 @@ data class PublishDutySlotRequest(
     val date: String,
     val dutyHours: String,
     val requiredSpecialty: Specialty,
+    val startDate: String,
+    val startTime: String,
+    val endDate: String,
+    val endTime: String
 )
 
 enum class DutySlotStatus(val status: String) {

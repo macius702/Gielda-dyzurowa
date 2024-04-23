@@ -2,6 +2,8 @@ package com.example.gieldadyzurowa
 
 
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -13,7 +15,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ListItem
@@ -52,6 +53,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import retrofit2.Response as RetrofitResponse
 
@@ -124,13 +126,13 @@ fun AppContent() {
     }
 
 
-//    // debug aid debugging
-//    performLogin("H1", "alamakota",
-//        onLoginSuccess = { user ->
-//            fetchAndAssignUserData(user)
-//        }
-//    )
-//    {}
+    // debug aid debugging
+    performLogin("H1", "alamakota",
+        onLoginSuccess = { user ->
+            fetchAndAssignUserData(user)
+        }
+    )
+    {}
 
     ModalNavigationDrawer(drawerState = drawerState, drawerContent = {
         DrawerContent(
@@ -770,6 +772,10 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
     }
 
     fun publishDutyVacancy(
+        startDate: String,
+        startTime: String,
+        endDate: String,
+        endTime: String,
         date: String,
         dutyHours: String,
         requiredSpecialty: MutableState<Specialty>,
@@ -781,7 +787,11 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
             val dutyVacancy = PublishDutySlotRequest(
                 date = date,
                 dutyHours = dutyHours,
-                requiredSpecialty = requiredSpecialty.value
+                requiredSpecialty = requiredSpecialty.value,
+                startDate = startDate,
+                startTime = startTime,
+                endDate = endDate,
+                endTime = endTime
             )
 
             val response = RetrofitClient.apiService.publishDutyVacancy(dutyVacancy)
@@ -986,57 +996,59 @@ fun DutyVacancyCard(
 fun DutyVacancyPublishScreen(
     viewModel: DutyVacanciesViewModel = viewModel(), onPublishSuccess: () -> Unit
 ) {
-    var date by remember { mutableStateOf("") }
-    var dutyHours by remember { mutableStateOf("") }
+    var date by remember { mutableStateOf("2024-04-30") }
+    var dutyHours by remember { mutableStateOf("16-08") }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val selectedSpecialty = remember { mutableStateOf(Specialty("", "")) }
 
+    val calendar = Calendar.getInstance()
+    calendar.add(Calendar.DAY_OF_YEAR, 1) // Tomorrow
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val startDate = remember { mutableStateOf(dateFormat.format(calendar.time)) }
+    val startTime = remember { mutableStateOf( "") }
+    val endDate = remember { mutableStateOf("") }
+    val endTime = remember { mutableStateOf("") }
 
-    // Date picker dialog
-    fun showDatePicker() {
+    // React to startDate change
+    LaunchedEffect(key1 = startDate.value) {
+        Log.d("DutyVacancyPublishScreen", "LaunchedEffect block entered with startDateString: ${startDate.value}")
+
+        val f = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val startDate = f.parse(startDate.value)
         val calendar = Calendar.getInstance()
-        DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-                calendar.set(Calendar.YEAR, year)
-                calendar.set(Calendar.MONTH, month)
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                date = dateFormat.format(calendar.time)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
+        calendar.time = startDate
+        val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK) // 1 (Sunday) to 7 (Saturday)
+
+        // If it's Saturday or Sunday, start at 08:00, otherwise start at 16:00
+        if (dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) {
+            // If it's Saturday or Sunday
+            startTime.value = "08:00"
+        } else {
+            // If it's a weekday
+            startTime.value = "16:00"
+        }
+
+        calendar.add(Calendar.DAY_OF_YEAR, 1) // Add 1 day to get a day after tomorrow's date
+        endDate.value = f.format(calendar.time)
+        endTime.value = "08:00"
     }
 
     Column {
-        // Use a TextField for the date display and a Button for the date selection
-        TextField(
-            value = date,
-            onValueChange = { date = it },
-            label = { Text("Date") },
-            modifier = Modifier.padding(PaddingValues(all = 8.dp))
-        )
-
-        Button(onClick = { showDatePicker() }) {
-            Text(text = "Select Date")
-        }
-
-        OutlinedTextField(
-            value = dutyHours,
-            onValueChange = { dutyHours = it },
-            label = { Text("Duty Hours") },
-            modifier = Modifier.padding(PaddingValues(all = 8.dp))
-        )
-
         SpecialtyDropdownMenu(viewModel.specialtiesViewModel, selectedSpecialty)
 
+
+        DateTimeInputField(context, "Start", startDate, startTime)
+        DateTimeInputField(context, "End", endDate, endTime)
+        
         Button(
             onClick = {
                 coroutineScope.launch {
                     viewModel.publishDutyVacancy(
+                        startDate.value,
+                        startTime.value,
+                        endDate.value,
+                        endTime.value,
                         date,
                         dutyHours,
                         selectedSpecialty,
@@ -1047,6 +1059,64 @@ fun DutyVacancyPublishScreen(
         ) {
             Text("Publish")
         }
+    }
+}
+
+@Composable
+fun DateTimeInputField(context: Context, label: String, date: MutableState<String>, time: MutableState<String>) {
+    val calendar = Calendar.getInstance()
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+    TextField(
+        value = date.value,
+        onValueChange = { date.value = it },
+        label = { Text("$label Date") },
+        modifier = Modifier.padding(PaddingValues(all = 8.dp))
+    )
+    Button(onClick = {
+        val currentSelectedDate = dateFormat.parse(date.value)
+        calendar.time = currentSelectedDate ?: Date()
+
+        DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                calendar.set(Calendar.YEAR, year)
+                calendar.set(Calendar.MONTH, month)
+                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                date.value = dateFormat.format(calendar.time)
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }) {
+        Text(text = "Select $label Date")
+    }
+
+    TextField(
+        value = time.value,
+        onValueChange = { time.value = it },
+        label = { Text("$label Time") },
+        modifier = Modifier.padding(PaddingValues(all = 8.dp))
+    )
+    Button(onClick = {
+        val currentSelectedTime = timeFormat.parse(time.value)
+        calendar.time = currentSelectedTime ?: Date()
+
+        TimePickerDialog(
+            context,
+            { _, hourOfDay, minute ->
+                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                calendar.set(Calendar.MINUTE, minute)
+                time.value = timeFormat.format(calendar.time)
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        ).show()
+    }) {
+        Text(text = "Select $label Time")
     }
 }
 
