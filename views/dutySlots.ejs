@@ -198,8 +198,9 @@
                     Required Specialty: <span class="required-specialty" data-slot-id="${slot._id}">${slot.requiredSpecialty.name}</span><br>
                     Status: <span class="status-display" data-slot-id="${slot._id}">${slot.status}</span><br>
                     Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="${slot._id}">${slot.assignedDoctorId ? slot.assignedDoctorId.username : 'None'}</span><br>
-                `;
-                                // Append the information as a new node
+                    Start DateTime: <span class="start-datetime" data-slot-id="${slot._id}">${new Date(slot.startDateTime).toLocaleString()}</span><br>
+                    End DateTime: <span class="end-datetime" data-slot-id="${slot._id}">${new Date(slot.endDateTime).toLocaleString()}</span><br>
+                `;      // Append the information as a new node
                 const infoNode = document.createElement('span');
                 infoNode.innerHTML = infoHTML;
                 element.appendChild(infoNode);

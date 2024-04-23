@@ -615,6 +615,14 @@ router.post('/give-consent', async (req, res) => {
  *           allOf:
  *             - $ref: '#/components/schemas/User'
  *           nullable: true
+ *         startDateTime:
+ *           type: string
+ *           format: date-time
+ *           description: The start date and time of the duty slot
+ *         endDateTime:
+ *           type: string
+ *           format: date-time
+ *           description: The end date and time of the duty slot
  *
  *     User:
  *       type: object
