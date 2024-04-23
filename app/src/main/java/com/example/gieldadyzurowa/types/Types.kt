@@ -32,7 +32,9 @@ data class DutyVacancy(
     val dutyHours: String,
     val requiredSpecialty: Specialty,
     val status: DutySlotStatus, //  enum type here
-    val assignedDoctorId: Doctor? = null
+    val assignedDoctorId: Doctor? = null,
+    val startDateTime: String,
+    val endDateTime: String
 )
 
 data class PublishDutySlotRequest(

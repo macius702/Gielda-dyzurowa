@@ -55,6 +55,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 import retrofit2.Response as RetrofitResponse
 
 
@@ -943,6 +944,19 @@ fun DutyVacancyCard(
             )
             Text("Status: ${dutyVacancy.status}", style = MaterialTheme.typography.bodyLarge)
 
+            val parseFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault())
+            parseFormat.timeZone = TimeZone.getTimeZone("UTC")
+
+            val displayFormat = SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault())
+            displayFormat.timeZone = TimeZone.getDefault()
+
+            val startDateTime = parseFormat.parse(dutyVacancy.startDateTime)
+            val formattedStartDateTime = displayFormat.format(startDateTime)
+            Text("Start DateTime: $formattedStartDateTime")
+
+            val endDateTime = parseFormat.parse(dutyVacancy.endDateTime)
+            val formattedEndDateTime = displayFormat.format(endDateTime)
+            Text("End DateTime: $formattedEndDateTime")
             when (userrole) {
                 "doctor" -> {
                     when (dutyVacancy.status) {
