@@ -10,6 +10,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTextReplacement
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.gieldadyzurowa.MainActivity
 import org.junit.Rule
@@ -100,13 +101,13 @@ class NavigationDrawerTest {
     }
 
     private fun addDutyVacancy() {
-        publishDutyVacancy("2024-12-20", "20-8", "Choroby wewnętrzne")
+        publishDutyVacancy("2024-12-20", "16:00", "Choroby wewnętrzne")
     }
 
-    private fun publishDutyVacancy(date: String, dutyHours: String, requiredSpecialty: String) {
+    private fun publishDutyVacancy(startDate: String, startTime: String, requiredSpecialty: String) {
         composeTestRule.onNodeWithText("Publish Duty Vacancy").performClick()
-        composeTestRule.onNodeWithText("Date").performTextInput(date)
-        composeTestRule.onNodeWithText("Duty Hours").performTextInput(dutyHours)
+        composeTestRule.onNodeWithText("Start Date").performTextReplacement(startDate)
+        composeTestRule.onNodeWithText("Start Time").performTextReplacement(startTime)
         composeTestRule.onNodeWithContentDescription("Dropdown menu").performClick()
         Thread.sleep(1000)
         composeTestRule.onNodeWithText(requiredSpecialty).performClick()
