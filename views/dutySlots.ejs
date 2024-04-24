@@ -200,7 +200,9 @@
                     Assigned Doctor: <span class="assigned-doctor-display" data-slot-id="${slot._id}">${slot.assignedDoctorId ? slot.assignedDoctorId.username : 'None'}</span><br>
                     Start DateTime: <span class="start-datetime" data-slot-id="${slot._id}">${new Date(slot.startDateTime).toLocaleString()}</span><br>
                     End DateTime: <span class="end-datetime" data-slot-id="${slot._id}">${new Date(slot.endDateTime).toLocaleString()}</span><br>
-                `;      // Append the information as a new node
+                    Price From: <span class="price-from" data-slot-id="${slot._id}">${slot.priceFrom}</span><br>
+                    Price To: <span class="price-to" data-slot-id="${slot._id}">${slot.priceTo}</span><br>
+                    ${slot.currency && slot.currency !== 'PLN' ? `Currency: <span class="currency" data-slot-id="${slot._id}">${slot.currency}</span><br>` : ''}                `;     // Append the information as a new node
                 const infoNode = document.createElement('span');
                 infoNode.innerHTML = infoHTML;
                 element.appendChild(infoNode);
