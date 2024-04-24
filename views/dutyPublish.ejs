@@ -31,6 +31,25 @@
           <label for="endTime" class="form-label">End Time</label>
           <input type="time" name="endTime" required class="form-control" id="endTime">
         </div>
+
+        <div class="mb-3">
+          <label for="priceFrom" class="form-label">Price From</label>
+          <input type="number" step="100" name="priceFrom" class="form-control" id="priceFrom">
+        </div>
+        <div class="mb-3">
+          <label for="priceTo" class="form-label">Price To</label>
+          <input type="number" step="100" name="priceTo" class="form-control" id="priceTo">
+        </div>
+        <div class="mb-3">
+          <label for="currency" class="form-label">Currency</label>
+          <select name="currency" class="form-control" id="currency">
+            <option value="">Select Currency</option>
+            <option value="PLN">PLN</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+          </select>
+        </div>
         <button type="submit" class="btn btn-primary">Publish</button>
       </form>
     </main>

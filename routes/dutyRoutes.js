@@ -142,12 +142,25 @@ router.get('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
  *           type: string
  *           format: time
  *           description: End time of the duty slot
- * 
+ *         priceFrom:
+ *           type: number
+ *           description: The minimum price for the duty slot, represented as a fixed-point number with two decimal places
+ *           nullable: true 
+ *         priceTo:
+ *           type: number
+ *           description: The maximum price for the duty slot, represented as a fixed-point number with two decimal places
+ *           nullable: true 
+ *         currency:
+ *           type: string
+ *           enum: [PLN, USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY, SEK, NZD]
+ *           default: PLN
+ *           description: The currency for the price
+ *           nullable: true 
  */
 router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
   try {
     const PublishDutySlotRequest = req.body;
-    const { date, dutyHours, requiredSpecialty, startDate, startTime, endDate, endTime } = PublishDutySlotRequest;
+    const { date, dutyHours, requiredSpecialty, startDate, startTime, endDate, endTime, priceFrom, priceTo, currency } = PublishDutySlotRequest;
 
     // Combine date and time fields into a single Date object
     const startDateTime = new Date(`${startDate}T${startTime}`);
@@ -168,7 +181,10 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
       requiredSpecialty: specialty,
       hospitalId,
       startDateTime,
-      endDateTime
+      endDateTime,
+      priceFrom,
+      priceTo,
+      currency
     });
     console.log(`New duty slot created: ${newDutySlot}`);
     res.redirect('/'); // Redirect to a confirmation page or back to the form

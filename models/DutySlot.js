@@ -19,7 +19,10 @@ const dutySlotSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: false // Set to true if a user must be assigned, or false to allow duty slots without an assigned user.
-    }
+    },
+    priceFrom: { type: Number, required: false },
+    priceTo: { type: Number, required: false },
+    currency: { type: String, required: false },
 });
 
 const DutySlot = mongoose.model('DutySlot', dutySlotSchema);
