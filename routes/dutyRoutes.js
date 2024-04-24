@@ -218,24 +218,7 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
  *           text/plain:
  *             schema:
  *               type: string
- * components:
- *  schemas:
- *     DutySlot:
- *       type: object
- *       properties:
- *         _id:
- *           type: string
- *         hospitalId:
- *           type: string
- *           description: ID of the hospital that published the duty slot
- *         date:
- *           type: string
- *           format: date
- *         dutyHours:
- *           type: string
- *         requiredSpecialty:
- *           type: string
- *           description: ID of the required specialty
+ *
  */
 router.get('/duty/find_by_specialty', isAuthenticated, async (req, res) => {
   try {

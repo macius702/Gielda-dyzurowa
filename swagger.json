@@ -1208,11 +1208,6 @@
           "_id": {
             "type": "string"
           },
-          "hospitalId": {
-            "type": "string",
-            "description": "ID of the hospital that published the duty slot",
-            "$ref": "#/components/schemas/User"
-          },
           "date": {
             "type": "string",
             "format": "date"
@@ -1221,9 +1216,10 @@
             "type": "string"
           },
           "requiredSpecialty": {
-            "type": "string",
-            "description": "ID of the required specialty",
             "$ref": "#/components/schemas/Specialty"
+          },
+          "hospitalId": {
+            "$ref": "#/components/schemas/User"
           },
           "status": {
             "type": "string",
