@@ -163,8 +163,8 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
     const hospitalId = req.session.userId; // Assuming session stores userId
     const specialty = specialtyDoc._id;
     const newDutySlot = await DutySlot.create({
-      date,
-      dutyHours,
+      date: '2024-12-30',
+      dutyHours: '20-8',
       requiredSpecialty: specialty,
       hospitalId,
       startDateTime,
