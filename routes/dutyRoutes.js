@@ -606,6 +606,22 @@ router.post('/give-consent', async (req, res) => {
  *           type: string
  *           format: date-time
  *           description: The end date and time of the duty slot
+ *         priceFrom:
+ *           type: number
+ *           description: The minimum price for the duty slot, represented as a fixed-point number with two decimal places
+ *           nullable: true 
+ *         priceTo:
+ *           type: number
+ *           description: The maximum price for the duty slot, represented as a fixed-point number with two decimal places
+ *           nullable: true 
+ *         currency:
+ *           type: string
+ *           enum: [PLN, USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY, SEK, NZD]
+ *           default: PLN
+ *           description: The currency for the price
+ *           nullable: true 
+ *  
+ * 
  *
  *     User:
  *       type: object
