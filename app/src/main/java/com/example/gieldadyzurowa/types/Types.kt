@@ -1,5 +1,7 @@
 package com.example.gieldadyzurowa.types
 
+import java.math.BigDecimal
+
 data class Hospital(
     val _id: String,
     val username: String,
@@ -34,7 +36,10 @@ data class DutyVacancy(
     val status: DutySlotStatus, //  enum type here
     val assignedDoctorId: Doctor? = null,
     val startDateTime: String,
-    val endDateTime: String
+    val endDateTime: String,
+    val priceFrom: BigDecimal? = null,
+    val priceTo: BigDecimal? = null,
+    val currency: Currency? = Currency.PLN
 )
 
 data class PublishDutySlotRequest(
@@ -44,8 +49,16 @@ data class PublishDutySlotRequest(
     val startDate: String,
     val startTime: String,
     val endDate: String,
-    val endTime: String
+    val endTime: String,
+    val priceFrom: BigDecimal? = null,
+    val priceTo: BigDecimal? = null,
+    val currency: Currency? = Currency.PLN
 )
+
+enum class Currency {
+    PLN, USD, EUR, GBP, JPY, AUD, CAD, CHF, CNY, SEK, NZD
+}
+
 
 enum class DutySlotStatus(val status: String) {
     OPEN("open"), PENDING("pending"), FILLED("filled");

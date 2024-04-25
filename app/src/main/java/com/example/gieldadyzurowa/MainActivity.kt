@@ -28,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -35,6 +36,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gieldadyzurowa.network.RetrofitClient
 import com.example.gieldadyzurowa.types.AssignDutySlotRequest
+import com.example.gieldadyzurowa.types.Currency
 import com.example.gieldadyzurowa.types.DoctorAvailability
 import com.example.gieldadyzurowa.types.DutySlotActionRequest
 import com.example.gieldadyzurowa.types.DutySlotStatus
@@ -51,6 +53,7 @@ import okhttp3.*
 import okio.ByteString
 import retrofit2.Call
 import retrofit2.Callback
+import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -780,11 +783,12 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
         date: String,
         dutyHours: String,
         requiredSpecialty: MutableState<Specialty>,
+        priceFrom: BigDecimal? = null,
+        priceTo: BigDecimal? = null,
+        currency: Currency? = Currency.PLN,
         onPublishSuccess: () -> Unit
     ) = viewModelScope.launch {
         try {
-            //val requiredSpecialtyId = specialtiesViewModel.specialties.value.find { it.name == requiredSpecialty }?._id ?: ""
-
             val dutyVacancy = PublishDutySlotRequest(
                 date = date,
                 dutyHours = dutyHours,
@@ -792,7 +796,10 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
                 startDate = startDate,
                 startTime = startTime,
                 endDate = endDate,
-                endTime = endTime
+                endTime = endTime,
+                priceFrom = priceFrom,
+                priceTo = priceTo,
+                currency = currency
             )
 
             val response = RetrofitClient.apiService.publishDutyVacancy(dutyVacancy)
@@ -1006,12 +1013,17 @@ fun DutyVacancyCard(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DutyVacancyPublishScreen(
     viewModel: DutyVacanciesViewModel = viewModel(), onPublishSuccess: () -> Unit
 ) {
+    var expanded by remember { mutableStateOf(false) }
     var date by remember { mutableStateOf("2024-04-30") }
     var dutyHours by remember { mutableStateOf("16-08") }
+    var priceFrom by remember { mutableStateOf(BigDecimal.ZERO) }
+    var priceTo by remember { mutableStateOf(BigDecimal.ZERO) }
+    var currency by remember { mutableStateOf(Currency.PLN) }
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
     val selectedSpecialty = remember { mutableStateOf(Specialty("", "")) }
@@ -1051,7 +1063,57 @@ fun DutyVacancyPublishScreen(
     Column {
         SpecialtyDropdownMenu(viewModel.specialtiesViewModel, selectedSpecialty)
 
+        TextField(
+            value = priceFrom.toString(),
+            onValueChange = { priceFrom = BigDecimal(it) },
+            label = { Text("Price From") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
 
+        TextField(
+            value = priceTo.toString(),
+            onValueChange = { priceTo = BigDecimal(it) },
+            label = { Text("Price To") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                OutlinedTextField(
+                    value = currency.name.ifEmpty { "Select Currency" },
+                    onValueChange = {},
+                    readOnly = true,
+                    trailingIcon = {
+                        Icon(
+                            imageVector = if (expanded) Icons.Filled.ArrowDropUp else Icons.Filled.ArrowDropDown,
+                            contentDescription = null
+                        )
+                    },
+                    modifier = Modifier.menuAnchor(),
+                    label = { Text("Currency") },
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    Currency.values().forEach { selectionOption ->
+                        DropdownMenuItem(
+                            onClick = {
+                                currency = selectionOption
+                                expanded = false
+                            }
+                        ) {
+                            Text(text = selectionOption.name)
+                        }
+                    }
+                }
+            }
+        }
         DateTimeInputField(context, "Start", startDate, startTime)
         DateTimeInputField(context, "End", endDate, endTime)
         
@@ -1066,6 +1128,9 @@ fun DutyVacancyPublishScreen(
                         date,
                         dutyHours,
                         selectedSpecialty,
+                        priceFrom,
+                        priceTo,
+                        currency,
                         onPublishSuccess
                     )
                 }
@@ -1082,58 +1147,67 @@ fun DateTimeInputField(context: Context, label: String, date: MutableState<Strin
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-    TextField(
-        value = date.value,
-        onValueChange = { date.value = it },
-        label = { Text("$label Date") },
-        modifier = Modifier.padding(PaddingValues(all = 8.dp))
-    )
-    Button(onClick = {
-        val currentSelectedDate = dateFormat.parse(date.value)
-        calendar.time = currentSelectedDate ?: Date()
+    Row(
+        modifier = Modifier.padding(PaddingValues(all = 8.dp)),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        TextField(
+            value = date.value,
+            onValueChange = { date.value = it },
+            label = { Text("$label Date") },
+            modifier = Modifier.weight(1f)
+        )
+        Button(onClick = {
+            val currentSelectedDate = dateFormat.parse(date.value)
+            calendar.time = currentSelectedDate ?: Date()
 
-        DatePickerDialog(
-            context,
-            { _, year, month, dayOfMonth ->
-                calendar.set(Calendar.YEAR, year)
-                calendar.set(Calendar.MONTH, month)
-                calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
-                date.value = dateFormat.format(calendar.time)
-            },
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
-        ).show()
-    }) {
-        Text(text = "Select $label Date")
+            DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    calendar.set(Calendar.YEAR, year)
+                    calendar.set(Calendar.MONTH, month)
+                    calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                    date.value = dateFormat.format(calendar.time)
+                },
+                calendar.get(Calendar.YEAR),
+                calendar.get(Calendar.MONTH),
+                calendar.get(Calendar.DAY_OF_MONTH)
+            ).show()
+        }) {
+            Text(text = "Select $label Date")
+        }
     }
 
-    TextField(
-        value = time.value,
-        onValueChange = { time.value = it },
-        label = { Text("$label Time") },
-        modifier = Modifier.padding(PaddingValues(all = 8.dp))
-    )
-    Button(onClick = {
-        val currentSelectedTime = timeFormat.parse(time.value)
-        calendar.time = currentSelectedTime ?: Date()
+    Row(
+        modifier = Modifier.padding(PaddingValues(all = 8.dp)),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        TextField(
+            value = time.value,
+            onValueChange = { time.value = it },
+            label = { Text("$label Time") },
+            modifier = Modifier.weight(1f)
+        )
+        Button(onClick = {
+            val currentSelectedTime = timeFormat.parse(time.value)
+            calendar.time = currentSelectedTime ?: Date()
 
-        TimePickerDialog(
-            context,
-            { _, hourOfDay, minute ->
-                calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
-                calendar.set(Calendar.MINUTE, minute)
-                time.value = timeFormat.format(calendar.time)
-            },
-            calendar.get(Calendar.HOUR_OF_DAY),
-            calendar.get(Calendar.MINUTE),
-            true
-        ).show()
-    }) {
-        Text(text = "Select $label Time")
+            TimePickerDialog(
+                context,
+                { _, hourOfDay, minute ->
+                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    calendar.set(Calendar.MINUTE, minute)
+                    time.value = timeFormat.format(calendar.time)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                true
+            ).show()
+        }) {
+            Text(text = "Select $label Time")
+        }
     }
 }
-
 // https://alexzh.com/jetpack-compose-dropdownmenu/ for ExposedDropdownMenuBox
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
