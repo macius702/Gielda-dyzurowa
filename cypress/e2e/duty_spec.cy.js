@@ -49,8 +49,6 @@ describe('Remove buttons Test', () => {
         cy.visit('/duty/publish');
 
         // Fill out the form
-        cy.get('#date').type('2024-12-31');
-        cy.get('#dutyHours').type('20:00 - 08:00');
         cy.get('#requiredSpecialty').select('Choroby wewnętrzne');
 
         // Submit the form
