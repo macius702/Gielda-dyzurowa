@@ -27,6 +27,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -1241,7 +1242,8 @@ fun SpecialtyDropdownMenu(
             expanded = expanded,
             onExpandedChange = {
                 expanded = !expanded
-            }
+            },
+            modifier = Modifier.testTag("Specialty Dropdown Menu"),
         ) {
             OutlinedTextField(
                 value = selectedText,
