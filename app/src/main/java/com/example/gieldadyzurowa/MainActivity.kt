@@ -964,6 +964,18 @@ fun DutyVacancyCard(
             val endDateTime = parseFormat.parse(dutyVacancy.endDateTime)
             val formattedEndDateTime = displayFormat.format(endDateTime)
             Text("End DateTime: $formattedEndDateTime")
+    
+            if (dutyVacancy.priceFrom != null && dutyVacancy.priceFrom != BigDecimal.ZERO) {
+                Text("Price From: ${dutyVacancy.priceFrom}", style = MaterialTheme.typography.bodyLarge)
+            }
+            if (dutyVacancy.priceTo != null && dutyVacancy.priceTo != BigDecimal.ZERO) {
+                Text("Price To: ${dutyVacancy.priceTo}", style = MaterialTheme.typography.bodyLarge)
+            }
+            if (dutyVacancy.currency != null && dutyVacancy.currency != Currency.PLN) {
+                Text("Currency: ${dutyVacancy.currency}", style = MaterialTheme.typography.bodyLarge)
+            }
+
+
             when (userrole) {
                 "doctor" -> {
                     when (dutyVacancy.status) {
