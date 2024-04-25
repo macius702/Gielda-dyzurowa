@@ -71,6 +71,8 @@ npm install swagger-jsdoc swagger-ui-express
 - const Holidays = require('date-holidays');
 - Kotlin is not sending broadcast on publishDutyVacancy
 - remove in publish : date: String, dutyHours: String,
+- shorten ExposedDropdownMenuBox in DutyVacancyPublishScreen
+- how about       priceFrom: BigDecimal? = null,         currency: Currency? = Currency.PLN, in Lotlin 
 
 
 - Doctors should be able to publish their unavailabilities as well
