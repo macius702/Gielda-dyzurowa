@@ -51,52 +51,50 @@ npm install swagger-jsdoc swagger-ui-express
 
 ### Todo
 
+- [ ]  Look and feel
+- [ ] showDatePicker is twice
+- [ ] ExposedDropdownMenuBox is twice
+- [ ] Test for Register in Kotlin RegisterScreen - onfailure -> snack, GUI test -> delete user needed first
 
 
-
-- Missing Fields - price range, PLN, hour
-- Look and feel
-- Swagger
-- showDatePicker is twice
-- ExposedDropdownMenuBox is twice
-- Test for Register in Kotlin RegisterScreen - onfailure -> snack, GUI test -> delete user needed first
-
-
-- some unique index - adding the same duty slot  is ok now! - referential integrity
-- remove doctor availability
-- /duty/find_by_specialty change into general finding endpoint
-- .populate more specific or not needed - use database view - generally send only the relevant information, no extras
-- show only my hospital duty records - or enable buttons only on my duty slots
-- languages
-- const Holidays = require('date-holidays');
-- Kotlin is not sending broadcast on publishDutyVacancy
-- remove in publish : date: String, dutyHours: String,
-- shorten ExposedDropdownMenuBox in DutyVacancyPublishScreen
-- how about       priceFrom: BigDecimal? = null,         currency: Currency? = Currency.PLN, in Lotlin 
+- [ ] some unique index - adding the same duty slot  is ok now! - referential integrity
+- [ ] remove doctor availability
+- [ ] /duty/find_by_specialty change into general finding endpoint
+- [ ] .populate more specific or not needed - use database view - generally send only the relevant information, no extras
+- [ ] show only my hospital duty records - or enable buttons only on my duty slots
+- [ ] languages
+- [ ] const Holidays = require('date-holidays');
+- [ ] Kotlin is not sending broadcast on publishDutyVacancy
+- [ ] web not sending broadcast on Remove
+- [ ] shorten ExposedDropdownMenuBox in DutyVacancyPublishScreen
+- [ ] how about       priceFrom: BigDecimal? = null,         currency: Currency? = Currency.PLN, in Lotlin 
 
 
-- Doctors should be able to publish their unavailabilities as well
-- Formatter
-- malignant doctor can occupy all slots, and assign to all duties
-- show internet connection is online - especially on start, before login, etc
-- keyboard handling
-- CI/CD
-- unit tests
-- Specialty master table - the sole source of truth
-- Separate datamodel from routes
+- [ ] Doctors should be able to publish their unavailabilities as well
+- [ ] select spewcialty with letter(s)?
+- [ ] Formatter
+- [ ] malignant doctor can occupy all slots, and assign to all duties
+- [ ] show internet connection is online - especially on start, before login, etc
+- [ ] keyboard handling
+- [ ] CI/CD
+- [ ] unit tests
+- [ ] Specialty master table - the sole source of truth
+- [ ] Separate datamodel from routes
 
 
-- DONE assure that tests have always a duty entry qqq
-- DONE remove duty vacancy 
-- DONE gui changes on notification
-- DONE Button logic dependent automatically on status
-- NOT DOING, https is fine - fix passsword in open text (OAuth2 ?2)
-- DONE Remove unnmecessary code
-- DONE Format
+- [x] assure that tests have always a duty entry qqq
+- [x] DONE remove duty vacancy 
+- [x] DONE gui changes on notification
+- [x] DONE Button logic dependent automatically on status
+- [x] NOT DOING, https is fine - fix passsword in open text (OAuth2 ?2)
+- [x] DONE Remove unnmecessary code
+- [x] DONE Format
+- [x] DONE Fix look of Refister Kotlin dialog, Register error - toast or snack
+- [x] DONE specialty enum
+- [x] DONE Missing Fields - price range, PLN, hour
+- [x] DONE Swagger
+- [x] DONE remove in publish : date: String, dutyHours: String,
 - FAILED Publish duty vacancy in Kotlin - don't drag specialtyviewmodel  everywhere, specialties list is enough
-- DONE Fix look of Refister Kotlin dialog, Register error - toast or snack
-- DONE specialty enum
-
 
 
 
