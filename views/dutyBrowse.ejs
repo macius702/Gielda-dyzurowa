@@ -8,8 +8,7 @@
       <% dutySlots.forEach(function(slot) { %>
         <div class="card mb-3">
           <div class="card-body">
-            <h5 class="card-title">Duty Slot on <%= slot.date.toDateString() %></h5>
-            <p class="card-text"><strong>Hours:</strong> <%= slot.dutyHours %></p>
+            <h5 class="card-title">Duty Slot on <%= slot.startDateTime.toDateString() %></h5>
             <p class="card-text"><strong>Specialty Required:</strong> <%= slot.requiredSpecialty %></p>
             <p class="card-text"><strong>Hospital:</strong> <%= slot.hospitalId.username %></p>
             <form action="/duty/interest/<%= slot._id %>" method="POST">

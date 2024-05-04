@@ -1169,13 +1169,6 @@
       "PublishDutySlotRequest": {
         "type": "object",
         "properties": {
-          "date": {
-            "type": "string",
-            "format": "date"
-          },
-          "dutyHours": {
-            "type": "string"
-          },
           "requiredSpecialty": {
             "type": "string",
             "description": "ID of the required specialty"
@@ -1235,13 +1228,6 @@
         "type": "object",
         "properties": {
           "_id": {
-            "type": "string"
-          },
-          "date": {
-            "type": "string",
-            "format": "date"
-          },
-          "dutyHours": {
             "type": "string"
           },
           "requiredSpecialty": {

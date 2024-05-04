@@ -118,11 +118,6 @@ router.get('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
  *     PublishDutySlotRequest:
  *       type: object
  *       properties:
- *         date:
- *           type: string
- *           format: date
- *         dutyHours:
- *           type: string
  *         requiredSpecialty:
  *           type: string
  *           description: ID of the required specialty
@@ -160,7 +155,7 @@ router.get('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
 router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
   try {
     const PublishDutySlotRequest = req.body;
-    const { date, dutyHours, requiredSpecialty, startDate, startTime, endDate, endTime, priceFrom, priceTo, currency } = PublishDutySlotRequest;
+    const { requiredSpecialty, startDate, startTime, endDate, endTime, priceFrom, priceTo, currency } = PublishDutySlotRequest;
 
     // Combine date and time fields into a single Date object
     const startDateTime = new Date(`${startDate}T${startTime}`);
@@ -176,8 +171,6 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
     const hospitalId = req.session.userId; // Assuming session stores userId
     const specialty = specialtyDoc._id;
     const newDutySlot = await DutySlot.create({
-      date: '2024-12-30',
-      dutyHours: '20-8',
       requiredSpecialty: specialty,
       hospitalId,
       startDateTime,
@@ -594,11 +587,6 @@ router.post('/give-consent', async (req, res) => {
  *       type: object
  *       properties:
  *         _id:
- *           type: string
- *         date:
- *           type: string
- *           format: date
- *         dutyHours:
  *           type: string
  *         requiredSpecialty:
  *           $ref: '#/components/schemas/Specialty'

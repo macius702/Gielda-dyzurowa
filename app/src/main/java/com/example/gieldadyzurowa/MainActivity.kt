@@ -781,8 +781,6 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
         startTime: String,
         endDate: String,
         endTime: String,
-        date: String,
-        dutyHours: String,
         requiredSpecialty: MutableState<Specialty>,
         priceFrom: BigDecimal? = null,
         priceTo: BigDecimal? = null,
@@ -791,8 +789,6 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
     ) = viewModelScope.launch {
         try {
             val dutyVacancy = PublishDutySlotRequest(
-                date = date,
-                dutyHours = dutyHours,
                 requiredSpecialty = requiredSpecialty.value,
                 startDate = startDate,
                 startTime = startTime,
@@ -942,11 +938,6 @@ fun DutyVacancyCard(
                 style = MaterialTheme.typography.bodyLarge
             )
             Text(
-                "Date: ${formatDate(dutyVacancy.date)}",
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text("Duty Hours: ${dutyVacancy.dutyHours}", style = MaterialTheme.typography.bodyLarge)
-            Text(
                 "Required Specialty: ${dutyVacancy.requiredSpecialty.name}",
                 style = MaterialTheme.typography.bodyLarge
             )
@@ -1032,8 +1023,6 @@ fun DutyVacancyPublishScreen(
     viewModel: DutyVacanciesViewModel = viewModel(), onPublishSuccess: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var date by remember { mutableStateOf("2024-04-30") }
-    var dutyHours by remember { mutableStateOf("16-08") }
     var priceFrom by remember { mutableStateOf(BigDecimal.ZERO) }
     var priceTo by remember { mutableStateOf(BigDecimal.ZERO) }
     var currency by remember { mutableStateOf(Currency.PLN) }
@@ -1138,8 +1127,6 @@ fun DutyVacancyPublishScreen(
                         startTime.value,
                         endDate.value,
                         endTime.value,
-                        date,
-                        dutyHours,
                         selectedSpecialty,
                         priceFrom,
                         priceTo,
