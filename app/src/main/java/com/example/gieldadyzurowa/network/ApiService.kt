@@ -15,6 +15,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface ApiService {
     @POST("/auth/login")
@@ -24,7 +25,7 @@ interface ApiService {
     fun fetchUserData(): Call<UserroleAndId>
 
     @POST("/auth/register")
-    fun registerUser(@Body registrationRequest: RegistrationRequest): Call<Void>
+    fun registerUser(@Query("canisterId") canisterId: String, @Body registrationRequest: RegistrationRequest): Call<Void>
 
     @GET("/duty/slots/json")
     suspend fun fetchDutyVacancies(): Response<List<DutyVacancy>>

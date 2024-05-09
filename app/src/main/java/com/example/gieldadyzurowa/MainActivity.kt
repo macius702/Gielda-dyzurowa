@@ -36,6 +36,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.gieldadyzurowa.network.RetrofitClient
+import com.example.gieldadyzurowa.network.RetrofitClient.BASE_CANISTER
 import com.example.gieldadyzurowa.types.AssignDutySlotRequest
 import com.example.gieldadyzurowa.types.Currency
 import com.example.gieldadyzurowa.types.DoctorAvailability
@@ -55,6 +56,7 @@ import okio.ByteString
 import retrofit2.Call
 import retrofit2.Callback
 import java.math.BigDecimal
+import java.nio.charset.Charset
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -627,22 +629,24 @@ fun performRegistration(
         specialty = specialty?.takeIf { it.isNotEmpty() },
         localization = localization?.takeIf { it.isNotEmpty() })
 
-    RetrofitClient.apiService.registerUser(registrationRequest).enqueue(object : Callback<Void> {
+    RetrofitClient.apiService.registerUser(BASE_CANISTER, registrationRequest).enqueue(object : Callback<Void> {
         override fun onResponse(call: Call<Void>, response: RetrofitResponse<Void>) {
             if (response.isSuccessful) {
                 Log.d("RegistrationSuccess", "Successfully registered user: $username")
                 onRegistrationSuccess()
             } else {
-                Log.e(
-                    "RegistrationError",
-                    "Failed to register user: $username. Response code: ${response.code()}"
-                )
+                Log.e("RegistrationError", "Failed to register user: $username. Response code: ${response.code()}")
+                Log.e("RegistrationError", "Response error body: ${response.errorBody()?.string()}")
+                Log.e("RegistrationError", "Response details: ${response.toString()}")
+                
                 // Here you can handle different HTTP codes and give feedback to the user accordingly
-            }
-        }
+            }        }
 
         override fun onFailure(call: Call<Void>, t: Throwable) {
             Log.e("RegistrationFailure", "Failed to register user: $username", t)
+            Log.e("RegistrationFailure", "Call was: $call")
+            Log.e("RegistrationFailure", "Throwable message: ${t.message}")
+            Log.e("RegistrationFailure", "Throwable cause: ${t.cause}")
             // Handle the failure, for example, by showing an error message to the user
         }
     })
