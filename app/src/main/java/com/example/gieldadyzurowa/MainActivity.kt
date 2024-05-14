@@ -106,7 +106,7 @@ fun AppContent() {
     val doctorAvailabilitiesViewModel = viewModel<DoctorAvailabilitiesViewModel>()
 
     fun fetchAndAssignUserData(user: String) {
-        RetrofitClient.apiService.fetchUserData().enqueue(object : Callback<UserroleAndId> {
+        RetrofitClient.apiService.fetchUserData(BASE_CANISTER).enqueue(object : Callback<UserroleAndId> {
             override fun onResponse(
                 call: Call<UserroleAndId>,
                 response: RetrofitResponse<UserroleAndId>
@@ -659,7 +659,7 @@ fun performLogin(
     onLoginFailure: (String) -> Unit
 ) {
     val loginRequest = LoginRequest(username, password)
-    RetrofitClient.apiService.loginUser(loginRequest).enqueue(object : Callback<Unit> {
+    RetrofitClient.apiService.loginUser(BASE_CANISTER, loginRequest).enqueue(object : Callback<Unit> {
         override fun onResponse(call: Call<Unit>, response: RetrofitResponse<Unit>) {
             if (response.isSuccessful) {
                 response.body()?.let { _ ->

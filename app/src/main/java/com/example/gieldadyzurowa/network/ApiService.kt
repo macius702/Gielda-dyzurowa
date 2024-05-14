@@ -19,10 +19,10 @@ import retrofit2.http.Query
 
 interface ApiService {
     @POST("/auth/login")
-    fun loginUser(@Body loginRequest: LoginRequest): Call<Unit>
+    fun loginUser(@Query("canisterId") canisterId: String, @Body loginRequest: LoginRequest): Call<Unit>
 
     @GET("/user/data")
-    fun fetchUserData(): Call<UserroleAndId>
+    fun fetchUserData(@Query("canisterId") canisterId: String): Call<UserroleAndId>
 
     @POST("/auth/register")
     fun registerUser(@Query("canisterId") canisterId: String, @Body registrationRequest: RegistrationRequest): Call<Void>
