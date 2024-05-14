@@ -28,10 +28,10 @@ val okHttpClient = OkHttpClient.Builder().cookieJar(cookieJar).build()
 object RetrofitClient {
 
     //for local node server
-    //private const val BASE_URL = "http://10.0.2.2:3000"
+    private const val BASE_URL = "http://10.0.2.2:3000"
 
     //for local ICP canister
-    private const val BASE_URL = "http://10.0.2.2:4943"
+    //private const val BASE_URL = "http://10.0.2.2:4943"
 
     public const val BASE_CANISTER = "bkyz2-fmaaa-aaaaa-qaaaq-cai"
 
