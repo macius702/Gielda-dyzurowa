@@ -214,10 +214,6 @@ router.post('/auth/login', async (req, res) =>
               const secret = process.env.JWT_SECRET;
               const token = jwt.sign({ userId: user._id, role: user.role, username: user.username }, secret, { expiresIn: '1h' });
 
-              res.on('header', () => {
-                console.log('Cookies:', res.get('Set-Cookie'));
-              });
-              
               // Store the token in an HttpOnly cookie
               console.log('Token:', token); // This will log the token
               res.cookie('token', token, { httpOnly: true });
