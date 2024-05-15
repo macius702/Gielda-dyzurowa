@@ -48,6 +48,8 @@ npm install cypress --save-dev
 
 npm install swagger-jsdoc swagger-ui-express
 
+npm install cookie-parser
+
 
 ### Todo
 
