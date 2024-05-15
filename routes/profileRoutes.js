@@ -206,7 +206,7 @@ router.get('/user/data', isAuthenticated, async (req, res) => {
   try {// add logging to see what is happening
     console.log('Fetching user data');
 
-    const user = await User.findById(req.session  ? req.session.userId : null); // If session is not available, return null user
+    const user = await User.findById(res.locals  ? res.locals.userId : null); // If session is not available, return null user
 
     console.log('User data:', user);
     let UserroleAndId = {
@@ -226,7 +226,7 @@ router.get('/user/data', isAuthenticated, async (req, res) => {
 // Display the settings page
 router.get('/user/settings', isAuthenticated, async (req, res) => {
   try {
-    const user = await User.findById(req.session.userId);
+    const user = await User.findById(res.locals.userId);
     if (!user) {
       console.log('User not found for settings page.');
       return res.status(404).send('User not found.');
@@ -243,8 +243,8 @@ router.get('/user/settings', isAuthenticated, async (req, res) => {
 router.post('/user/settings', isAuthenticated, async (req, res) => {
   try {
     const { email, phoneNumber } = req.body;
-    await User.findByIdAndUpdate(req.session.userId, { email, phoneNumber });
-    console.log(`User settings updated for user ID: ${req.session.userId}`);
+    await User.findByIdAndUpdate(res.locals.userId, { email, phoneNumber });
+    console.log(`User settings updated for user ID: ${res.locals.userId}`);
     res.redirect('/user/settings');
   } catch (error) {
     console.error('Error updating user settings:', error);

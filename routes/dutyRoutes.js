@@ -7,7 +7,7 @@ const router = express.Router();
 
 // Middleware to ensure only hospitals can access certain routes
 const isHospital = (req, res, next) => {
-  if (req.session.role === 'hospital') {
+  if (res.locals.role === 'hospital') {
     next();
   } else {
     res.status(403).send('Access denied. Only hospitals can perform this action.');
@@ -16,7 +16,7 @@ const isHospital = (req, res, next) => {
 
 // Middleware to ensure only doctors can access certain routes
 const isDoctor = (req, res, next) => {
-  if (req.session.role === 'doctor') {
+  if (res.locals.role === 'doctor') {
     next();
   } else {
     res.status(403).send('Access denied. Only doctors can perform this action.');
@@ -168,7 +168,7 @@ router.post('/duty/publish', isAuthenticated, isHospital, async (req, res) => {
       console.error('Invalid specialty:', requiredSpecialty);
       return res.status(400).send('Invalid specialty.');
     }
-    const hospitalId = req.session.userId; // Assuming session stores userId
+    const hospitalId = res.locals.userId; // Assuming session stores userId
     const specialty = specialtyDoc._id;
     const newDutySlot = await DutySlot.create({
       requiredSpecialty: specialty,

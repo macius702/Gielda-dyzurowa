@@ -6,10 +6,10 @@ const router = express.Router();
 
 // Middleware to ensure only doctors can access certain routes
 const isDoctor = (req, res, next) => {
-  if (req.session.role === 'doctor') {
+  if (res.locals.role === 'doctor') {
     next();
   } else {
-    console.log(`Access denied. Role: ${req.session.role}, Required: doctor`);
+    console.log(`Access denied. Role: ${res.locals.role}, Required: doctor`);
     res.status(403).send('Access denied. Only doctors can perform this action.');
   }
 };
@@ -101,7 +101,7 @@ router.get('/doctor/availability', isAuthenticated, isDoctor, (req, res) => {
 router.post('/doctor/availability', isAuthenticated, isDoctor, async (req, res) => {
   try {
     const { date, availableHours } = req.body;
-    const doctorId = req.session.userId; // Assuming session stores userId
+    const doctorId = res.locals.userId; // Assuming session stores userId
     const availability = await DoctorAvailability.create({
       doctorId,
       date,

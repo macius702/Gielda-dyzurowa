@@ -5,6 +5,7 @@ const Specialty = require('../models/Specialty');
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { isAuthenticated } = require('./middleware/authMiddleware');
 const router = express.Router();
 
 router.get('/auth/register', async (req, res) => {
@@ -206,10 +207,10 @@ router.post('/auth/login', async (req, res) =>
         const isMatch = await bcrypt.compare(password, user.password);
         if (isMatch)
         {
-            req.session.userId = user._id;
-            req.session.role = user.role; // Store user role in session for role-based access control
-            req.session.username = user.username; // Store the username in the session
-
+            res.locals.username = user.username;
+            res.locals.role = user.role;
+            res.locals.userId = user._id;
+            
             try {
               const secret = process.env.JWT_SECRET;
               const token = jwt.sign({ userId: user._id, role: user.role, username: user.username }, secret, { expiresIn: '1h' });
@@ -223,6 +224,8 @@ router.post('/auth/login', async (req, res) =>
               return sendResponse(500, 'An error occurred while signing the token');
             }
             console.log(`User logged in: ${user.username}`);
+            console.log('Response Locals:', res.locals); // This will log the response locals
+
             return sendResponse(null, null, '/');
         }
         else
@@ -241,7 +244,7 @@ router.post('/auth/login', async (req, res) =>
 
 
 // login redirects here
-router.get('/', (req, res) => {
+router.get('/', isAuthenticated, (req, res) => {
 
   console.log('Incoming / Request:', 
   {
@@ -250,6 +253,9 @@ router.get('/', (req, res) => {
       headers: req.headers,
       body: req.body
   });
+
+
+  console.log('Response Locals:', res.locals); // This will log the response locals
 
   console.log('Cookies:', req.cookies); // This will log the cookies
 
@@ -293,18 +299,13 @@ router.get('/', (req, res) => {
  *                type: string
  */
 router.get('/auth/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      console.error('Error during session destruction:', err);
-      console.error(err.stack); // Log the error stack for more detailed debugging information
-      return res.status(500).send('Error logging out');
-    }
+
     res.clearCookie('token', { httpOnly: true});
 
     console.log('User logged out successfully');
     res.redirect('/auth/login');
   });
-});
+
 
 
 /**
