@@ -209,6 +209,23 @@ router.post('/auth/login', async (req, res) =>
             req.session.userId = user._id;
             req.session.role = user.role; // Store user role in session for role-based access control
             req.session.username = user.username; // Store the username in the session
+
+            try {
+              const secret = process.env.JWT_SECRET;
+              const token = jwt.sign({ userId: user._id, role: user.role, username: user.username }, secret, { expiresIn: '1h' });
+
+              res.on('header', () => {
+                console.log('Cookies:', res.get('Set-Cookie'));
+              });
+              
+              // Store the token in an HttpOnly cookie
+              console.log('Token:', token); // This will log the token
+              res.cookie('token', token, { httpOnly: true });
+         
+            } catch (err) {
+              console.error('Error signing the token:', err);
+              return sendResponse(500, 'An error occurred while signing the token');
+            }
             console.log(`User logged in: ${user.username}`);
             return sendResponse(null, null, '/');
         }
@@ -224,6 +241,38 @@ router.post('/auth/login', async (req, res) =>
         console.error(error.stack); // Log the error stack for more detailed debugging information
         return sendResponse(500, error.message);
     }
+});
+
+
+// login redirects here
+router.get('/', (req, res) => {
+
+  console.log('Incoming / Request:', 
+  {
+      method: req.method,
+      url: req.originalUrl,
+      headers: req.headers,
+      body: req.body
+  });
+
+  console.log('Cookies:', req.cookies); // This will log the cookies
+
+  if (req.cookies && req.cookies.token) {
+    const token = req.cookies.token;
+    const secret = process.env.JWT_SECRET;
+
+    jwt.verify(token, secret, (err, decoded) => {
+      if (err) {
+        console.error('Error decoding the token:', err);
+        return res.render('', { username: 'Guest' });
+      }
+      res.render('index', { username: decoded.username });
+    });
+  } else {
+    // Handle the case when req.cookies or req.cookies.token is undefined
+    // For example, you might want to send a response to the client
+    res.status(400).send('No token provided');
+  }
 });
 
 /* auth/logout:
