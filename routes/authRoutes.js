@@ -303,6 +303,8 @@ router.get('/auth/logout', (req, res) => {
       console.error(err.stack); // Log the error stack for more detailed debugging information
       return res.status(500).send('Error logging out');
     }
+    res.clearCookie('token', { httpOnly: true});
+
     console.log('User logged out successfully');
     res.redirect('/auth/login');
   });
