@@ -19,12 +19,12 @@ const isAuthenticated = (req, res, next) => {
       res.locals.role = decoded.role;
       res.locals.userId = decoded.userId;
 
-      next()
+      return next()
     });
   } else {
     // Handle the case when req.cookies or req.cookies.token is undefined
     // For example, you might want to send a response to the client
-    res.status(400).send('You are not authenticated: no token provided');
+    return res.status(400).send('You are not authenticated: no token provided');
   }
 };
 

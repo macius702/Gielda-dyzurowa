@@ -244,7 +244,7 @@ router.post('/auth/login', async (req, res) =>
 
 
 // login redirects here
-router.get('/', isAuthenticated, (req, res) => {
+router.get('/', (req, res) => {
 
   console.log('Incoming / Request:', 
   {
@@ -262,18 +262,14 @@ router.get('/', isAuthenticated, (req, res) => {
   if (req.cookies && req.cookies.token) {
     const token = req.cookies.token;
     const secret = process.env.JWT_SECRET;
+    isAuthenticated(req, res, () => {});
 
-    jwt.verify(token, secret, (err, decoded) => {
-      if (err) {
-        console.error('Error decoding the token:', err);
-        return res.render('', { username: 'Guest' });
-      }
-      res.render('index', { username: decoded.username });
-    });
+    res.render('index', { username: res.locals.username });
+    
   } else {
     // Handle the case when req.cookies or req.cookies.token is undefined
     // For example, you might want to send a response to the client
-    res.status(400).send('No token provided');
+    res.render('index');
   }
 });
 
