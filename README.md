@@ -60,6 +60,7 @@ npm install cookie-parser
 
 
 - [ ] some unique index - adding the same duty slot  is ok now! - referential integrity
+- [ ] refactor - split 'isAuthenticated'
 - [ ] remove doctor availability
 - [ ] /duty/find_by_specialty change into general finding endpoint
 - [ ] .populate more specific or not needed - use database view - generally send only the relevant information, no extras
