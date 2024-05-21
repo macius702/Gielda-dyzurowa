@@ -86,6 +86,13 @@ app.on("error", (error) => {
   console.error(error.stack);
 });
 
+// Middleware function to set the backendUrl in res.locals
+// res.locals properties are available to the view during that render request cycle
+// This avoids the need to manually set the backendUrl for each render
+app.use((req, res, next) => {
+  res.locals.backendUrl = process.env.BACKEND_URL;
+  next();
+});
 
 // Authentication Routes
 app.use(authRoutes);
