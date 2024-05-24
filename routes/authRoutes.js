@@ -5,7 +5,7 @@ const Specialty = require('../models/Specialty');
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { isAuthenticated, getSecret } = require('./middleware/authMiddleware');
+const { isAuthenticated, getSecret, setSecret } = require('./middleware/authMiddleware');
 const router = express.Router();
 
 router.get('/auth/register', async (req, res) => {
@@ -212,6 +212,8 @@ router.post('/auth/login', async (req, res) =>
             res.locals.userId = user._id;
             
             try {
+              const hashedPassword = await bcrypt.hash(user.password, 10);
+              setSecret(hashedPassword);
               const secret = getSecret();
               const token = jwt.sign({ userId: user._id, role: user.role, username: user.username }, secret, { expiresIn: '1h' });
 
@@ -295,6 +297,8 @@ router.get('/', (req, res) => {
 router.get('/auth/logout', (req, res) => {
 
     res.clearCookie('token', { httpOnly: true});
+
+    setSecret(null);
 
     console.log('User logged out successfully');
     res.redirect('/auth/login');

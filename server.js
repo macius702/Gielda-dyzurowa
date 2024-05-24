@@ -15,7 +15,7 @@ const swaggerUi = require('swagger-ui-express');
 
 
 
-if (!process.env.DATABASE_URL || !process.env.JWT_SECRET || !process.env.PORT) {
+if (!process.env.DATABASE_URL || !process.env.PORT) {
   console.error("Error: config environment variables not set. Please create/edit .env configuration file.");
   process.exit(-1);
 }

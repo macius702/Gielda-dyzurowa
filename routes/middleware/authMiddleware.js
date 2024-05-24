@@ -28,12 +28,21 @@ const isAuthenticated = (req, res, next) => {
   }
 };
 
+let session_secret = null
+
 const getSecret = () => {
-  return process.env.JWT_SECRET;
+  return session_secret;
 };
+
+// setSecret to store it in a module variable
+const setSecret = (secret) => {
+  session_secret = secret;
+};
+
 
 
 module.exports = {
   isAuthenticated,
-  getSecret
+  getSecret,
+  setSecret
 };
