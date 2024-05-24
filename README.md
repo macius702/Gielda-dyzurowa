@@ -83,6 +83,7 @@ npm install cookie-parser
 - [ ] unit tests
 - [ ] Specialty master table - the sole source of truth
 - [ ] Separate datamodel from routes
+- [ ] Assure that cypress tests have always users H1 and Doktor2 
 
 
 - [x] assure that tests have always a duty entry qqq
