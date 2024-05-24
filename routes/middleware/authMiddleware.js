@@ -7,7 +7,7 @@ const isAuthenticated = (req, res, next) => {
 
   if (req.cookies && req.cookies.token) {
     const token = req.cookies.token;
-    const secret = process.env.JWT_SECRET;
+    const secret = getSecret();
 
     jwt.verify(token, secret, (err, decoded) => {
       if (err) {
@@ -28,7 +28,12 @@ const isAuthenticated = (req, res, next) => {
   }
 };
 
+const getSecret = () => {
+  return process.env.JWT_SECRET;
+};
+
 
 module.exports = {
-  isAuthenticated
+  isAuthenticated,
+  getSecret
 };

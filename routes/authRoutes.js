@@ -5,7 +5,7 @@ const Specialty = require('../models/Specialty');
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { isAuthenticated } = require('./middleware/authMiddleware');
+const { isAuthenticated, getSecret } = require('./middleware/authMiddleware');
 const router = express.Router();
 
 router.get('/auth/register', async (req, res) => {
@@ -212,7 +212,7 @@ router.post('/auth/login', async (req, res) =>
             res.locals.userId = user._id;
             
             try {
-              const secret = process.env.JWT_SECRET;
+              const secret = getSecret();
               const token = jwt.sign({ userId: user._id, role: user.role, username: user.username }, secret, { expiresIn: '1h' });
 
               // Store the token in an HttpOnly cookie
@@ -260,8 +260,6 @@ router.get('/', (req, res) => {
   console.log('Cookies:', req.cookies); // This will log the cookies
 
   if (req.cookies && req.cookies.token) {
-    const token = req.cookies.token;
-    const secret = process.env.JWT_SECRET;
     isAuthenticated(req, res, () => {});
 
     res.render('index', { username: res.locals.username });
