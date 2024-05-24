@@ -343,6 +343,7 @@ router.get('/auth/logout', (req, res) => {
 router.get('/specialties', async (req, res) => {
   try {
     const specialties = await Specialty.find({});
+    console.log(specialties);
     res.json(specialties);
   } catch (error) {
     res.status(500).json({ message: error.message });

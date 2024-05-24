@@ -27,9 +27,8 @@ interface ApiService {
     @POST("/auth/register")
     fun registerUser(@Query("canisterId") canisterId: String, @Body registrationRequest: RegistrationRequest): Call<Void>
 
-    // tutaj dodaj canister teraz itp tu skonczylem
     @GET("/duty/slots/json")
-    suspend fun fetchDutyVacancies(): Response<List<DutyVacancy>>
+    suspend fun fetchDutyVacancies(@Query("canisterId") canisterId: String): Response<List<DutyVacancy>>
 
     @POST("/duty/publish")
     suspend fun publishDutyVacancy(
@@ -64,7 +63,8 @@ interface ApiService {
         @Body request: DutySlotActionRequest
     ): Response<Unit>
 
+    // tutaj dodaj canister teraz itp tu skonczylem
     @GET("/specialties")
-    suspend fun getSpecialties(
+    suspend fun getSpecialties(@Query("canisterId") canisterId: String
     ): Response<List<Specialty>>
 }

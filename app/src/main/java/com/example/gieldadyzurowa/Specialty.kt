@@ -21,8 +21,11 @@ class SpecialtyViewModel : ViewModel() {
     private fun fetchSpecialties() {
         viewModelScope.launch {
             try {
-                val specialties = RetrofitClient.apiService.getSpecialties()
+                Log.d("SpecialtyViewModel", "Fetching specialties...")
+                val specialties = RetrofitClient.apiService.getSpecialties(RetrofitClient.BASE_CANISTER)
+                Log.d("SpecialtyViewModel", "Specialties: ${specialties.body()}")
                 _specialties.value = specialties.body() ?: emptyList()
+                Log.d("SpecialtyViewModel", "Specialties: ${specialties.body()}")
             } catch (e: Exception) {
                 Log.e("SpecialtyViewModel", "Error fetching specialties", e)
             }

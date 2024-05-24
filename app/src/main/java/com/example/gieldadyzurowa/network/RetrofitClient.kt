@@ -7,6 +7,7 @@ import okhttp3.Cookie
 import okhttp3.CookieJar
 import okhttp3.HttpUrl
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -22,16 +23,21 @@ val cookieJar = object : CookieJar {
     }
 }
 
-val okHttpClient = OkHttpClient.Builder().cookieJar(cookieJar).build()
+val loggingInterceptor = HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
+
+val okHttpClient = OkHttpClient.Builder()
+    .addInterceptor(loggingInterceptor)
+    .cookieJar(cookieJar)
+    .build()
 
 
 object RetrofitClient {
 
     //for local node server
-    private const val BASE_URL = "http://10.0.2.2:3000"
+    //private const val BASE_URL = "http://10.0.2.2:3000"
 
     //for local ICP canister
-    //private const val BASE_URL = "http://10.0.2.2:4943"
+    private const val BASE_URL = "http://10.0.2.2:4943"
 
     public const val BASE_CANISTER = "bkyz2-fmaaa-aaaaa-qaaaq-cai"
 
