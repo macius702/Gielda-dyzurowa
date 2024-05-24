@@ -119,8 +119,8 @@ fun AppContent() {
                         isLoggedIn = true
                         username = user
                         selectedNav = LANDING_SCREEN
-                        Log.d("fetchUserData", "Successfully fetched userrole and Id")
-                    }
+                        Log.d("fetchUserData", "Successfully fetched userrole: " + userrole + " and Id: " + userId)
+                                     }
                 } else {
                     Log.e("fetchUserData", "Failed to fetch user info: ${response.code()}")
                 }
