@@ -764,7 +764,7 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
 
     fun fetchDutyVacancies() = viewModelScope.launch {
         try {
-            val response = RetrofitClient.apiService.fetchDutyVacancies(BASE_CANISTER)
+            val response = RetrofitClient.apiService.fetchDutyVacancies()
             if (response.isSuccessful) {
                 _dutyVacancies.value = response.body() ?: emptyList()
             } else {
@@ -803,7 +803,7 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
                 currency = currency
             )
 
-            val response = RetrofitClient.apiService.publishDutyVacancy(dutyVacancy)
+            val response = RetrofitClient.apiService.publishDutyVacancy(BASE_CANISTER, dutyVacancy)
             if (response.isSuccessful) {
                 // Handle successful publish
                 Log.d("DutyVacanciesViewModel", "Duty vacancy published successfully")
