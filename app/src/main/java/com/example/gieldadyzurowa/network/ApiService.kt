@@ -28,7 +28,7 @@ interface ApiService {
     fun registerUser(@Query("canisterId") canisterId: String, @Body registrationRequest: RegistrationRequest): Call<Void>
 
     @GET("/duty/slots/json")
-    suspend fun fetchDutyVacancies(): Response<List<DutyVacancy>>
+    suspend fun fetchDutyVacancies(@Query("canisterId") canisterId: String): Response<List<DutyVacancy>>
 
     @POST("/duty/publish")
     suspend fun publishDutyVacancy(@Query("canisterId") canisterId: String,

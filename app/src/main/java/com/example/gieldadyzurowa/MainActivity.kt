@@ -764,7 +764,7 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
 
     fun fetchDutyVacancies() = viewModelScope.launch {
         try {
-            val response = RetrofitClient.apiService.fetchDutyVacancies()
+            val response = RetrofitClient.apiService.fetchDutyVacancies(BASE_CANISTER)
             if (response.isSuccessful) {
                 _dutyVacancies.value = response.body() ?: emptyList()
             } else {
