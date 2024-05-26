@@ -213,13 +213,14 @@ router.post('/auth/login', async (req, res) =>
             
             try {
               const hashedPassword = await bcrypt.hash(user.password, 10);
-              setSecret(hashedPassword);
-              const secret = getSecret();
+              setSecret(user.username, hashedPassword);
+              const secret = getSecret(user.username);
               const token = jwt.sign({ userId: user._id, role: user.role, username: user.username }, secret, { expiresIn: '1h' });
 
               // Store the token in an HttpOnly cookie
               console.log('Token:', token); // This will log the token
               res.cookie('token', token, { httpOnly: true });
+              res.cookie('username', user.username, { httpOnly: true });
          
             } catch (err) {
               console.error('Error signing the token:', err);
@@ -296,7 +297,8 @@ router.get('/', (req, res) => {
  */
 router.get('/auth/logout', (req, res) => {
 
-    res.clearCookie('token', { httpOnly: true});
+  res.clearCookie('token', { httpOnly: true});
+  res.clearCookie('username', { httpOnly: true});
 
     setSecret(null);
 

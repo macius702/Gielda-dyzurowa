@@ -5,9 +5,9 @@ const isAuthenticated = (req, res, next) => {
 
   console.log('Cookies:', req.cookies); // This will log the cookies
 
-  if (req.cookies && req.cookies.token) {
+  if (req.cookies && req.cookies.token && req.cookies.username) {
     const token = req.cookies.token;
-    const secret = getSecret();
+    const secret = getSecret(req.cookies.username);
 
     jwt.verify(token, secret, (err, decoded) => {
       if (err) {
@@ -28,17 +28,18 @@ const isAuthenticated = (req, res, next) => {
   }
 };
 
-let session_secret = null
 
-const getSecret = () => {
-  return session_secret;
+//TODO - this array needs to have timestamps, so that is is cleared from time to time to prevent unrestricted growing
+//The entry should be cleared when JWToken expires, when logout, refesh when JWToken refereshes, and remove when the entry expires itself (no JWT refresh was)
+const secret_array = {};
+
+const setSecret = (username, secret) => {
+  secret_array[username] = secret;
 };
 
-// setSecret to store it in a module variable
-const setSecret = (secret) => {
-  session_secret = secret;
+const getSecret = (username) => {
+  return secret_array[username];
 };
-
 
 
 module.exports = {
