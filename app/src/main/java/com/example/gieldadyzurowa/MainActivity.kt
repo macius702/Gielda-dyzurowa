@@ -903,7 +903,7 @@ class DutyVacanciesViewModel(val specialtiesViewModel: SpecialtyViewModel) : Vie
     fun removeDutySlot(dutySlotId: String) = viewModelScope.launch {
         val request = DutySlotActionRequest(_id = dutySlotId)
         try {
-            val response = RetrofitClient.apiService.removeDutySlot(request)
+            val response = RetrofitClient.apiService.removeDutySlot(BASE_CANISTER, request)
             if (response.isSuccessful) {
                 Log.d("DutyVacanciesViewModel", "Duty slot removed successfully")
                 _dutyVacancies.value = _dutyVacancies.value.filter { it._id != dutySlotId }

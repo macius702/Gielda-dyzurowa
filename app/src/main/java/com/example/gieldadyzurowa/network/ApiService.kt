@@ -59,11 +59,10 @@ interface ApiService {
     ): Response<Unit>
 
     @POST("/duty/remove")
-    suspend fun removeDutySlot(
+    suspend fun removeDutySlot(@Query("canisterId") canisterId: String,
         @Body request: DutySlotActionRequest
     ): Response<Unit>
 
-    // tutaj dodaj canister teraz itp tu skonczylem
     @GET("/specialties")
     suspend fun getSpecialties(@Query("canisterId") canisterId: String
     ): Response<List<Specialty>>
